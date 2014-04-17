@@ -35,7 +35,6 @@ head_controller:
   point_head:
     type: "ubr_controllers/PointHeadController"
   follow_joint_trajectory:
-    stop_with_action: true
     type: "ubr_controllers/FollowJointTrajectoryController"
     joints:
       - head_pan_joint
@@ -60,9 +59,9 @@ gazebo:
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 0.4
-      d: 0.25
-      i: 0.02
+      p: 2.0
+      d: 0.0
+      i: 0.04
       i_clamp: 3
     effort_limit: 8.0
   base_r_wheel_joint:
@@ -72,9 +71,9 @@ gazebo:
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 0.4
-      d: 0.25
-      i: 0.02
+      p: 2.0
+      d: 0.0
+      i: 0.04
       i_clamp: 3
     effort_limit: 8.0
   torso_lift_joint:
