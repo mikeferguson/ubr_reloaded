@@ -34,7 +34,8 @@
 
 /* Authors: John Hsu, Michael Ferguson */
 
-#include "ubr1_gazebo/ubr1_gazebo_plugin.h"
+#include <ubr1_gazebo/ubr1_gazebo_plugin.h>
+#include <ubr_controllers/base_controller.h>
 
 using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(UBR1GazeboPlugin)
@@ -97,4 +98,13 @@ void UBR1GazeboPlugin::OnTimer(const ros::TimerEvent& event)
     js.effort.push_back((*it)->GetForce(0u));
   }
   joint_state_pub_.publish(js);
+
+  /* TODO: Publish IMU */
+
+  /* Publish Base Odometry */
+  ubr_controllers::Controller * base = this->manager_->getController("base_controller");
+  if (base)
+  {
+    dynamic_cast<ubr_controllers::BaseController*>(base)->publish(ros::Time::now());
+  }
 }
