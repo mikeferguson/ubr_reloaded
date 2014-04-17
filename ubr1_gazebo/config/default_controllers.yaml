@@ -55,7 +55,7 @@ gazebo:
     - "torso_controller/follow_joint_trajectory"
   base_l_wheel_joint:
     position:
-      p: 1.0
+      p: 0.0
       d: 0.0
       i: 0.0
       i_clamp: 0.0
@@ -64,9 +64,10 @@ gazebo:
       d: 0.25
       i: 0.02
       i_clamp: 3
+    effort_limit: 8.0
   base_r_wheel_joint:
     position:
-      p: 1.0
+      p: 0.0
       d: 0.0
       i: 0.0
       i_clamp: 0.0
@@ -75,6 +76,7 @@ gazebo:
       d: 0.25
       i: 0.02
       i_clamp: 3
+    effort_limit: 8.0
   torso_lift_joint:
     position:
       p: 1.0
@@ -174,6 +176,7 @@ gazebo:
       d: 0.0
       i: 0.094
       i_clamp: 0.235
+    effort_limit: 3.166
   wrist_flex_joint:
     position:
       p: 200.0
@@ -196,6 +199,7 @@ gazebo:
       d: 0.0
       i: 0.0294
       i_clamp: 0.147
+    effort_limit: 1.0
   left_gripper_joint:
     position:
       p: 1.0

@@ -62,8 +62,13 @@ public:
     mode_(MODE_DISABLED)
   {
     ros::NodeHandle nh("~");
+
+    /* Load controller parameters */
     position_pid_.init(ros::NodeHandle(nh, joint_->GetName() + "/position"));
     velocity_pid_.init(ros::NodeHandle(nh, joint_->GetName() + "/velocity"));
+
+    /* Load optional effort_limit as a workaround to gzsdf limitation */
+    nh.param( joint_->GetName() + "/effort_limit", effort_limit_, 0.0);
   }
   virtual ~GazeboJointHandle()
   {
@@ -196,7 +201,18 @@ public:
   /** \brief Get the effort limit */
   virtual float getEffortLimit()
   {
-    return joint_->GetEffortLimit(0);
+    /*
+     * gzsdf has a major flaw when using continuous joints. It appears gazebo
+     * cannot handle continuous joints and so it sets the limits to +/-1e16.
+     * This is fine, except it drops the limit effort and limit velocity.
+     * Lack of limit effort causes the robot to implode to the origin if the
+     * controllers are not tuned or experience a disturbance. This little hack
+     * lets us limit the controller effort internally.
+     */
+    float lim = joint_->GetEffortLimit(0);
+    if (lim < 0)
+      return effort_limit_;
+    return lim;
   }
 
   virtual std::string getName()
@@ -229,25 +245,29 @@ public:
 
   void update(const ros::Time now, const ros::Duration dt)
   {
+    float effort = 0.0;
     if (isEffortControlled())
     {
-      joint_->SetForce(0, desired_effort_);
+      effort = desired_effort_;
     }
     else if (isPositionControlled())
     {
       float t = position_pid_.computeCommand(desired_position_ - getPosition(), dt) +
                 velocity_pid_.computeCommand(desired_velocity_ - getVelocity(), dt);
-      joint_->SetForce(0, t + desired_effort_);
+      effort = t + desired_effort_;
     }
     else if (isVelocityControlled())
     {
       float t = velocity_pid_.computeCommand(desired_velocity_ - getVelocity(), dt);
-      joint_->SetForce(0, t + desired_effort_);
+      effort = t + desired_effort_;
     }
-    else
-    {
-      joint_->SetForce(0, 0.0);
-    }
+
+    /* Limit effort so robot doesn't implode */
+    float lim = getEffortLimit();
+    effort = std::max(-lim, std::min(effort, lim));
+
+    /* Actually update */
+    joint_->SetForce(0, effort);
   }
 
 private:
@@ -262,6 +282,9 @@ private:
 
   control_toolbox::Pid position_pid_;
   control_toolbox::Pid velocity_pid_;
+
+  /// Hack for continuous joints that fail to have effort limits
+  double effort_limit_;
 };
 
 }  // namespace ubr1_gazebo
