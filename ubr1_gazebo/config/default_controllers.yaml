@@ -1,0 +1,220 @@
+arm_controller:
+  follow_joint_trajectory:
+    type: "ubr_controllers/FollowJointTrajectoryController"
+    joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - upperarm_roll_joint
+      - elbow_flex_joint
+      - forearm_roll_joint
+      - wrist_flex_joint
+      - wrist_roll_joint
+  gravity_compensation:
+    type: "ubr_controllers/GravityCompensation"
+
+arm_with_torso_controller:
+  follow_joint_trajectory:
+    type: "ubr_controllers/FollowJointTrajectoryController"
+    joints:
+      - torso_lift_joint
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - upperarm_roll_joint
+      - elbow_flex_joint
+      - forearm_roll_joint
+      - wrist_flex_joint
+      - wrist_roll_joint
+
+torso_controller:
+  follow_joint_trajectory:
+    type: "ubr_controllers/FollowJointTrajectoryController"
+    joints:
+      - torso_lift_joint
+
+head_controller:
+  point_head:
+    type: "ubr_controllers/PointHeadController"
+  follow_joint_trajectory:
+    stop_with_action: true
+    type: "ubr_controllers/FollowJointTrajectoryController"
+    joints:
+      - head_pan_joint
+      - head_tilt_joint
+
+base_controller:
+  type: "ubr_controllers/BaseController"
+
+gazebo:
+  controllers:
+    - "arm_controller/follow_joint_trajectory"
+    - "arm_controller/gravity_compensation"
+    - "arm_with_torso_controller/follow_joint_trajectory"
+    - "base_controller"
+    - "head_controller/follow_joint_trajectory"
+    - "head_controller/point_head"
+    - "torso_controller/follow_joint_trajectory"
+  base_l_wheel_joint:
+    position:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+    velocity:
+      p: 0.4
+      d: 0.25
+      i: 0.02
+      i_clamp: 3
+  base_r_wheel_joint:
+    position:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+    velocity:
+      p: 0.4
+      d: 0.25
+      i: 0.02
+      i_clamp: 3
+  torso_lift_joint:
+    position:
+      p: 1.0
+      d: 0.0
+      i: 0.05
+      i_clamp: 0.15
+    velocity:
+      p: 0.126
+      d: 0.015
+      i: 0.0095
+      i_clamp: 0.396
+  bellows_joint:
+    position:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+    velocity:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+  head_pan_joint:
+    position:
+      p: 200.0
+      d: 0.0
+      i: 0.5
+      i_clamp: 0.1
+    velocity:
+      p: 0.864
+      d: 0.0
+      i: 0.128
+      i_clamp: 0.32
+  head_tilt_joint:
+    position:
+      p: 200.0
+      d: 0.0
+      i: 0.5
+      i_clamp: 0.1
+    velocity:
+      p: 0.7668
+      d: 0.0
+      i: 0.1136
+      i_clamp: 0.284
+  shoulder_pan_joint:
+    position:
+      p: 0.7
+      d: 0.0
+      i: 0.02
+      i_clamp: 0.05
+    velocity:
+      p: 0.174
+      d: 0.087
+      i: 0.0348
+      i_clamp: 3.48
+  shoulder_lift_joint:
+    position:
+      p: 6.0
+      d: 0.0
+      i: 0.07
+      i_clamp: 0.1
+    velocity:
+      p: 0.8855
+      d: 0.0
+      i: 0.253
+      i_clamp: 101.2
+  upperarm_roll_joint:
+    position:
+      p: 0.7
+      d: 0.0
+      i: 0.02
+      i_clamp: 0.05
+    velocity:
+      p: 0.174
+      d: 0.087
+      i: 0.0348
+      i_clamp: 4.35
+  elbow_flex_joint:
+    position:
+      p: 200.0
+      d: 0.0
+      i: 0.5
+      i_clamp: 0.1
+    velocity:
+      p: 0.6345
+      d: 0.0
+      i: 0.094
+      i_clamp: 0.235
+  forearm_roll_joint:
+    position:
+      p: 200.0
+      d: 0.0
+      i: 0.5
+      i_clamp: 0.1
+    velocity:
+      p: 0.6345
+      d: 0.0
+      i: 0.094
+      i_clamp: 0.235
+  wrist_flex_joint:
+    position:
+      p: 200.0
+      d: 0.0
+      i: 15.0
+      i_clamp: 5.0
+    velocity:
+      p: 0.3969
+      d: 0.0
+      i: 0.0294
+      i_clamp: 0.147
+  wrist_roll_joint:
+    position:
+      p: 200.0
+      d: 0.0
+      i: 15.0
+      i_clamp: 5.0
+    velocity:
+      p: 0.3969
+      d: 0.0
+      i: 0.0294
+      i_clamp: 0.147
+  left_gripper_joint:
+    position:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+    velocity:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+  right_gripper_joint:
+    position:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
+    velocity:
+      p: 1.0
+      d: 0.0
+      i: 0.0
+      i_clamp: 0.0
