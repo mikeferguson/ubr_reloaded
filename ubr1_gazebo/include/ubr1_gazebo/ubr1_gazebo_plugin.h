@@ -58,6 +58,10 @@ public:
   virtual void Init();
 
 private:
+  /** \brief Callback to handle periodic publishing of robot date */
+  void OnTimer(const ros::TimerEvent& event);
+
+  /** \brief Callback to handle periodic updating for Gazebo */
   void OnUpdate();
 
   event::ConnectionPtr updateConnection;
@@ -71,6 +75,8 @@ private:
 
   ros::Publisher joint_state_pub_;
   ros::NodeHandle nh_;
+
+  ros::Timer pubtimer_;
 };
 
 }  // namespace gazebo

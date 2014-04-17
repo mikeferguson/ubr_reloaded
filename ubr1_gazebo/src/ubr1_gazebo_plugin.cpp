@@ -41,6 +41,8 @@ GZ_REGISTER_MODEL_PLUGIN(UBR1GazeboPlugin)
 
 UBR1GazeboPlugin::UBR1GazeboPlugin() : nh_()
 {
+  /* Create a periodic timer to publish joint_states, odom, etc */
+  pubtimer_ = nh_.createTimer(ros::Duration(0.01), &UBR1GazeboPlugin::OnTimer, this);
 }
 
 UBR1GazeboPlugin::~UBR1GazeboPlugin()
@@ -65,14 +67,25 @@ void UBR1GazeboPlugin::Init()
 
 void UBR1GazeboPlugin::OnUpdate()
 {
+  /* Get time and timestep for controllers */
   common::Time currTime = this->model->GetWorld()->GetSimTime();
   common::Time stepTime = currTime - this->prevUpdateTime;
   this->prevUpdateTime = currTime;
   double dt = stepTime.Double();
 
+  /* Update controllers */
   this->manager_->update(ros::Time(currTime.Double()), ros::Duration(dt));
+}
 
-  /* Publish joint state messages */
+void UBR1GazeboPlugin::OnTimer(const ros::TimerEvent& event)
+{
+  /* Don't try to publish if we are shutting down. */
+  if (!ros::ok()) return;
+
+  /* Get gazebo time */
+  common::Time currTime = this->model->GetWorld()->GetSimTime();
+
+  /* Publish joint_state message */
   sensor_msgs::JointState js;
   js.header.stamp = ros::Time(currTime.Double());
   gazebo::physics::Joint_V joints = this->model->GetJoints();
@@ -82,7 +95,6 @@ void UBR1GazeboPlugin::OnUpdate()
     js.position.push_back((*it)->GetAngle(0).Radian());
     js.velocity.push_back((*it)->GetVelocity(0));
     js.effort.push_back((*it)->GetForce(0u));
-
   }
   joint_state_pub_.publish(js);
 }
