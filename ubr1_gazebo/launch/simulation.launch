@@ -6,6 +6,9 @@
 
   <!-- Load default controllers -->
   <rosparam file="$(find ubr1_gazebo)/config/default_controllers.yaml" command="load" />
+
+  <!-- Not simulating the IMU, so we will not use graft, just publish the odometry -->
+  <param name="base_controller/odometry_frame" value="odom_combined" />
   <param name="base_controller/publish_tf" value="true" />
 
   <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->

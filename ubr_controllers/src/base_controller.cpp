@@ -71,6 +71,8 @@ bool BaseController::init(ros::NodeHandle& nh, ControllerManager* manager)
   nh.param<double>("track_width", track_width_, 0.33665);
   nh.param<double>("radians_per_meter", radians_per_meter_, 17.4978147374);
   nh.param<bool>("publish_tf", publish_tf_, true);
+  nh.param<std::string>("odometry_frame", odometry_frame_, "odom");
+  nh.param<std::string>("base_frame", base_frame_, "base_link");
   nh.param<double>("moving_threshold", moving_threshold_, 0.0001);
 
   double t;
@@ -238,7 +240,7 @@ bool BaseController::publish(ros::Time time)
      * REP105 (http://ros.org/reps/rep-0105.html)
      *   says: map -> odom -> base_link
      */
-    broadcaster_->sendTransform(tf::StampedTransform(transform, time, "odom", "base_link"));
+    broadcaster_->sendTransform(tf::StampedTransform(transform, time, odometry_frame_, base_frame_));
   }
 
   return true;
