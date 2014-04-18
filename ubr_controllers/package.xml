@@ -1,6 +1,6 @@
 <package>
   <name>ubr_controllers</name>
-  <version>0.2.11</version>
+  <version>0.3.0</version>
   <description>
     Controller infrastructure for Unbounded robots.
   </description>

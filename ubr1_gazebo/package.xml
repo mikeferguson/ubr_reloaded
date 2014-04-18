@@ -1,6 +1,6 @@
 <package>
   <name>ubr1_gazebo</name>
-  <version>0.1.0</version>
+  <version>0.3.0</version>
   <description>
     Gazebo package for the UBR-1.
   </description>
