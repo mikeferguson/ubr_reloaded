@@ -59,7 +59,7 @@ gazebo:
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 2.0
+      p: 1.0
       d: 0.0
       i: 0.04
       i_clamp: 3
@@ -71,7 +71,7 @@ gazebo:
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 2.0
+      p: 1.0
       d: 0.0
       i: 0.04
       i_clamp: 3
@@ -122,7 +122,7 @@ gazebo:
       i_clamp: 0.284
   shoulder_pan_joint:
     position:
-      p: 0.7
+      p: 2.0
       d: 0.0
       i: 0.02
       i_clamp: 0.05
@@ -144,7 +144,7 @@ gazebo:
       i_clamp: 101.2
   upperarm_roll_joint:
     position:
-      p: 0.7
+      p: 5.0
       d: 0.0
       i: 0.02
       i_clamp: 0.05
