@@ -529,7 +529,7 @@
   <link name="fixed_torso_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.12118 -0.00188 0.55187" />
-      <mass value="10.19400" />
+      <mass value="7.19400" />
       <inertia ixx="0.16941095831" ixy="-0.00114443001"   ixz="0.00090167218"
                iyy="0.15113888533" iyz="-0.00744737659"
                izz="0.04165307088" />
