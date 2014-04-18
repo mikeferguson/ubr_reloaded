@@ -17,6 +17,7 @@ find_package(catkin REQUIRED
     tf
     tf_conversions
     trajectory_msgs
+    ubr_msgs
     urdf
 )
 
@@ -30,6 +31,7 @@ catkin_package(
     pluginlib
     roscpp
     sensor_msgs
+    ubr_msgs
   LIBRARIES
     ubr_controllers
 )
