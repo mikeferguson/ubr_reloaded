@@ -1,0 +1,4 @@
+controller_frequency: 10.0
+clearing_radius: 0.5
+oscillation_timeout: 10.0
+oscillation_distance: 0.5

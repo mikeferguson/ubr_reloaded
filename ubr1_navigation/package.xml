@@ -1,0 +1,15 @@
+<package>
+  <name>ubr1_navigation</name>
+  <version>0.3.0</version>
+  <description>Configuration and launch files for UBR-1 using ROS navigation</description>
+  <maintainer email="fergs@unboundedrobotics.com">Michael Ferguson</maintainer>
+  <license>BSD</license>
+  <author>Michael Ferguson</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>message_generation</build_depend>
+
+  <run_depend>message_runtime</run_depend>
+  <run_depend>navigation</run_depend>
+</package>

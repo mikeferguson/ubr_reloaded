@@ -1,0 +1,27 @@
+<launch>
+
+  <!-- this feeds into the teleop mux -->
+  <arg name="cmd_vel_topic" default="cmd_vel" />
+
+  <!-- depending on imu fusion, this topic could change over time -->
+  <arg name="odom_topic" default="odom" />
+
+  <!-- work around for footprint reload -->
+  <rosparam command="delete" ns="move_base" />
+
+  <!-- the actual move base node -->
+  <node pkg="move_base" type="move_base" name="move_base" respawn="false" output="screen">
+    <rosparam file="$(find ubr1_navigation)/config/costmap_common.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find ubr1_navigation)/config/costmap_common.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find ubr1_navigation)/config/costmap_local.yaml" command="load" ns="local_costmap" />
+    <rosparam file="$(find ubr1_navigation)/config/costmap_global.yaml" command="load" ns="global_costmap" />
+    <rosparam file="$(find ubr1_navigation)/config/base_local_planner.yaml" command="load" />
+    <rosparam file="$(find ubr1_navigation)/config/move_base.yaml" command="load" />
+    <remap from="cmd_vel" to="$(arg cmd_vel_topic)"/>
+    <remap from="odom" to="$(arg odom_topic)"/>
+  </node>
+
+  <!-- move the head -->
+  <node pkg="ubr1_navigation" type="tilt_head.py" name="tilt_head_node" />
+
+</launch>

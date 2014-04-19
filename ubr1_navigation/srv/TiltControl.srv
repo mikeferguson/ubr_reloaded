@@ -1,0 +1,6 @@
+# Should the head tilt?
+bool enable_tilt
+# Should the head look in direction of plan?
+bool enable_look
+---
+
