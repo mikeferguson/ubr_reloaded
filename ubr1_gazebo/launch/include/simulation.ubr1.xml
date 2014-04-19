@@ -18,4 +18,7 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -x 0 -y 0 -z .05 -model ubr1 -param robot_description"/>
 
+  <!-- Tuck Arm -->
+  <node name="tuck" pkg="ubr1_demo" type="tuck_my_arm.py" />
+
 </launch>
