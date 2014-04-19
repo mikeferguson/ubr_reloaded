@@ -11,6 +11,7 @@
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="headless" value="false"/>
+    <arg name="world_name" value="$(find ubr1_gazebo)/worlds/home.sdf"/>
   </include>
 
   <!-- Add the robot -->

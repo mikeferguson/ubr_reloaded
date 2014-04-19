@@ -1,0 +1,21 @@
+<launch>
+
+  <!-- Load default controllers -->
+  <rosparam file="$(find ubr1_gazebo)/config/default_controllers.yaml" command="load" />
+
+  <!-- Not simulating the IMU, so we will not use graft, just publish the odometry -->
+  <param name="base_controller/odometry_frame" value="odom_combined" />
+  <param name="base_controller/publish_tf" value="true" />
+
+  <!-- Load the URDF into the ROS Parameter Server -->
+  <param name="robot_description" command="$(find xacro)/xacro.py $(find ubr1_gazebo)/robots/ubr1_robot.urdf.xacro" />
+
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" >
+    <param name="publish_frequency" value="100.0"/>
+  </node>
+
+  <!-- Call a python script to the run a service call to gazebo_ros to spawn a URDF robot -->
+  <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+	args="-urdf -x 0 -y 0 -z .05 -model ubr1 -param robot_description"/>
+
+</launch>
