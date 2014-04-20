@@ -43,6 +43,10 @@ head_controller:
 base_controller:
   type: "ubr_controllers/BaseController"
 
+gripper_controller:
+  gripper_action:
+    type: "ubr_controllers/SimulatedGripperController"
+
 gazebo:
   controllers:
     - "arm_controller/follow_joint_trajectory"
@@ -52,6 +56,7 @@ gazebo:
     - "head_controller/follow_joint_trajectory"
     - "head_controller/point_head"
     - "torso_controller/follow_joint_trajectory"
+    - "gripper_controller/gripper_action"
   base_l_wheel_joint:
     position:
       p: 0.0

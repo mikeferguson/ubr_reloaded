@@ -50,6 +50,7 @@ add_library(ubr_controllers
   src/follow_joint_trajectory.cpp
   src/gravity_compensation.cpp
   src/point_head.cpp
+  src/simulated_gripper_controller.cpp
 )
 target_link_libraries(ubr_controllers
   ${catkin_LIBRARIES}
