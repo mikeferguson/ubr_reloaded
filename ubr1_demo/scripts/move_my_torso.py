@@ -27,18 +27,18 @@ if __name__=='__main__':
     trajectory.joint_names = ["torso_lift_joint"]
     trajectory.points.append(JointTrajectoryPoint())
     trajectory.points[0].positions = [0.0]
-    trajectory.points[0].velocities = [0.0 for i in joint_names]
-    trajectory.points[0].accelerations = [0.0 for i in joint_names]
+    trajectory.points[0].velocities = [0.0]
+    trajectory.points[0].accelerations = [0.0]
     trajectory.points[0].time_from_start = rospy.Duration(3.0)
     trajectory.points.append(JointTrajectoryPoint())
     trajectory.points[1].positions = [0.35]
-    trajectory.points[1].velocities = [0.0 for i in joint_names]
-    trajectory.points[1].accelerations = [0.0 for i in joint_names]
+    trajectory.points[1].velocities = [0.0]
+    trajectory.points[1].accelerations = [0.0]
     trajectory.points[1].time_from_start = rospy.Duration(6.0)
     trajectory.points.append(JointTrajectoryPoint())
-    trajectory.points[2].positions = [0.0]
-    trajectory.points[2].velocities = [0.0 for i in joint_names]
-    trajectory.points[2].accelerations = [0.0 for i in joint_names]
+    trajectory.points[2].positions = [0.35]
+    trajectory.points[2].velocities = [0.0]
+    trajectory.points[2].accelerations = [0.0]
     trajectory.points[2].time_from_start = rospy.Duration(9.0)
 
     # Put this trajectory in an action goal
@@ -49,6 +49,6 @@ if __name__=='__main__':
 
     # Send the goal
     client.send_goal(goal)
-    client.wait_for_result(rospy.Duration(5.0))
+    client.wait_for_result(rospy.Duration(10.0))
     rospy.loginfo('...done')
 
