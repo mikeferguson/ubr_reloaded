@@ -8,8 +8,8 @@
     <mu1>0</mu1>
     <mu2>0</mu2>
     <fdir1>1 0 0</fdir1>
-    <maxVel>1.0</maxVel>
-    <minDepth>0.01</minDepth>
+    <maxVel>10.0</maxVel>
+    <minDepth>0.0005</minDepth>
     <material>Gazebo/White</material>
   </gazebo>
   <gazebo reference="estop_link">
