@@ -83,15 +83,16 @@ gazebo:
     effort_limit: 8.0
   torso_lift_joint:
     position:
-      p: 1.0
+      p: 10.0
       d: 0.0
-      i: 0.05
-      i_clamp: 0.15
+      i: 25.0
+      i_clamp: 50.0
     velocity:
       p: 0.126
       d: 0.015
       i: 0.0095
       i_clamp: 0.396
+    effort_offset: 300.0
   bellows_joint:
     position:
       p: 1.0

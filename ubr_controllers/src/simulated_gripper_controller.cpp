@@ -71,7 +71,6 @@ bool SimulatedGripperController::init(ros::NodeHandle& nh, ControllerManager* ma
 
   /* Set gripper open, as would be calibrated to */
   left_effort_ = right_effort_ = 28.0;
-  manager_->requestStart(name_);
 
   return true;
 }

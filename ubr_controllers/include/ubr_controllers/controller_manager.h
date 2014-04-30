@@ -126,7 +126,7 @@ public:
     /* No controller to load */
     if (idx == -1)
     {
-      ROS_ERROR("No such controller to start");
+      ROS_ERROR_STREAM("No such controller to start: " << name);
       return false;
     }
 

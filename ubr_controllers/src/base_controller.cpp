@@ -80,10 +80,10 @@ bool BaseController::init(ros::NodeHandle& nh, ControllerManager* manager)
   timeout_ = ros::Duration(t);
 
   /* Get limits of base controller */
-  nh.param<double>("max_velocity_x", max_velocity_x_, 0.75);
-  nh.param<double>("max_velocity_r", max_velocity_r_, 4.45566);
-  nh.param<double>("max_acceleration_x", max_acceleration_x_, 0.5);
-  nh.param<double>("max_acceleration_r", max_acceleration_r_, 2.97044);
+  nh.param<double>("max_velocity_x", max_velocity_x_, 1.0);
+  nh.param<double>("max_velocity_r", max_velocity_r_, 4.5);
+  nh.param<double>("max_acceleration_x", max_acceleration_x_, 0.75);
+  nh.param<double>("max_acceleration_r", max_acceleration_r_, 3.0);
 
   /* Subscribe to base commands */
   cmd_sub_ = nh.subscribe<geometry_msgs::Twist>("command", 1,

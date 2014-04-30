@@ -68,7 +68,10 @@ public:
     velocity_pid_.init(ros::NodeHandle(nh, joint_->GetName() + "/velocity"));
 
     /* Load optional effort_limit as a workaround to gzsdf limitation */
-    nh.param( joint_->GetName() + "/effort_limit", effort_limit_, 0.0);
+    nh.param(joint_->GetName() + "/effort_limit", effort_limit_, 0.0);
+
+    /* Extra force input (for torso gas spring) */
+    nh.param(joint_->GetName() + "/effort_offset", effort_offset_, 0.0);
   }
   virtual ~GazeboJointHandle()
   {
@@ -177,7 +180,7 @@ public:
   /** \brief Returns the effort applied to the joint. */
   virtual double getEffort()
   { 
-    return joint_->GetForce(0u);
+    return joint_->GetForce(0u) - effort_offset_;
   }
 
   /** \brief Get the lower positional limit */
@@ -267,7 +270,7 @@ public:
     effort = std::max(-lim, std::min(effort, lim));
 
     /* Actually update */
-    joint_->SetForce(0, effort);
+    joint_->SetForce(0, effort + effort_offset_);
   }
 
 private:
@@ -285,6 +288,9 @@ private:
 
   /// Hack for continuous joints that fail to have effort limits
   double effort_limit_;
+
+  /// Hack for joints with gas springs attached
+  double effort_offset_;
 };
 
 }  // namespace ubr1_gazebo

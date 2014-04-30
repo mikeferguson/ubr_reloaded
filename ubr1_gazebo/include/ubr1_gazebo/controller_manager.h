@@ -75,6 +75,9 @@ public:
 
     /* Start gravity compensation */
     requestStart("arm_controller/gravity_compensation");
+
+    /* Start the simulated gripper */
+    requestStart("gripper_controller/gripper_action");
   }
 
   virtual bool update(const ros::Time now, const ros::Duration dt)
