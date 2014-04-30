@@ -47,6 +47,9 @@ gripper_controller:
   gripper_action:
     type: "ubr_controllers/SimulatedGripperController"
 
+bellows_controller:
+  type: "ubr_controllers/SimulatedBellowsController"
+
 gazebo:
   controllers:
     - "arm_controller/follow_joint_trajectory"
@@ -57,6 +60,7 @@ gazebo:
     - "head_controller/point_head"
     - "torso_controller/follow_joint_trajectory"
     - "gripper_controller/gripper_action"
+    - "bellows_controller"
   base_l_wheel_joint:
     position:
       p: 0.0
@@ -95,7 +99,7 @@ gazebo:
     effort_offset: 300.0
   bellows_joint:
     position:
-      p: 1.0
+      p: 50.0
       d: 0.0
       i: 0.0
       i_clamp: 0.0

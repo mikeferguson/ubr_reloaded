@@ -506,6 +506,33 @@
     <child link="estop_link" />
     <axis xyz="0 0 1" />
   </joint>
+  <link name="bellows_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="-4.95346061296346E-08 0.123400904659858 0.0107781507059864" />
+      <mass value="0.1" />
+      <inertia ixx="0.000408561556131289" ixy="3.9348438720509E-09" ixz="2.76652370410412E-11"
+               iyy="0.000721553598298091" iyz="3.35031527267575E-07"
+               izz="0.00103695967363802" />
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <geometry>
+        <mesh filename="package://ubr1_description/meshes/bellows_link.STL" />
+      </geometry>
+      <material name="">
+        <color rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+  </link>
+  <joint name="bellows_joint" type="prismatic">
+    <origin rpy="1.5708 -2.4652E-32 -1.5708" xyz="0.0047367 0 -0.1823" />
+    <parent link="torso_lift_link" />
+    <child link="bellows_link" />
+    <axis xyz="0 1 0" />
+    <limit effort="25.0" lower="-0.1778" upper="0.0" velocity="0.0" />
+    <calibration rising="0.0" />
+    <dynamics damping="0.7" />
+  </joint>
   <link name="fixed_bellows_link">
     <inertial>
       <origin rpy="0 0 0" xyz="-4.95346056930955E-08 0.123400904659858 0.0107781507059864" />

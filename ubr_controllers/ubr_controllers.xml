@@ -30,4 +30,10 @@
     <description>Simulated Gripper Controller</description>
   </class>
 
+  <class name="ubr_controllers/SimulatedBellowsController"
+         type="ubr_controllers::SimulatedBellowsController"
+         base_class_type="ubr_controllers::Controller">
+    <description>Simulated Bellows Controller</description>
+  </class>
+
 </library>
