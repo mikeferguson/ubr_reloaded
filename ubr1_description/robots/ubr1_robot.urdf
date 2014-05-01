@@ -18,9 +18,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0.05715" />
+      <origin rpy="0 0 0" xyz="0 0 0.14" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/base_link_col.STL" />
+        <cylinder length="0.28" radius="0.25"/>
       </geometry>
     </collision>
   </link>
@@ -42,9 +42,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="-0.08 0 0.30" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/torso_lift_link_col.STL" />
+        <box size="0.20 0.32 0.58"/>
       </geometry>
     </collision>
   </link>
@@ -75,9 +75,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0.0 0 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/shoulder_pan_link_col.STL" />
+        <cylinder length="0.19" radius="0.115"/>
       </geometry>
     </collision>
   </link>
@@ -103,9 +103,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="1.57 0 0" xyz="0.0 0 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/shoulder_lift_link_col.STL" />
+        <cylinder length="0.23" radius="0.09"/>
       </geometry>
     </collision>
   </link>
@@ -131,9 +131,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 1.57 0" xyz="0.1275 0 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/upperarm_roll_link_col.STL" />
+        <cylinder length="0.255" radius="0.075"/>
       </geometry>
     </collision>
   </link>
@@ -148,7 +148,10 @@
   </joint>
   <link name="elbow_flex_link">
     <inertial>
-      <inertia ixx="0.00134" ixy="1e-05" ixz="-1e-05" iyy="0.00135" iyz="0.0" izz="0.00214" /><mass value="1.18183" /><origin rpy="0.0 0.0 0.0" xyz="-0.01618 0.00090 0.00033" /></inertial>
+      <inertia ixx="0.00134" ixy="1e-05" ixz="-1e-05" iyy="0.00135" iyz="0.0" izz="0.00214" />
+      <mass value="1.18183" />
+      <origin rpy="0.0 0.0 0.0" xyz="-0.01618 0.00090 0.00033" />
+    </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
@@ -158,12 +161,6 @@
         <color rgba="0.874509803921569 0.352941176470588 0.0470588235294118 1" />
       </material>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
-      <geometry>
-        <mesh filename="package://ubr1_description/meshes/elbow_flex_link_col.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint name="elbow_flex_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.20955 0 0" />
@@ -176,7 +173,10 @@
   </joint>
   <link name="forearm_roll_link">
     <inertial>
-      <inertia ixx="0.00215" ixy="-3e-05" ixz="-0.00018" iyy="0.00589" iyz="0.0" izz="0.00659" /><mass value="1.61673" /><origin rpy="0.0 0.0 0.0" xyz="0.10890 -0.00049 -0.01352" /></inertial>
+      <inertia ixx="0.00215" ixy="-3e-05" ixz="-0.00018" iyy="0.00589" iyz="0.0" izz="0.00659" />
+      <mass value="1.61673" />
+      <origin rpy="0.0 0.0 0.0" xyz="0.10890 -0.00049 -0.01352" />
+    </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
@@ -187,9 +187,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0.14 0 -0.005" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/forearm_roll_link_col.STL" />
+        <box size="0.275 0.15 0.10"/>
       </geometry>
     </collision>
   </link>
@@ -204,7 +204,10 @@
   </joint>
   <link name="wrist_flex_link">
     <inertial>
-      <inertia ixx="0.00028" ixy="0.0" ixz="0.0" iyy="0.00018" iyz="0.0" izz="0.00032" /><mass value="0.46911" /><origin rpy="0.0 0.0 0.0" xyz="0.00360 -0.00013 0.00004" /></inertial>
+      <inertia ixx="0.00028" ixy="0.0" ixz="0.0" iyy="0.00018" iyz="0.0" izz="0.00032" />
+      <mass value="0.46911" />
+      <origin rpy="0.0 0.0 0.0" xyz="0.00360 -0.00013 0.00004" />
+    </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
@@ -214,12 +217,6 @@
         <color rgba="0.874509803921569 0.352941176470588 0.0470588235294118 1" />
       </material>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
-      <geometry>
-        <mesh filename="package://ubr1_description/meshes/wrist_flex_link_col.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint name="wrist_flex_joint" type="revolute">
     <origin rpy="0 0 0" xyz="0.2345 0 0" />
@@ -232,7 +229,10 @@
   </joint>
   <link name="wrist_roll_link">
     <inertial>
-      <inertia ixx="0.00039" ixy="0.0" ixz="0.0" iyy="0.00039" iyz="-1e-05" izz="0.00066" /><mass value="0.4218" /><origin rpy="0.0 0.0 0.0" xyz="0.04724 0.00159 0.00064" /></inertial>
+      <inertia ixx="0.00039" ixy="0.0" ixz="0.0" iyy="0.00039" iyz="-1e-05" izz="0.00066" />
+      <mass value="0.4218" />
+      <origin rpy="0.0 0.0 0.0" xyz="0.04724 0.00159 0.00064" />
+    </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
@@ -242,12 +242,12 @@
         <color rgba="1 1 1 1" />
       </material>
     </visual>
-    <collision>
+    <!--<collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
         <mesh filename="package://ubr1_description/meshes/wrist_roll_link_col.STL" />
       </geometry>
-    </collision>
+    </collision>-->
   </link>
   <joint name="wrist_roll_joint" type="continuous">
     <origin rpy="0 0 0" xyz="0.0406 0 0" />
@@ -262,7 +262,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-0.0670153498108639 -0.00132295634769695 0.00257367957834986" />
       <mass value="0.0548736502934717" />
-      <inertia ixx="8.42935547625042E-05" ixy="2.83872396856548E-07" ixz="4.50471456795242E-07" iyy="5.67591543072221E-05" iyz="-5.15345035440548E-08" izz="9.73544515410343E-05" />
+      <inertia ixx="8.42935547625042E-05" ixy="2.83872396856548E-07" ixz="4.50471456795242E-07"
+               iyy="5.67591543072221E-05" iyz="-5.15345035440548E-08"
+               izz="9.73544515410343E-05" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -274,9 +276,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="-0.07 0 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/gripper_link_col.STL" />
+        <box size="0.08 0.102 0.05" />
       </geometry>
     </collision>
   </link>
@@ -290,7 +292,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00180634193065077 -0.00507960988304032 1.82718525310044E-07" />
       <mass value="0.00805661879107867" />
-      <inertia ixx="5.11986641952728E-07" ixy="3.30246887636314E-09" ixz="-1.19155944238838E-12" iyy="2.94192790473005E-06" iyz="7.56098476735154E-12" izz="2.63439556818182E-06" />
+      <inertia ixx="5.11986641952728E-07" ixy="3.30246887636314E-09" ixz="-1.19155944238838E-12"
+               iyy="2.94192790473005E-06" iyz="7.56098476735154E-12"
+               izz="2.63439556818182E-06" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -302,9 +306,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0 -0.005 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/right_gripper_finger_link_col.STL" />
+        <box size="0.06 0.01 0.022" />
       </geometry>
     </collision>
   </link>
@@ -321,7 +325,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00180634285159509 0.00507961002244872 -1.82994932651503E-07" />
       <mass value="0.00805661848049576" />
-      <inertia ixx="5.11986620594033E-07" ixy="-3.30249741353407E-09" ixz="1.24817528594142E-12" iyy="2.94192770039741E-06" iyz="7.56956725380165E-12" izz="2.63439537656996E-06" />
+      <inertia ixx="5.11986620594033E-07" ixy="-3.30249741353407E-09" ixz="1.24817528594142E-12"
+               iyy="2.94192770039741E-06" iyz="7.56956725380165E-12"
+               izz="2.63439537656996E-06" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -333,9 +339,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0 0.005 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/left_gripper_finger_link_col.STL" />
+        <box size="0.06 0.01 0.022" />
       </geometry>
     </collision>
   </link>
@@ -373,9 +379,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0.06 0 0.01" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/head_pan_link_col.STL" />
+        <box size="0.30 0.29 0.11"/>
       </geometry>
     </collision>
   </link>
@@ -408,7 +414,7 @@
     <collision>
       <origin rpy="0 0 0" xyz="0 0 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/head_tilt_link_col.STL" />
+        <box size="0.10 0.29 0.10"/>
       </geometry>
     </collision>
   </link>
@@ -425,7 +431,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00178948803750542 0.00293228933526682 -0.00126569018604761" />
       <mass value="0.15791194679459" />
-      <inertia ixx="0.000410373133213838" ixy="-4.65746959126115E-06" ixz="1.54869804665117E-06" iyy="2.66787966300267E-05" iyz="-8.80223403267447E-06" izz="0.000415197483134736" />
+      <inertia ixx="0.000410373133213838" ixy="-4.65746959126115E-06" ixz="1.54869804665117E-06"
+               iyy="2.66787966300267E-05" iyz="-8.80223403267447E-06"
+               izz="0.000415197483134736" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -436,12 +444,6 @@
         <color rgba="0 0 0 1" />
       </material>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
-      <geometry>
-        <mesh filename="package://ubr1_description/meshes/head_camera_link.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint name="head_camera_joint" type="fixed">
     <origin rpy="0 0 0" xyz="0.03475 0 0.022877" />
@@ -482,7 +484,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-6.39117272993595E-09 1.30867278759217E-05 0.0263084007038297" />
       <mass value="0.00196130439130725" />
-      <inertia ixx="3.14705392512728E-07" ixy="-4.08544353458379E-12" ixz="2.20397665051664E-13" iyy="3.14452534479207E-07" iyz="-4.49188364721138E-10" izz="1.95488289214464E-07" />
+      <inertia ixx="3.14705392512728E-07" ixy="-4.08544353458379E-12" ixz="2.20397665051664E-13"
+               iyy="3.14452534479207E-07" iyz="-4.49188364721138E-10"
+               izz="1.95488289214464E-07" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -493,12 +497,6 @@
         <color rgba="1 0 0 1" />
       </material>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
-      <geometry>
-        <mesh filename="package://ubr1_description/meshes/estop_link.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint name="estop_joint" type="fixed">
     <origin rpy="1.5708 -0.047415 -1.5708" xyz="-0.15995 0 0.4859" />
@@ -537,7 +535,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-4.95346056930955E-08 0.123400904659858 0.0107781507059864" />
       <mass value="0.0636200134411883" />
-      <inertia ixx="0.000408561556131288" ixy="3.93484387266685E-09" ixz="2.76652374600841E-11" iyy="0.000721553598298089" iyz="3.35031527267454E-07" izz="0.00103695967363802" />
+      <inertia ixx="0.000408561556131288" ixy="3.93484387266685E-09" ixz="2.76652374600841E-11"
+               iyy="0.000721553598298089" iyz="3.35031527267454E-07"
+               izz="0.00103695967363802" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -548,12 +548,6 @@
         <color rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
       </material>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
-      <geometry>
-        <mesh filename="package://ubr1_description/meshes/bellows_link_col.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint name="fixed_bellows_joint" type="fixed">
     <origin rpy="1.5708 -2.4652E-32 -1.5708" xyz="0.0047367 0 -0.1823" />
@@ -578,9 +572,9 @@
       </material>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0" />
+      <origin rpy="0 0 0" xyz="0.13 0.45 0" />
       <geometry>
-        <mesh filename="package://ubr1_description/meshes/fixed_torso_link.STL" />
+        <box size="0.20 0.40 0.32"/>
       </geometry>
     </collision>
   </link>
@@ -594,7 +588,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-1.64014810163652E-10 0.00025233203864472 -2.77555756156289E-17" />
       <mass value="0.680549565836583" />
-      <inertia ixx="0.000516152001969145" ixy="2.81654304441038E-14" ixz="-1.48432572797365E-22" iyy="0.000867209455065921" iyz="-1.17328198292256E-12" izz="0.000516152001737231" />
+      <inertia ixx="0.000516152001969145" ixy="2.81654304441038E-14" ixz="-1.48432572797365E-22"
+               iyy="0.000867209455065921" iyz="-1.17328198292256E-12"
+               izz="0.000516152001737231" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -613,7 +609,7 @@
     </collision>
   </link>
   <joint name="base_r_wheel_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 -0.17 0.05715" />
+    <origin rpy="0 0 0" xyz="0 -0.17 0.05615" />
     <parent link="base_link" />
     <child link="right_wheel_link" />
     <axis xyz="0 1 0" />
@@ -625,7 +621,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-1.64014810154732E-10 0.000252332038644693 -2.77555756156289E-17" />
       <mass value="0.680549565836583" />
-      <inertia ixx="0.000516152001969145" ixy="2.81654302730693E-14" ixz="-1.39880007920223E-22" iyy="0.000867209455065921" iyz="-1.17328198291752E-12" izz="0.000516152001737231" />
+      <inertia ixx="0.000516152001969145" ixy="2.81654302730693E-14" ixz="-1.39880007920223E-22"
+               iyy="0.000867209455065921" iyz="-1.17328198291752E-12"
+               izz="0.000516152001737231" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -644,7 +642,7 @@
     </collision>
   </link>
   <joint name="base_l_wheel_joint" type="continuous">
-    <origin rpy="0 0 0" xyz="0 0.17 0.05715" />
+    <origin rpy="0 0 0" xyz="0 0.17 0.05615" />
     <parent link="base_link" />
     <child link="left_wheel_link" />
     <axis xyz="0 1 0" />
@@ -656,7 +654,9 @@
     <inertial>
       <origin rpy="0 0 0" xyz="-2.77555756156289E-17 2.24932874362996E-18 0.0202675371573463" />
       <mass value="0.13945214558184" />
-      <inertia ixx="7.38616097495533E-05" ixy="3.43625778332246E-08" ixz="1.18982532649698E-21" iyy="7.38616097495533E-05" iyz="2.6318307602024E-21" izz="5.02435312332874E-05" />
+      <inertia ixx="7.38616097495533E-05" ixy="3.43625778332246E-08" ixz="1.18982532649698E-21"
+               iyy="7.38616097495533E-05" iyz="2.6318307602024E-21"
+               izz="5.02435312332874E-05" />
     </inertial>
     <visual>
       <origin rpy="-3.14159265359 0 0" xyz="0 0 0" />
@@ -667,12 +667,6 @@
         <color rgba="0 0 0 1" />
       </material>
     </visual>
-    <collision>
-      <origin rpy="-3.14159265359 0 0" xyz="0 0 0" />
-      <geometry>
-        <mesh filename="package://ubr1_description/meshes/base_laser_link.STL" />
-      </geometry>
-    </collision>
   </link>
   <joint name="base_laser_joint" type="fixed">
     <origin rpy="3.14159265359 0 -2.2204E-16" xyz="0.18683 0 0.21048" />
