@@ -613,9 +613,9 @@
     <parent link="base_link" />
     <child link="right_wheel_link" />
     <axis xyz="0 1 0" />
-    <limit effort="8.0" velocity="20.0" />
+    <limit effort="12.0" velocity="20.0" />
     <calibration rising="0.0" />
-    <dynamics damping="0.7" />
+    <dynamics damping="0.3" />
   </joint>
   <link name="left_wheel_link">
     <inertial>
@@ -646,9 +646,9 @@
     <parent link="base_link" />
     <child link="left_wheel_link" />
     <axis xyz="0 1 0" />
-    <limit effort="8.0" velocity="20.0" />
+    <limit effort="12.0" velocity="20.0" />
     <calibration rising="0.0" />
-    <dynamics damping="0.7" />
+    <dynamics damping="0.3" />
   </joint>
   <link name="base_laser_link">
     <inertial>
