@@ -117,6 +117,11 @@ public:
 
   /** \brief Get the name of this joint. */
   virtual std::string getName() { return "invalid"; }
+
+private:
+  /* You no copy... */
+  JointHandle(const JointHandle&);
+  JointHandle& operator=(const JointHandle&);
 };
 
 }  // namespace ubr_controllers

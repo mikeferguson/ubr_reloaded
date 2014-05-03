@@ -42,8 +42,6 @@ GZ_REGISTER_MODEL_PLUGIN(UBR1GazeboPlugin)
 
 UBR1GazeboPlugin::UBR1GazeboPlugin() : nh_()
 {
-  /* Create a periodic timer to publish joint_states, odom, etc */
-  pubtimer_ = nh_.createTimer(ros::Duration(0.01), &UBR1GazeboPlugin::OnTimer, this);
 }
 
 UBR1GazeboPlugin::~UBR1GazeboPlugin()
@@ -54,6 +52,7 @@ UBR1GazeboPlugin::~UBR1GazeboPlugin()
 void UBR1GazeboPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr /*_sdf*/)
 {
   this->model = _model;
+  last_publish_ = ros::Time(this->model->GetWorld()->GetSimTime().Double());
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&UBR1GazeboPlugin::OnUpdate, this));
@@ -63,28 +62,35 @@ void UBR1GazeboPlugin::Init()
 {
   this->joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 10);
   this->manager_ = new ubr1_gazebo::GazeboControllerManager(this->model);
+
+  /* Start gravity compensation */
+  this->manager_->requestStart("arm_controller/gravity_compensation");
+
+  /* Start the simulated controllers */
+  this->manager_->requestStart("gripper_controller/gripper_action");
+  this->manager_->requestStart("bellows_controller");
+
   ROS_INFO("Finished initializing UBR1GazeboPlugin");
 }
 
 void UBR1GazeboPlugin::OnUpdate()
 {
+  /* Don't try to update/publish if we are shutting down. */
+  if (!ros::ok()) return;
+
   /* Get time and timestep for controllers */
   common::Time currTime = this->model->GetWorld()->GetSimTime();
   common::Time stepTime = currTime - this->prevUpdateTime;
   this->prevUpdateTime = currTime;
   double dt = stepTime.Double();
+  ros::Time now = ros::Time(currTime.Double());
 
   /* Update controllers */
-  this->manager_->update(ros::Time(currTime.Double()), ros::Duration(dt));
-}
+  this->manager_->update(now, ros::Duration(dt));
 
-void UBR1GazeboPlugin::OnTimer(const ros::TimerEvent& event)
-{
-  /* Don't try to publish if we are shutting down. */
-  if (!ros::ok()) return;
-
-  /* Get gazebo time */
-  common::Time currTime = this->model->GetWorld()->GetSimTime();
+  /* Limit publish rate */
+  if (now - last_publish_ < ros::Duration(0.01))
+    return;
 
   /* Publish joint_state message */
   sensor_msgs::JointState js;
@@ -107,4 +113,7 @@ void UBR1GazeboPlugin::OnTimer(const ros::TimerEvent& event)
   {
     dynamic_cast<ubr_controllers::BaseController*>(base)->publish(ros::Time::now());
   }
+
+  last_publish_ = now;
 }
+

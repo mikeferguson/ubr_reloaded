@@ -72,13 +72,6 @@ public:
   {
     /* Load default controllers */
     ubr_controllers::ControllerManager::init(nh);
-
-    /* Start gravity compensation */
-    requestStart("arm_controller/gravity_compensation");
-
-    /* Start the simulated controllers */
-    requestStart("gripper_controller/gripper_action");
-    requestStart("bellows_controller");
   }
 
   virtual bool update(const ros::Time now, const ros::Duration dt)

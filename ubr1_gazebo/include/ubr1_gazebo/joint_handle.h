@@ -64,14 +64,20 @@ public:
     ros::NodeHandle nh("~");
 
     /* Load controller parameters */
-    position_pid_.init(ros::NodeHandle(nh, joint_->GetName() + "/position"));
-    velocity_pid_.init(ros::NodeHandle(nh, joint_->GetName() + "/velocity"));
+    position_pid_.init(ros::NodeHandle(nh, getName() + "/position"));
+    velocity_pid_.init(ros::NodeHandle(nh, getName() + "/velocity"));
 
     /* Load optional effort_limit as a workaround to gzsdf limitation */
-    nh.param(joint_->GetName() + "/effort_limit", effort_limit_, 0.0);
+    nh.param(getName() + "/effort_limit", effort_limit_, 0.0);
 
     /* Extra force input (for torso gas spring) */
-    nh.param(joint_->GetName() + "/effort_offset", effort_offset_, 0.0);
+    nh.param(getName() + "/effort_offset", effort_offset_, 0.0);
+
+    /* Should we put out debug info? */
+    nh.param(getName() + "/debug", debug_, false);
+
+    if (debug_)
+      ROS_INFO_STREAM(getName() << " has limit of " << getEffortLimit() << " and offset of " << effort_offset_);
   }
   virtual ~GazeboJointHandle()
   {
@@ -220,6 +226,7 @@ public:
 
   virtual std::string getName()
   {
+    // TODO pointer check on joint_ ???
     return joint_->GetName();
   }
 
@@ -269,8 +276,15 @@ public:
     float lim = getEffortLimit();
     effort = std::max(-lim, std::min(effort, lim));
 
+    if (debug_)
+        ROS_INFO_STREAM(getName() << " commanded effort of " << effort);
+
     /* Actually update */
     joint_->SetForce(0, effort + effort_offset_);
+
+
+    if (debug_)
+        ROS_INFO_STREAM(getName() << " output effort of " << joint_->GetForce(0u));
   }
 
 private:
@@ -291,6 +305,13 @@ private:
 
   /// Hack for joints with gas springs attached
   double effort_offset_;
+
+  /// By-joint debug capability
+  bool debug_;
+
+  /* You no copy... */
+  GazeboJointHandle(const GazeboJointHandle&);
+  GazeboJointHandle& operator=(const GazeboJointHandle&);
 };
 
 }  // namespace ubr1_gazebo
