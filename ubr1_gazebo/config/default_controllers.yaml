@@ -63,33 +63,33 @@ gazebo:
     - "bellows_controller"
   base_l_wheel_joint:
     position:
-      p: 0.0
+      p: 0.1
       d: 0.0
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 1.0
+      p: 2.0
       d: 0.0
-      i: 0.04
-      i_clamp: 3
-    effort_limit: 8.0
+      i: 0.2
+      i_clamp: 5.0
+    effort_limit: 12.0
   base_r_wheel_joint:
     position:
-      p: 0.0
+      p: 0.1
       d: 0.0
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 1.0
+      p: 2.0
       d: 0.0
-      i: 0.04
-      i_clamp: 3
-    effort_limit: 8.0
+      i: 0.2
+      i_clamp: 5.0
+    effort_limit: 12.0
   torso_lift_joint:
     position:
-      p: 10.0
+      p: 1.0
       d: 0.0
-      i: 25.0
+      i: 0.05
       i_clamp: 50.0
     velocity:
       p: 0.126
@@ -132,82 +132,82 @@ gazebo:
       i_clamp: 0.284
   shoulder_pan_joint:
     position:
-      p: 2.0
+      p: 500.0
       d: 0.0
-      i: 0.02
-      i_clamp: 0.05
+      i: 20.0
+      i_clamp: 3.0
     velocity:
-      p: 0.174
-      d: 0.087
-      i: 0.0348
-      i_clamp: 3.48
+      p: 0.0025
+      d: 0.0
+      i: 0.0002
+      i_clamp: 0.01
   shoulder_lift_joint:
     position:
-      p: 6.0
+      p: 1200.0
       d: 0.0
-      i: 0.07
-      i_clamp: 0.1
+      i: 20.0
+      i_clamp: 30.0
     velocity:
-      p: 0.8855
+      p: 0.25
       d: 0.0
-      i: 0.253
-      i_clamp: 101.2
+      i: 0.25
+      i_clamp: 2.5
   upperarm_roll_joint:
     position:
-      p: 5.0
+      p: 155.0
       d: 0.0
-      i: 0.02
-      i_clamp: 0.05
+      i: 3.49
+      i_clamp: 8.725
     velocity:
-      p: 0.174
-      d: 0.087
-      i: 0.0348
-      i_clamp: 4.35
+      p: 0.001
+      d: 0.0
+      i: 0.0002
+      i_clamp: 0.025
   elbow_flex_joint:
     position:
       p: 200.0
       d: 0.0
-      i: 0.5
-      i_clamp: 0.1
+      i: 30
+      i_clamp: 1.3
     velocity:
-      p: 0.6345
+      p: 0.001
       d: 0.0
-      i: 0.094
-      i_clamp: 0.235
+      i: 0.0002
+      i_clamp: 0.025
   forearm_roll_joint:
     position:
-      p: 200.0
+      p: 100.0
       d: 0.0
-      i: 0.5
-      i_clamp: 0.1
+      i: 15
+      i_clamp: 0.5
     velocity:
-      p: 0.6345
+      p: 0.001
       d: 0.0
-      i: 0.094
-      i_clamp: 0.235
+      i: 0.0002
+      i_clamp: 0.0125
     effort_limit: 3.166
   wrist_flex_joint:
     position:
       p: 200.0
       d: 0.0
       i: 15.0
-      i_clamp: 5.0
+      i_clamp: 0.2
     velocity:
-      p: 0.3969
+      p: 0.002
       d: 0.0
-      i: 0.0294
-      i_clamp: 0.147
+      i: 0.0002
+      i_clamp: 0.01
   wrist_roll_joint:
     position:
       p: 200.0
       d: 0.0
       i: 15.0
-      i_clamp: 5.0
+      i_clamp: 0.2
     velocity:
-      p: 0.3969
+      p: 0.002
       d: 0.0
-      i: 0.0294
-      i_clamp: 0.147
+      i: 0.0002
+      i_clamp: 0.01
     effort_limit: 1.0
   left_gripper_joint:
     position:
