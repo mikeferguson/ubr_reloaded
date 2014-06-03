@@ -209,8 +209,12 @@ bool BaseController::update(const ros::Time now, const ros::Duration dt)
   theta_ += th;
 
   /* Actually set command */
-  setCommand(last_sent_x_ - (last_sent_r_/2.0 * track_width_),
-             last_sent_x_ + (last_sent_r_/2.0 * track_width_));
+  if ((last_sent_x_ != 0.0) || (last_sent_r_ != 0.0) ||
+      (fabs(dx) > 0.05) || (fabs(dr) > 0.05))
+  {
+    setCommand(last_sent_x_ - (last_sent_r_/2.0 * track_width_),
+              last_sent_x_ + (last_sent_r_/2.0 * track_width_));
+  }
 
   /* Update odometry information. */
   odom_.pose.pose.orientation.z = sin(theta_/2.0);
