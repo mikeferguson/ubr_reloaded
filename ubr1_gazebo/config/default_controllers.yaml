@@ -63,27 +63,27 @@ gazebo:
     - "bellows_controller"
   base_l_wheel_joint:
     position:
-      p: 0.1
+      p: 0.0
       d: 0.0
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 2.0
+      p: 8.0
       d: 0.0
-      i: 0.2
-      i_clamp: 5.0
+      i: 0.5
+      i_clamp: 6.0
     effort_limit: 12.0
   base_r_wheel_joint:
     position:
-      p: 0.1
+      p: 0.0
       d: 0.0
       i: 0.0
       i_clamp: 0.0
     velocity:
-      p: 2.0
+      p: 8.0
       d: 0.0
-      i: 0.2
-      i_clamp: 5.0
+      i: 0.5
+      i_clamp: 6.0
     effort_limit: 12.0
   torso_lift_joint:
     position:
