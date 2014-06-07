@@ -98,10 +98,11 @@ void UBR1GazeboPlugin::OnUpdate()
   gazebo::physics::Joint_V joints = this->model->GetJoints();
   for (gazebo::physics::Joint_V::iterator it = joints.begin(); it != joints.end(); ++it)
   {
+    ubr_controllers::JointHandle* j = this->manager_->getJointHandle((*it)->GetName());
     js.name.push_back((*it)->GetName());
-    js.position.push_back((*it)->GetAngle(0).Radian());
-    js.velocity.push_back((*it)->GetVelocity(0));
-    js.effort.push_back((*it)->GetForce(0u));
+    js.position.push_back(j->getPosition());
+    js.velocity.push_back(j->getVelocity());
+    js.effort.push_back(j->getEffort());
   }
   joint_state_pub_.publish(js);
 
