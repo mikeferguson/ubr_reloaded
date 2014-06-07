@@ -16,7 +16,7 @@ from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
 # The names of the joints, and the "tucked" position of the joints
 joint_names = ['shoulder_pan_joint', 'shoulder_lift_joint', 'upperarm_roll_joint', 
                'elbow_flex_joint', 'forearm_roll_joint', 'wrist_flex_joint', 'wrist_roll_joint']
-tucked  = [-1.4486, 1.3439, -2.8327, -1.8119, 0.0, -1.6571, 0.0]
+tucked  = [-1.3901, 1.3439, -2.8327, -1.8119, 0.0, -1.6571, 0.0]
 
 if __name__=='__main__':
     rospy.init_node('tuck_my_arm')
