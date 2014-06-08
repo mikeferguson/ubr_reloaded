@@ -70,23 +70,23 @@ public:
 
   virtual bool init(ros::NodeHandle & nh)
   {
-    /* Load default controllers */
+    // Load default controllers
     ubr_controllers::ControllerManager::init(nh);
   }
 
   virtual bool update(const ros::Time now, const ros::Duration dt)
   {
-    /* Clear previous commands */
+    // Clear previous commands
     for (std::map<std::string, boost::shared_ptr<GazeboJointHandle> >::const_iterator it = this->jointMap_.begin();
              it != this->jointMap_.end(); ++it)
     {
       it->second->clear();
     }
 
-    /* Add controller updates */
+    // Add controller updates
     ControllerManager::update(now, dt);
 
-    /* Set commands in Gazebo */
+    // Set commands in Gazebo
     for (std::map<std::string, boost::shared_ptr<GazeboJointHandle> >::const_iterator it = this->jointMap_.begin();
              it != this->jointMap_.end(); ++it)
     {

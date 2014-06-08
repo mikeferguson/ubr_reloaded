@@ -63,10 +63,10 @@ void UBR1GazeboPlugin::Init()
   this->joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 10);
   this->manager_ = new ubr1_gazebo::GazeboControllerManager(this->model);
 
-  /* Start gravity compensation */
+  // Start gravity compensation
   this->manager_->requestStart("arm_controller/gravity_compensation");
 
-  /* Start the simulated controllers */
+  // Start the simulated controllers
   this->manager_->requestStart("gripper_controller/gripper_action");
   this->manager_->requestStart("bellows_controller");
 
@@ -75,24 +75,24 @@ void UBR1GazeboPlugin::Init()
 
 void UBR1GazeboPlugin::OnUpdate()
 {
-  /* Don't try to update/publish if we are shutting down. */
+  // Don't try to update/publish if we are shutting down
   if (!ros::ok()) return;
 
-  /* Get time and timestep for controllers */
+  // Get time and timestep for controllers
   common::Time currTime = this->model->GetWorld()->GetSimTime();
   common::Time stepTime = currTime - this->prevUpdateTime;
   this->prevUpdateTime = currTime;
   double dt = stepTime.Double();
   ros::Time now = ros::Time(currTime.Double());
 
-  /* Update controllers */
+  // Update controllers
   this->manager_->update(now, ros::Duration(dt));
 
-  /* Limit publish rate */
+  // Limit publish rate
   if (now - last_publish_ < ros::Duration(0.01))
     return;
 
-  /* Publish joint_state message */
+  // Publish joint_state message
   sensor_msgs::JointState js;
   js.header.stamp = ros::Time(currTime.Double());
   gazebo::physics::Joint_V joints = this->model->GetJoints();
@@ -106,9 +106,9 @@ void UBR1GazeboPlugin::OnUpdate()
   }
   joint_state_pub_.publish(js);
 
-  /* TODO: Publish IMU */
+  // TODO: Publish IMU
 
-  /* Publish Base Odometry */
+  // Publish Base Odometry
   ubr_controllers::Controller * base = this->manager_->getController("base_controller");
   if (base)
   {

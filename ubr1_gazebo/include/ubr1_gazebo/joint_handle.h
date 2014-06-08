@@ -313,7 +313,7 @@ private:
   /// By-joint debug capability
   bool debug_;
 
-  /* You no copy... */
+  // You no copy...
   GazeboJointHandle(const GazeboJointHandle&);
   GazeboJointHandle& operator=(const GazeboJointHandle&);
 };
