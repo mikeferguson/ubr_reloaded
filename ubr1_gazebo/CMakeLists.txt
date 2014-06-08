@@ -27,7 +27,6 @@ catkin_package(
     ubr_controllers
   DEPENDS
     gazebo
-    orocos_kdl
 #    INCLUDE_DIRS
 #    LIBRARIES
 )

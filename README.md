@@ -71,12 +71,16 @@ position. As with most ROS robots, UBR-1 outputs a standard "sensors_msgs/JointS
 message on the topic "joint_states". This includes position, velocity and effort
 for each joint in the robot, and is updated at 100hz, just like the real robot.
 
-The simulator does not at this time expose the IMUs that would be present in both
-the robot base and the gripper in the real UBR-1.
-
 Running the Demos
 ===========
 TODO
+
+Differences From The Real Robot
+===========
+The simulator does not at this time expose the IMUs that would be present in both
+the robot base and the gripper in the real UBR-1.
+
+The head_camera/depth topics (XYZ only, no RGB) do not exist in the simulator.
 
 Limitations & Warnings
 ===========
