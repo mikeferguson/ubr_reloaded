@@ -38,6 +38,7 @@
 #define UBR1_GAZEBO_JOINT_HANDLE_H_
 
 #include <ros/ros.h>
+#include <angles/angles.h>
 
 #include <gazebo/physics/physics.hh>
 #include <ubr_controllers/joint_handle.h>
@@ -63,17 +64,17 @@ public:
   {
     ros::NodeHandle nh("~");
 
-    /* Load controller parameters */
+    // Load controller parameters
     position_pid_.init(ros::NodeHandle(nh, getName() + "/position"));
     velocity_pid_.init(ros::NodeHandle(nh, getName() + "/velocity"));
 
-    /* Load optional effort_limit as a workaround to gzsdf limitation */
+    // Load optional effort_limit as a workaround to gzsdf limitation
     nh.param(getName() + "/effort_limit", effort_limit_, 0.0);
 
-    /* Extra force input (for torso gas spring) */
+    // Extra force input (for torso gas spring)
     nh.param(getName() + "/effort_offset", effort_offset_, 0.0);
 
-    /* Should we put out debug info? */
+    // Should we put out debug info?
     nh.param(getName() + "/debug", debug_, false);
 
     if (debug_)
@@ -173,20 +174,20 @@ public:
 
   /** \brief Returns the position of the joint. */
   virtual double getPosition()
-  { 
+  {
     return joint_->GetAngle(0).Radian();
   }
 
   /** \brief Returns the velocity of the joint. */
   virtual double getVelocity()
-  { 
+  {
     return joint_->GetVelocity(0);
   }
 
   /** \brief Returns the effort applied to the joint. */
   virtual double getEffort()
-  { 
-    return joint_->GetForce(0u) - effort_offset_;
+  {
+    return applied_effort_;
   }
 
   /** \brief Get the lower positional limit */
@@ -262,7 +263,8 @@ public:
     }
     else if (isPositionControlled())
     {
-      float t = position_pid_.computeCommand(desired_position_ - getPosition(), dt) +
+      float p_error = angles::shortest_angular_distance(getPosition(), desired_position_);
+      float t = position_pid_.computeCommand(p_error, dt) +
                 velocity_pid_.computeCommand(desired_velocity_ - getVelocity(), dt);
       effort = t + desired_effort_;
     }
@@ -272,19 +274,18 @@ public:
       effort = t + desired_effort_;
     }
 
-    /* Limit effort so robot doesn't implode */
+    if (debug_)
+      ROS_INFO_STREAM(getName() << " commanded effort of " << effort);
+
+    // Limit effort so robot doesn't implode
     float lim = getEffortLimit();
-    effort = std::max(-lim, std::min(effort, lim));
+    applied_effort_ = std::max(-lim, std::min(effort, lim));
+
+    // Actually update
+    joint_->SetForce(0, applied_effort_ + effort_offset_);
 
     if (debug_)
-        ROS_INFO_STREAM(getName() << " commanded effort of " << effort);
-
-    /* Actually update */
-    joint_->SetForce(0, effort + effort_offset_);
-
-
-    if (debug_)
-        ROS_INFO_STREAM(getName() << " output effort of " << joint_->GetForce(0u));
+      ROS_INFO_STREAM(getName() << " output effort of " << applied_effort_ + effort_offset_);
   }
 
 private:
@@ -305,6 +306,9 @@ private:
 
   /// Hack for joints with gas springs attached
   double effort_offset_;
+
+  /// GetForce(0u) is not always right
+  double applied_effort_;
 
   /// By-joint debug capability
   bool debug_;

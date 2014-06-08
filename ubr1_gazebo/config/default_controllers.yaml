@@ -132,7 +132,7 @@ gazebo:
       i_clamp: 0.284
   shoulder_pan_joint:
     position:
-      p: 500.0
+      p: 400.0
       d: 0.0
       i: 20.0
       i_clamp: 3.0
@@ -188,10 +188,10 @@ gazebo:
     effort_limit: 3.166
   wrist_flex_joint:
     position:
-      p: 200.0
+      p: 10.0
       d: 0.0
-      i: 15.0
-      i_clamp: 0.2
+      i: 1.0
+      i_clamp: 0.3
     velocity:
       p: 0.002
       d: 0.0
@@ -199,15 +199,15 @@ gazebo:
       i_clamp: 0.01
   wrist_roll_joint:
     position:
-      p: 200.0
+      p: 10.0
       d: 0.0
-      i: 15.0
-      i_clamp: 0.2
+      i: 1.0
+      i_clamp: 0.3
     velocity:
       p: 0.002
       d: 0.0
       i: 0.0002
-      i_clamp: 0.01
+      i_clamp: 0.2
     effort_limit: 1.0
   left_gripper_joint:
     position:
