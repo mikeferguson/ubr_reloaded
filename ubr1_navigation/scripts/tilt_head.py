@@ -30,6 +30,8 @@
 # Tilt head for navigation obstacle avoidance.
 #
 
+from __future__ import print_function
+
 from threading import Lock
 
 import rospy
@@ -38,6 +40,7 @@ import actionlib
 from tf.listener import TransformListener
 from tf.transformations import quaternion_matrix
 
+from actionlib_msgs.msg import GoalStatus, GoalStatusArray
 from control_msgs.msg import PointHeadAction, PointHeadGoal
 from geometry_msgs.msg import PointStamped
 from nav_msgs.msg import Path
@@ -49,6 +52,7 @@ class NavHeadController:
         # enables
         self.enable_tilt = True
         self.enable_look = True
+        self.has_goal = False
 
         # pose and lock
         self.x = 1.0
@@ -62,12 +66,21 @@ class NavHeadController:
 
         self.service = rospy.Service('~configure', TiltControl, self.serviceHandler)
 
-        self.sub = rospy.Subscriber('move_base/TrajectoryPlannerROS/local_plan', Path, self.planCallback)
+        self.plan_sub = rospy.Subscriber('move_base/TrajectoryPlannerROS/local_plan', Path, self.planCallback)
+        self.stat_sub = rospy.Subscriber('move_base/status', GoalStatusArray, self.statCallback)
 
     def serviceHandler(self, req):
         self.enable_tilt = req.enable_tilt
         self.enable_look = req.enable_look and self.enable_tilt  # tilt has to be enabled to look
         return TiltControlResponse()
+
+    def statCallback(self, msg):
+        goal = False
+        for status in msg.status_list:
+            if status.status == GoalStatus.ACTIVE:
+                goal = True
+                break
+        self.has_goal = goal
 
     def planCallback(self, msg):
         # Only need to do this if we are looking
@@ -108,7 +121,7 @@ class NavHeadController:
 
     def loop(self):
         while not rospy.is_shutdown():
-            if self.enable_tilt:
+            if self.has_goal and self.enable_tilt:
                 goal = PointHeadGoal()
                 goal.target.header.stamp = rospy.Time.now()
                 goal.target.header.frame_id = 'base_link'
