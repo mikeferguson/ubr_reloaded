@@ -64,6 +64,7 @@
 int kfd = 0;
 struct termios cooked, raw;
 RobotController robot;
+ros::Time last;
 
 void quit(int sig)
 {
@@ -75,6 +76,8 @@ void quit(int sig)
 
 void callback(const ros::TimerEvent&)
 {
+  if ((ros::Time::now() - last) > ros::Duration(0.5))
+    robot.stop();
   robot.sendCommands();
 }
 
@@ -120,6 +123,9 @@ int main(int argc, char ** argv)
       exit(-1);
     }
 
+    last = ros::Time::now();
+    robot.start();
+
     switch (c)
     {
 
@@ -151,7 +157,7 @@ int main(int argc, char ** argv)
       break;
 
     default:
-      robot.stop();
+      robot.setBaseVelocity(0, 0);
     }
   }
 
