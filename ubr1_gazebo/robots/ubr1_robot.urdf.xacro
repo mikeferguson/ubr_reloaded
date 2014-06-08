@@ -89,7 +89,7 @@
       <plugin name="head_camera_controller" filename="libgazebo_ros_openni_kinect.so">
         <baseline>0.1</baseline>
         <alwaysOn>true</alwaysOn>
-        <updateRate>1.0</updateRate>
+        <updateRate>15.0</updateRate>
         <cameraName>head_camera</cameraName>
         <imageTopicName>/head_camera/rgb/image_raw</imageTopicName>
         <cameraInfoTopicName>/head_camera/rgb/camera_info</cameraInfoTopicName>
