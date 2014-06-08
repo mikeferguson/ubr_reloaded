@@ -83,7 +83,7 @@
         </image>
         <clip>
           <near>0.05</near>
-          <far>3.0</far>
+          <far>3.5</far>
         </clip>
       </camera>
       <plugin name="head_camera_controller" filename="libgazebo_ros_openni_kinect.so">
@@ -93,16 +93,11 @@
         <cameraName>head_camera</cameraName>
         <imageTopicName>/head_camera/rgb/image_raw</imageTopicName>
         <cameraInfoTopicName>/head_camera/rgb/camera_info</cameraInfoTopicName>
-        <depthImageTopicName>/head_camera/depth/image_raw</depthImageTopicName>
-        <depthImageCameraInfoTopicName>/head_camera/depth/camera_info</depthImageCameraInfoTopicName>
-        <pointCloudTopicName>/head_camera/depth/points</pointCloudTopicName>
+        <depthImageTopicName>/head_camera/depth_registered/image_raw</depthImageTopicName>
+        <depthImageCameraInfoTopicName>/head_camera/depth_registered/camera_info</depthImageCameraInfoTopicName>
+        <pointCloudTopicName>/head_camera/depth_registered/points</pointCloudTopicName>
         <frameName>head_camera_rgb_optical_frame</frameName>
-        <pointCloudCutoff>0.5</pointCloudCutoff>
-        <distortionK1>0.00000001</distortionK1>
-        <distortionK2>0.00000001</distortionK2>
-        <distortionK3>0.00000001</distortionK3>
-        <distortionT1>0.00000001</distortionT1>
-        <distortionT2>0.00000001</distortionT2>
+        <pointCloudCutoff>0.35</pointCloudCutoff>
         <CxPrime>0</CxPrime>
         <Cx>0</Cx>
         <Cy>0</Cy>
@@ -111,7 +106,7 @@
       </plugin>
     </sensor>
   </gazebo>
- -
+
   <!-- hokuyo -->
   <gazebo reference="base_laser_link">
     <sensor type="gpu_ray" name="base_laser">

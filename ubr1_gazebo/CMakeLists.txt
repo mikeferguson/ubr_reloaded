@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 2.8.3)
 project(ubr1_gazebo)
 
 find_package(gazebo REQUIRED)
-find_package(orocos_kdl)
 
 find_package(catkin
   REQUIRED
@@ -13,7 +12,6 @@ find_package(catkin
 
 link_directories(
   ${GAZEBO_LIBRARY_DIRS}
-  ${orocos_kdl_LIBRARY_DIRS}
 )
 
 include_directories(
@@ -40,7 +38,6 @@ target_link_libraries(UBR1GazeboPlugin
   ${GAZEBO_LIBRARIES}
   ${catkin_LIBRARIES}
   ${Boost_LIBRARIES}
-  ${orocos_kdl_LIBRARIES}
 )
 
 install(DIRECTORY

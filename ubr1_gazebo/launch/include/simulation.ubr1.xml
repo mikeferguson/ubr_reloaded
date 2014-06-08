@@ -21,4 +21,7 @@
   <!-- Reset Robot Pose -->
   <node name="reset_robot" pkg="ubr1_gazebo" type="reset_robot.py" />
 
+  <!-- Camera Nodelets (actual data is generated in Gazebo) -->
+  <include file="$(find ubr1_gazebo)/launch/include/head_camera.launch.xml" />
+
 </launch>
