@@ -24,4 +24,7 @@
   <!-- Camera Nodelets (actual data is generated in Gazebo) -->
   <include file="$(find ubr1_gazebo)/launch/include/head_camera.launch.xml" />
 
+  <!-- Teleop -->
+  <include file="$(find ubr1_gazebo)/launch/include/simulated_teleop.launch.xml" />
+
 </launch>
