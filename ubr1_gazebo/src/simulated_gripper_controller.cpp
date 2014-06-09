@@ -35,14 +35,14 @@
 /* Author: Michael Ferguson */
 
 #include <pluginlib/class_list_macros.h>
-#include <ubr_controllers/simulated_gripper_controller.h>
+#include <ubr1_gazebo/simulated_gripper_controller.h>
 
-PLUGINLIB_EXPORT_CLASS(ubr_controllers::SimulatedGripperController, ubr_controllers::Controller)
+PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedGripperController, ubr_controllers::Controller)
 
-namespace ubr_controllers
+namespace ubr1_gazebo_controllers
 {
 
-bool SimulatedGripperController::init(ros::NodeHandle& nh, ControllerManager* manager)
+bool SimulatedGripperController::init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager)
 {
   /* We absolutely need access to the controller manager */
   if (!manager)
@@ -51,7 +51,7 @@ bool SimulatedGripperController::init(ros::NodeHandle& nh, ControllerManager* ma
     return false;
   }
 
-  Controller::init(nh, manager);
+  ubr_controllers::Controller::init(nh, manager);
 
   /* Set Joint Names */
   joint_names_.push_back("left_gripper_joint");
@@ -214,4 +214,4 @@ std::vector<std::string> SimulatedGripperController::getJointNames()
   return joint_names_;
 }
 
-}  // namespace ubr_controllers
+}  // namespace ubr1_gazebo_controllers

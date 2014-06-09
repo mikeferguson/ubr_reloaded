@@ -34,73 +34,63 @@
 
 /* Author: Michael Ferguson */
 
-#include <pluginlib/class_list_macros.h>
-#include <ubr_controllers/simulated_bellows_controller.h>
+#ifndef UBR1_GAZEBO_CONTROLLERS_SIMULATED_BELLOWS_CONTROLLER_H_
+#define UBR1_GAZEBO_CONTROLLERS_SIMULATED_BELLOWS_CONTROLLER_H_
 
-PLUGINLIB_EXPORT_CLASS(ubr_controllers::SimulatedBellowsController, ubr_controllers::Controller)
+#include <string>
+#include <boost/shared_ptr.hpp>
 
-namespace ubr_controllers
+#include <ros/ros.h>
+#include <ubr_controllers/controller.h>
+#include <ubr_controllers/joint_handle.h>
+
+namespace ubr1_gazebo_controllers
 {
 
-bool SimulatedBellowsController::init(ros::NodeHandle& nh, ControllerManager* manager)
+/**
+ *  \brief World's stupidest controller -- this makes the bellows
+ *         be in the right place. If you ever find yourself reading this
+ *         code... I apologize in advance.
+ */
+class SimulatedBellowsController : public ubr_controllers::Controller
 {
-  /* We absolutely need access to the controller manager */
-  if (!manager)
+public:
+  SimulatedBellowsController() : initialized_(false) {}
+  virtual ~SimulatedBellowsController() {}
+
+  /** \brief Initialize parameters, interfaces */
+  virtual bool init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager);
+
+  /** \brief Start the controller. */
+  virtual bool start();
+
+  /** \brief Is this controller the head of the list? */
+  virtual bool authoritative()
   {
-    initialized_ = false;
+    // Honestly, if you want to control the bellows, go right ahead...
     return false;
   }
 
-  Controller::init(nh, manager);
+  /**
+   *  \brief Preempt this controller.
+   *  \param force If true, this controller will be stopped regardless
+   *         of return value.
+   *  \returns true if controller preempted successfully.
+   */
+  virtual bool preempt(bool force);
 
-  /* Get Joint Handles */
-  bellows_ = manager_->getJointHandle("bellows_joint");
-  torso_lift_ = manager_->getJointHandle("torso_lift_joint");
+  /** \brief Update controller, called from controller_manager update */
+  virtual bool update(const ros::Time now, const ros::Duration dt);
 
-  initialized_ = true;
-  return initialized_;
-}
+  /** \brief Get a list of joints this controls. */
+  virtual std::vector<std::string> getJointNames();
 
-bool SimulatedBellowsController::start()
-{
-  if (!initialized_)
-  {
-    ROS_ERROR_NAMED("SimulatedBellowsController",
-                    "Unable to start, not initialized.");
-    return false;
-  }
+private:
+  bool initialized_;
+  ubr_controllers::JointHandle* bellows_;
+  ubr_controllers::JointHandle* torso_lift_;
+};
 
-  return true;
-}
+}  // namespace ubr1_gazebo_controllers
 
-bool SimulatedBellowsController::preempt(bool force)
-{
-  if (!initialized_)
-    return true;
-
-  if (force)
-    return true;
-
-  /* If we preempt -- the bellows will fall -- and the world will end! */
-  return false;
-}
-
-bool SimulatedBellowsController::update(const ros::Time now, const ros::Duration dt)
-{
-  if (!initialized_)
-    return false;
-
-  /* I warned you this controller was stupid */
-  bellows_->setPositionCommand(torso_lift_->getPosition() / -2.0, 0.0, 0.0);
-
-  return true;
-}
-
-std::vector<std::string> SimulatedBellowsController::getJointNames()
-{
-  std::vector<std::string> names;
-  names.push_back("bellows_joint");
-  return names;
-}
-
-}  // namespace ubr_controllers
+#endif  // UBR1_GAZEBO_CONTROLLERS_SIMULATED_BELLOWS_CONTROLLER_H_

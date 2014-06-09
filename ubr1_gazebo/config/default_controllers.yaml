@@ -45,10 +45,10 @@ base_controller:
 
 gripper_controller:
   gripper_action:
-    type: "ubr_controllers/SimulatedGripperController"
+    type: "ubr1_gazebo_controllers/SimulatedGripperController"
 
 bellows_controller:
-  type: "ubr_controllers/SimulatedBellowsController"
+  type: "ubr1_gazebo_controllers/SimulatedBellowsController"
 
 gazebo:
   controllers:

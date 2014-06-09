@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2013, Unbounded Robotics Inc.
+ *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -34,8 +34,8 @@
 
 /* Author: Michael Ferguson */
 
-#ifndef UBR_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
-#define UBR_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
+#ifndef UBR1_GAZEBO_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
+#define UBR1_GAZEBO_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
 
 #include <string>
 #include <boost/shared_ptr.hpp>
@@ -47,13 +47,13 @@
 
 #include <control_msgs/GripperCommandAction.h>
 
-namespace ubr_controllers
+namespace ubr1_gazebo_controllers
 {
 
 /**
  *  \brief Controller for simulating the gripper
  */
-class SimulatedGripperController : public Controller
+class SimulatedGripperController : public ubr_controllers::Controller
 {
   typedef actionlib::SimpleActionServer<control_msgs::GripperCommandAction> server_t;
 
@@ -62,7 +62,7 @@ public:
   virtual ~SimulatedGripperController() {}
 
   /** \brief Initialize parameters, interfaces */
-  virtual bool init(ros::NodeHandle& nh, ControllerManager* manager);
+  virtual bool init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager);
 
   /** \brief Start the controller. */
   virtual bool start();
@@ -94,13 +94,13 @@ private:
 
   bool initialized_;
   std::vector<std::string> joint_names_;
-  JointHandle* left_;
-  JointHandle* right_;
+  ubr_controllers::JointHandle* left_;
+  ubr_controllers::JointHandle* right_;
   double left_effort_, right_effort_;
 
   boost::shared_ptr<server_t> server_;
 };
 
-}  // namespace ubr_controllers
+}  // namespace ubr1_gazebo_controllers
 
-#endif  // UBR_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
+#endif  // UBR1_GAZEBO_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
