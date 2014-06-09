@@ -274,18 +274,15 @@ public:
       effort = t + desired_effort_;
     }
 
-    if (debug_)
-      ROS_INFO_STREAM(getName() << " commanded effort of " << effort);
-
     // Limit effort so robot doesn't implode
     float lim = getEffortLimit();
     applied_effort_ = std::max(-lim, std::min(effort, lim));
 
+    if (debug_)
+      ROS_INFO_STREAM(getName() << " commanded effort of " << effort);
+
     // Actually update
     joint_->SetForce(0, applied_effort_ + effort_offset_);
-
-    if (debug_)
-      ROS_INFO_STREAM(getName() << " output effort of " << applied_effort_ + effort_offset_);
   }
 
 private:

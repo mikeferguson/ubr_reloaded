@@ -17,9 +17,17 @@
   </gazebo>
   <gazebo reference="right_gripper_finger_link">
     <material>Gazebo/Orange</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
   </gazebo>
   <gazebo reference="left_gripper_finger_link">
     <material>Gazebo/Orange</material>
+    <mu1>1.0</mu1>
+    <mu2>1.0</mu2>
+    <minDepth>0.001</minDepth>
+    <maxVel>0.1</maxVel>
   </gazebo>
   <gazebo reference="torso_lift_link">
     <material>Gazebo/White</material>

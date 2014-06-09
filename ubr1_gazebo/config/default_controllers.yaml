@@ -211,8 +211,8 @@ gazebo:
     effort_limit: 1.0
   left_gripper_joint:
     position:
-      p: 0.5
-      d: 0.05
+      p: 0.0
+      d: 0.0
       i: 0.0
       i_clamp: 0.0
     velocity:
@@ -222,8 +222,8 @@ gazebo:
       i_clamp: 0.0
   right_gripper_joint:
     position:
-      p: 0.5
-      d: 0.05
+      p: 0.0
+      d: 0.0
       i: 0.0
       i_clamp: 0.0
     velocity:

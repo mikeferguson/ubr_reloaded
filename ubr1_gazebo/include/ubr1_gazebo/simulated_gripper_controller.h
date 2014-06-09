@@ -94,9 +94,16 @@ private:
 
   bool initialized_;
   std::vector<std::string> joint_names_;
+
   ubr_controllers::JointHandle* left_;
   ubr_controllers::JointHandle* right_;
-  double left_effort_, right_effort_;
+
+  // The goal pose for the gripper
+  double goal_;
+  double max_effort_;
+  double last_position_;
+  double last_effort_;
+  ros::Time last_position_time_;
 
   boost::shared_ptr<server_t> server_;
 };
