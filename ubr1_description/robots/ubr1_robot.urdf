@@ -251,7 +251,13 @@
     <dynamics damping="0.7" />
   </joint>
   <link name="wrist_roll_link">
-    <!-- TODO: should this have inertial? -->
+    <!--<inertial>
+      <origin rpy="0 0 0" xyz="0 0 0" />
+      <mass value="0.01" />
+      <inertia ixx="0.000002"  ixy="0"  ixz="0"
+               iyy="0.00004"  iyz="0"
+               izz="0.00004" />
+    </inertial>-->
     <visual>
       <origin rpy="0 1.57 0" xyz="0 0 0" />
       <geometry>
@@ -656,9 +662,10 @@
     <inertial>
       <origin rpy="0 0 0" xyz="0.00180634193065077 -0.00507960988304032 1.82718525310044E-07" />
       <mass value="0.00805661879107867" />
-      <inertia ixx="5.11986641952728E-07" ixy="3.30246887636314E-09" ixz="-1.19155944238838E-12"
-               iyy="2.94192790473005E-06" iyz="7.56098476735154E-12"
-               izz="2.63439556818182E-06" />
+      <!-- Inertial matrix ixx/iyy/izz increased to make gazebo happy -->
+      <inertia ixx="5.11986641952728E-03" ixy="3.30246887636314E-09" ixz="-1.19155944238838E-12"
+               iyy="2.94192790473005E-03" iyz="7.56098476735154E-12"
+               izz="2.63439556818182E-03" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -683,15 +690,16 @@
     <axis xyz="0 -1 0" />
     <limit effort="28.0" lower="0.0" upper="0.045" velocity="0.1" />
     <calibration rising="0.0" />
-    <dynamics damping="0.7" />
+    <dynamics damping="5" />
   </joint>
   <link name="left_gripper_finger_link">
     <inertial>
       <origin rpy="0 0 0" xyz="0.00180634285159509 0.00507961002244872 -1.82994932651503E-07" />
       <mass value="0.00805661848049576" />
-      <inertia ixx="5.11986620594033E-07" ixy="-3.30249741353407E-09" ixz="1.24817528594142E-12"
-               iyy="2.94192770039741E-06" iyz="7.56956725380165E-12"
-               izz="2.63439537656996E-06" />
+      <!-- Inertial matrix ixx/iyy/izz increased to make gazebo happy -->
+      <inertia ixx="5.11986620594033E-03" ixy="-3.30249741353407E-09" ixz="1.24817528594142E-12"
+               iyy="2.94192770039741E-03" iyz="7.56956725380165E-12"
+               izz="2.63439537656996E-03" />
     </inertial>
     <visual>
       <origin rpy="0 0 0" xyz="0 0 0" />
@@ -716,7 +724,7 @@
     <axis xyz="0 1 0" />
     <limit effort="28.0" lower="0.0" upper="0.045" velocity="0.1" />
     <calibration rising="0.0" />
-    <dynamics damping="0.7" />
+    <dynamics damping="5" />
   </joint>
 
 
