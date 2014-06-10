@@ -15,6 +15,12 @@
   <gazebo reference="estop_link">
     <material>Gazebo/Red</material>
   </gazebo>
+  <gazebo reference="right_gripper_joint">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
+  <gazebo reference="left_gripper_joint">
+    <implicitSpringDamper>1</implicitSpringDamper>
+  </gazebo>
   <gazebo reference="right_gripper_finger_link">
     <material>Gazebo/Orange</material>
     <mu1>1.0</mu1>

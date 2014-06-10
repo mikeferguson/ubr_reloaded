@@ -50,7 +50,7 @@ target_link_libraries(ubr1_gazebo_controllers
 )
 
 install(DIRECTORY
-  launch robots
+  config launch robots
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

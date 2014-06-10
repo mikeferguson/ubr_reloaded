@@ -690,7 +690,7 @@
     <axis xyz="0 -1 0" />
     <limit effort="28.0" lower="0.0" upper="0.045" velocity="0.1" />
     <calibration rising="0.0" />
-    <dynamics damping="5" />
+    <dynamics damping="5000" />
   </joint>
   <link name="left_gripper_finger_link">
     <inertial>
@@ -724,7 +724,7 @@
     <axis xyz="0 1 0" />
     <limit effort="28.0" lower="0.0" upper="0.045" velocity="0.1" />
     <calibration rising="0.0" />
-    <dynamics damping="5" />
+    <dynamics damping="5000" />
   </joint>
 
 
