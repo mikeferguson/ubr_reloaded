@@ -67,7 +67,7 @@ public:
 
   virtual bool init(ros::NodeHandle& nh)
   {
-    /* Start default controllers */
+    // Start default controllers
     XmlRpc::XmlRpcValue names;
     if (nh.getParam("controllers", names))
     {
@@ -103,7 +103,7 @@ public:
   {
     boost::recursive_mutex::scoped_lock lock(update_lock_);
 
-    /* Check that controller is not already running */
+    // Check that controller is not already running
     for (size_t i = 0; i < active_.size(); ++i)
     {
       if (active_[i]->getName() == name)
@@ -112,7 +112,7 @@ public:
       }
     }
 
-    /* Find controller */
+    // Find controller
     int idx = -1;
     for (size_t i = 0; i < controllers_.size(); ++i)
     {
@@ -123,14 +123,14 @@ public:
       }
     }
 
-    /* No controller to load */
+    // No controller to load
     if (idx == -1)
     {
       ROS_ERROR_STREAM("No such controller to start: " << name);
       return false;
     }
 
-    /* Check if controller can be started or is in conflict with another */
+    // Check if controller can be started or is in conflict with another
     if (active_.size() > 0)
     {
       std::vector<std::string> joints = controllers_[idx]->getJointNames();
@@ -144,7 +144,7 @@ public:
       }
     }
 
-    /* Activate it */
+    // Activate it
     if (controllers_[idx]->start())
     {
       ROS_INFO_STREAM("Started " << name);
@@ -256,7 +256,7 @@ protected:
         {
           if (joints[i] == joints2[j])
           {
-            /* conflict found, try to unload this controller */
+            // conflict found, try to unload this controller
             if (requestStop(controller->getName()))
             {
               ROS_INFO_STREAM("Stopped " << controller->getName());
