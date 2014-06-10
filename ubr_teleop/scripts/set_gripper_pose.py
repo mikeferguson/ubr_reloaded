@@ -27,8 +27,9 @@
 # ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 """
-Usage: set_gripper_pose.py <pose>
+Usage: set_gripper_pose.py <pose> <effort=28.0>
   <pose> is the opening of the gripper, or 'open' or 'closed' for predefined positions
+  <effort> is the max effort to use.
 """
 
 import sys
@@ -43,6 +44,8 @@ if __name__ == "__main__":
         print(__doc__)
         exit(-1)
     else:
+        if len(sys.argv) == 3:
+            goal.command.max_effort = float(sys.argv[2])
         if sys.argv[1] == "open":
             goal.command.position = 0.09
         elif sys.argv[1] == "closed":
@@ -56,6 +59,7 @@ if __name__ == "__main__":
     client.wait_for_server()
     rospy.loginfo("...connected")
     rospy.loginfo("Setting gripper pose to %f" % goal.command.position)
+    print(goal)
     client.send_goal(goal)
     client.wait_for_result(rospy.Duration.from_sec(5.0))
     rospy.loginfo("Results:")
