@@ -60,7 +60,7 @@ void UBR1GazeboPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr /*_sdf*/)
 
 void UBR1GazeboPlugin::Init()
 {
-  this->joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 10);
+  // Loads controllers
   this->manager_ = new ubr1_gazebo::GazeboControllerManager(this->model);
 
   // Start gravity compensation
@@ -69,6 +69,9 @@ void UBR1GazeboPlugin::Init()
   // Start the simulated controllers
   this->manager_->requestStart("gripper_controller/gripper_action");
   this->manager_->requestStart("bellows_controller");
+
+  // Publish joint states only after controllers are fully ready
+  this->joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 10);
 
   ROS_INFO("Finished initializing UBR1GazeboPlugin");
 }
