@@ -18,8 +18,9 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -x 0 -y 0 -z .05 -model ubr1 -param robot_description"/>
 
-  <!-- Reset Robot Pose -->
-  <node name="reset_robot" pkg="ubr1_gazebo" type="reset_robot.py" />
+  <!-- Prepare arm and head -->
+  <node name="prepare_arm" pkg="ubr_teleop" type="tuck_arm.py" />
+  <node name="prepare_head" pkg="ubr_teleop" type="set_head_pose.py" args="0 0"/>
 
   <!-- Camera Nodelets (actual data is generated in Gazebo) -->
   <include file="$(find ubr1_gazebo)/launch/include/head_camera.launch.xml" />
