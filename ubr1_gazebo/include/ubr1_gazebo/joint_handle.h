@@ -69,7 +69,7 @@ public:
     velocity_pid_.init(ros::NodeHandle(nh, getName() + "/velocity"));
 
     // Load optional effort_limit as a workaround to gzsdf limitation
-    nh.param(getName() + "/effort_limit", effort_limit_, 0.0);
+    nh.param(getName() + "/effort_limit", effort_limit_, -1.0);
 
     // Extra force input (for torso gas spring)
     nh.param(getName() + "/effort_offset", effort_offset_, 0.0);
@@ -219,10 +219,10 @@ public:
      * controllers are not tuned or experience a disturbance. This little hack
      * lets us limit the controller effort internally.
      */
-    float lim = joint_->GetEffortLimit(0);
-    if (lim < 0)
+    if (effort_limit_ < 0.0)
+      return joint_->GetEffortLimit(0);
+    else
       return effort_limit_;
-    return lim;
   }
 
   virtual std::string getName()
@@ -288,7 +288,7 @@ public:
   /** \brief Used only by the gripper */
   double setMaxEffort(double effort)
   {
-    joint_->SetMaxForce(0u, effort);
+    effort_limit_ = effort;
     return getEffortLimit();
   }
 
