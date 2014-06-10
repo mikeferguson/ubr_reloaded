@@ -58,8 +58,8 @@ bool SimulatedGripperController::init(ros::NodeHandle& nh, ubr_controllers::Cont
   joint_names_.push_back("right_gripper_joint");
 
   // Get Joint Handles
-  left_ = manager_->getJointHandle("left_gripper_joint");
-  right_ = manager_->getJointHandle("right_gripper_joint");
+  left_ = dynamic_cast<ubr1_gazebo::GazeboJointHandle*>(manager_->getJointHandle("left_gripper_joint"));
+  right_ = dynamic_cast<ubr1_gazebo::GazeboJointHandle*>(manager_->getJointHandle("right_gripper_joint"));
 
   // Setup ROS interfaces
   server_.reset(new server_t(nh, "", /*"gripper_controller/gripper_action",*/
@@ -69,8 +69,6 @@ bool SimulatedGripperController::init(ros::NodeHandle& nh, ubr_controllers::Cont
 
   // Set gripper open, as would be calibrated to
   goal_ = 0.09;
-  max_effort_ = 28.0;
-  last_position_time_ = ros::Time::now();
 
   initialized_ = true;
 
@@ -116,47 +114,8 @@ bool SimulatedGripperController::update(const ros::Time now, const ros::Duration
   if (!initialized_)
     return false;
 
-  double position = left_->getPosition() + right_->getPosition();
-  double velocity = position - last_position_ / (ros::Time::now() - last_position_time_).toSec();
-  if (fabs(position - last_position_) > 0.005)
-  {
-    last_position_ = position;
-    last_position_time_ = ros::Time::now();
-  }
-
-  if (fabs(position - goal_) < 0.002)
-  {
-    // Are we there?
-    left_->setEffortCommand(last_effort_);  // max effort?
-    right_->setEffortCommand(last_effort_);
-  }
-  else if (ros::Time::now() - last_position_time_ > ros::Duration(2.0))
-  {
-    // Have we stalled?
-    left_->setEffortCommand(last_effort_);  // max effort?
-    right_->setEffortCommand(last_effort_);
-  }
-  else
-  {
-    if (fabs(velocity) < 0.1)
-    {
-      if (goal_ - position > 0)
-        last_effort_ += max_effort_/500.0;  // ramp to max effort in 1/2 sec
-      else        
-        last_effort_ -= max_effort_/500.0;
-      if (last_effort_ > max_effort_)
-        last_effort_ = max_effort_;
-      else if (last_effort_ < -max_effort_)
-        last_effort_ = -max_effort_;
-    }
-    else // moving too fast
-    {
-      //last_effort_ = 0.5 * last_effort_;
-    }
-  }
-
-  left_->setEffortCommand(last_effort_);
-  right_->setEffortCommand(last_effort_);
+  left_->setPositionCommand(goal_/2.0, 0, 0);
+  right_->setPositionCommand(goal_/2.0, 0, 0);
 
   return true;
 }
@@ -180,15 +139,20 @@ void SimulatedGripperController::executeCb(const control_msgs::GripperCommandGoa
   }
 
   // If effort == 0.0, assume that user did not fill it in, and use max effort
-  if (goal->command.max_effort == 0.0)
-    max_effort_ = 28.0;
+  if (goal->command.max_effort <= 0.0 || goal->command.max_effort > 28.0)
+  {
+    left_->setMaxEffort(28.0);
+    right_->setMaxEffort(28.0);
+  }
   else
-    max_effort_ = goal->command.max_effort;
-  last_effort_ = 0.0;
+  {
+    left_->setMaxEffort(goal->command.max_effort);
+    right_->setMaxEffort(goal->command.max_effort);
+  }
 
   // Set goal position
-  float last_position = last_position_ = left_->getPosition() + right_->getPosition();
-  ros::Time last_position_time = last_position_time_ = ros::Time::now();
+  float last_position = left_->getPosition() + right_->getPosition();
+  ros::Time last_position_time = ros::Time::now();
   goal_ = goal->command.position;
 
   ros::Rate r(50);

@@ -285,6 +285,13 @@ public:
     joint_->SetForce(0, applied_effort_ + effort_offset_);
   }
 
+  /** \brief Used only by the gripper */
+  double setMaxEffort(double effort)
+  {
+    joint_->SetMaxForce(0u, effort);
+    return getEffortLimit();
+  }
+
 private:
   gazebo::physics::JointPtr joint_;
 
