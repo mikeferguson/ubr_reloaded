@@ -23,5 +23,5 @@ install(DIRECTORY launch
         DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(PROGRAMS scripts/get_gripper_pose.py scripts/set_head_pose.py scripts/set_torso_pose.py scripts/tuck_arm.py
+install(PROGRAMS scripts/set_gripper_pose.py scripts/set_head_pose.py scripts/set_torso_pose.py scripts/tuck_arm.py
 DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
