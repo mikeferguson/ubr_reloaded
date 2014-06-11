@@ -101,6 +101,7 @@ private:
 
   // The goal pose for the gripper
   double goal_;
+  double fudge_scale_;
 
   boost::shared_ptr<server_t> server_;
 };

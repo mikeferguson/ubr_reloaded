@@ -48,7 +48,7 @@ trajectory_msgs::JointTrajectory makeGraspPosture(double pose)
   point.positions.push_back(pose/2.0);
   point.effort.push_back(28.0);
   point.effort.push_back(28.0);
-  point.time_from_start = ros::Duration(0.5);
+  point.time_from_start = ros::Duration(10.0);
   trajectory.points.push_back(point);
   return trajectory;
 }

@@ -69,6 +69,7 @@ bool SimulatedGripperController::init(ros::NodeHandle& nh, ubr_controllers::Cont
 
   // Set gripper open, as would be calibrated to
   goal_ = 0.09;
+  fudge_scale_ = 2.0;
 
   initialized_ = true;
 
@@ -141,13 +142,13 @@ void SimulatedGripperController::executeCb(const control_msgs::GripperCommandGoa
   // If effort == 0.0, assume that user did not fill it in, and use max effort
   if (goal->command.max_effort <= 0.0 || goal->command.max_effort > 28.0)
   {
-    left_->setMaxEffort(28.0);
-    right_->setMaxEffort(28.0);
+    left_->setMaxEffort(fudge_scale_ * 28.0);
+    right_->setMaxEffort(fudge_scale_ * 28.0);
   }
   else
   {
-    left_->setMaxEffort(goal->command.max_effort);
-    right_->setMaxEffort(goal->command.max_effort);
+    left_->setMaxEffort(fudge_scale_ * goal->command.max_effort);
+    right_->setMaxEffort(fudge_scale_ * goal->command.max_effort);
   }
 
   // Set goal position

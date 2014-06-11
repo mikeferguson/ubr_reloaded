@@ -23,15 +23,17 @@
   </gazebo>
   <gazebo reference="right_gripper_finger_link">
     <material>Gazebo/Orange</material>
-    <mu1>10.0</mu1>
-    <mu2>10.0</mu2>
-    <fdir1>1 0 0</fdir1>
+    <kp>500000.0</kp>
+    <kd>10.0</kd>
+    <mu1>500.0</mu1>
+    <mu2>500.0</mu2>
   </gazebo>
   <gazebo reference="left_gripper_finger_link">
     <material>Gazebo/Orange</material>
-    <mu1>10.0</mu1>
-    <mu2>10.0</mu2>
-    <fdir1>1 0 0</fdir1>
+    <kp>500000.0</kp>
+    <kd>10.0</kd>
+    <mu1>500.0</mu1>
+    <mu2>500.0</mu2>
   </gazebo>
   <gazebo reference="torso_lift_link">
     <material>Gazebo/White</material>
