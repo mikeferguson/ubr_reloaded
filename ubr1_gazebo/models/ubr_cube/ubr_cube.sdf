@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<sdf version='1.4'>
+  <model name="ubr_cube">      
+      <static>0</static>
+      <link name='link'>
+        <inertial>
+          <mass>0.015</mass>
+          <inertia>
+            <ixx>0.0001</ixx>
+            <ixy>0.000000</ixy>
+            <ixz>0.000000</ixz>
+            <iyy>0.0001</iyy>
+            <iyz>0.000000</iyz>
+            <izz>0.0001</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry>
+            <box>
+              <size>0.060 0.060 0.060</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <contact>
+              <ode/>
+            </contact>
+          </surface>
+        </collision>
+        <visual name='visual'>
+          <geometry>
+            <box>
+              <size>0.060 0.060 0.060</size>
+            </box>
+          </geometry>
+          <material>
+            <script>
+              <uri>file://media/materials/scripts/gazebo.material</uri>
+              <name>Gazebo/Orange</name>
+            </script>
+          </material>
+        </visual>
+        <velocity_decay>
+          <linear>0.000000</linear>
+          <angular>0.000000</angular>
+        </velocity_decay>
+        <self_collide>0</self_collide>
+        <kinematic>0</kinematic>
+        <gravity>1</gravity>        
+      </link>   
+  </model>
+</sdf>

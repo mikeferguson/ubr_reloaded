@@ -1,0 +1,24 @@
+<launch>
+
+  <env name="GAZEBO_MODEL_PATH" value="$(find ubr1_gazebo)/models:$(optenv GAZEBO_MODEL_PATH)" />
+
+  <!-- roslaunch arguments -->
+  <arg name="debug" default="false"/>
+  <arg name="gui" default="true"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="debug" value="$(arg debug)" />
+    <arg name="gui" value="$(arg gui)" />
+    <arg name="paused" value="false"/>
+    <arg name="use_sim_time" value="true"/>
+    <arg name="headless" value="false"/>
+    <arg name="world_name" value="$(find ubr1_gazebo)/worlds/cube_on_table.sdf"/>
+  </include>
+
+  <!-- Add the robot, set torso up, head down -->
+  <include file="$(find ubr1_gazebo)/launch/include/simulation.ubr1.xml" />
+  <node name="prepare_torso" pkg="ubr_teleop" type="set_torso_pose.py" args="0.35"/>
+  <node name="prepare_head" pkg="ubr_teleop" type="set_head_pose.py" args="0 0.9"/>
+
+</launch>
