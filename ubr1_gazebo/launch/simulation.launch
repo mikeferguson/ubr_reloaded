@@ -13,7 +13,8 @@
     <arg name="headless" value="false"/>
   </include>
 
-  <!-- Add the robot -->
+  <!-- Add the robot, set head forward -->
   <include file="$(find ubr1_gazebo)/launch/include/simulation.ubr1.xml" />
+  <node name="prepare_head" pkg="ubr_teleop" type="set_head_pose.py" args="0 0"/>
 
 </launch>

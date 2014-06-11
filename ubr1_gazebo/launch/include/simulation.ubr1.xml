@@ -18,14 +18,15 @@
   <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
 	args="-urdf -x 0 -y 0 -z .05 -model ubr1 -param robot_description"/>
 
-  <!-- Prepare arm and head -->
+  <!-- Set arm tucked (head and possibly torso will be handled upstream) -->
   <node name="prepare_arm" pkg="ubr_teleop" type="tuck_arm.py" />
-  <node name="prepare_head" pkg="ubr_teleop" type="set_head_pose.py" args="0 0"/>
 
   <!-- Camera Nodelets (actual data is generated in Gazebo) -->
   <include file="$(find ubr1_gazebo)/launch/include/head_camera.launch.xml" />
 
-  <!-- Teleop -->
-  <include file="$(find ubr1_gazebo)/launch/include/simulated_teleop.launch.xml" />
+  <!-- bringup a mux between our application and the teleop -->
+  <node pkg="topic_tools" type="mux" name="cmd_vel_mux" respawn="true" args="base_controller/command /cmd_vel /teleop/cmd_vel">
+    <remap from="mux" to="cmd_vel_mux" />
+  </node>
 
 </launch>

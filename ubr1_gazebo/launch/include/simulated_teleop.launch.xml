@@ -1,8 +1,0 @@
-<launch>
-
-  <!-- bringup a mux between our application and the teleop -->
-  <node pkg="topic_tools" type="mux" name="cmd_vel_mux" respawn="true" args="base_controller/command /cmd_vel /teleop/cmd_vel">
-    <remap from="mux" to="cmd_vel_mux" />
-  </node>
-
-</launch>
