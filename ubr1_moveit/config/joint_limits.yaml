@@ -11,9 +11,9 @@ joint_limits:
     max_acceleration: 1.57079633
   shoulder_lift_joint:
     has_velocity_limits: true
-    max_velocity: 1.00899694
+    max_velocity: 1.30899694
     has_acceleration_limits: true
-    max_acceleration: 0.74719755
+    max_acceleration: 1.04719755
   forearm_roll_joint:
     has_velocity_limits: true
     max_velocity: 2.0943951
