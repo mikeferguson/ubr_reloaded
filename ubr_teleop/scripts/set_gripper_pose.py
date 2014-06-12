@@ -59,7 +59,6 @@ if __name__ == "__main__":
     client.wait_for_server()
     rospy.loginfo("...connected")
     rospy.loginfo("Setting gripper pose to %f" % goal.command.position)
-    print(goal)
     client.send_goal(goal)
     client.wait_for_result(rospy.Duration.from_sec(5.0))
     rospy.loginfo("Results:")
