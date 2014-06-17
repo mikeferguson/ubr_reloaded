@@ -50,7 +50,18 @@ target_link_libraries(ubr1_gazebo_controllers
 )
 
 install(DIRECTORY
-  config launch robots
+  config launch robots worlds models
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)
+
+install(PROGRAMS
+  scripts/stop_controllers.py
+  test/pick_up_cube_test.py
+  test/scripts/generate_grasp_test.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
+
+install(FILES test/pick_up_cube_trajectories.bag
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
