@@ -61,7 +61,7 @@ install(PROGRAMS
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(FILES test/pick_up_cube_trajectories.bag
+install(FILES test/pick_up_cube_trajectories.bag test/pick_up_cube_test.launch
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

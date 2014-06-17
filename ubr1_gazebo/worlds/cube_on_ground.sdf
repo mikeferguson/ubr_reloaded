@@ -1,6 +1,14 @@
 <?xml version="1.0" ?>
 <sdf version="1.4">
   <world name="default">
+    <physics type="ode">
+      <gravity>0.000000 0.000000 -9.810000</gravity>
+      <ode>
+        <solver>
+          <sor>1.000000</sor>
+        </solver>
+      </ode>
+    </physics>
     <light name='sun' type='directional'>
       <cast_shadows>1</cast_shadows>
       <pose>0 0 10 0 -0 0</pose>
