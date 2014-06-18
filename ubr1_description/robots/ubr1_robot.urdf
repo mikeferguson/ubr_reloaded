@@ -24,7 +24,7 @@
       <mass value="35.0237183" />
       <inertia ixx="0.2749377" ixy="-0.0002025" ixz="-0.0013661"
                iyy="0.2398372" iyz="-0.0004900"
-               izz="0.3671008"/>
+               izz="5.3671008"/>
     </inertial>
   </link>
   <joint name="base_inertia_joint" type="fixed">
@@ -61,7 +61,7 @@
     <axis xyz="0 0 1" />
     <limit effort="450" lower="0.0" upper="0.3556" velocity="0.1" />
     <calibration rising="0.0" />
-    <dynamics damping="100" />
+    <dynamics damping="1000" />
   </joint>
   <link name="shoulder_pan_link">
     <inertial>
