@@ -61,6 +61,9 @@ bool PointHeadController::init(ros::NodeHandle& nh, ControllerManager* manager)
   sampler_.reset();
   preempted_ = false;
 
+  /* Get parameters */
+  nh.param<bool>("stop_with_action", stop_with_action_, false);
+
   /* Setup Joints */
   head_pan_ = manager_->getJointHandle("head_pan_joint");
   head_tilt_ = manager_->getJointHandle("head_tilt_joint");
@@ -170,9 +173,13 @@ bool PointHeadController::update(const ros::Time now, const ros::Duration dt)
 
     return true;
   }
+  else if (last_sample_.q.size() == 2)
+  {
+    // Hold Position
+    head_pan_->setPositionCommand(last_sample_.q[0], 0.0, 0.0);
+    head_tilt_->setPositionCommand(last_sample_.q[1], 0.0, 0.0);
+  }
 
-  head_pan_->setEffortCommand(0.0);
-  head_tilt_->setEffortCommand(0.0);
   return false;
 }
 
@@ -261,6 +268,10 @@ void PointHeadController::executeCb(const control_msgs::PointHeadGoalConstPtr& g
     // no feedback needed for PointHeadAction
     ros::Duration(1/50.0).sleep();
   }
+
+  /* Stop this controller if desired (and not preempted) */
+  if (stop_with_action_ && !preempted_)
+    manager_->requestStop(name_);
 
   ROS_DEBUG_NAMED("PointHeadController", "Done pointing head");
 }
