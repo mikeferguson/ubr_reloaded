@@ -383,7 +383,18 @@ void FollowJointTrajectoryController::executeCb(const control_msgs::FollowJointT
   {
     if (new_trajectory.size() > 1)
     {
+      // use the generated trajectory
       executable_trajectory = new_trajectory;
+
+      // if this hasn't started yet, need to insert current position
+      if (goal->trajectory.points[0].time_from_start.toSec() > 0.0)
+      {
+        executable_trajectory.points.insert(
+          executable_trajectory.points.begin(),
+          getPointFromCurrent(new_trajectory.points[0].qd.size() > 0,
+                              new_trajectory.points[0].qdd.size() > 0,
+                              true));
+      }
     }
     else
     {
