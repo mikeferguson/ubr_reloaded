@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_CONTROLLERS_GRAVITY_COMPENSATION_H_
 #define UBR_CONTROLLERS_GRAVITY_COMPENSATION_H_

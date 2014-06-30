@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_CONTROLLERS_BASE_CONTROLLER_H_
 #define UBR_CONTROLLERS_BASE_CONTROLLER_H_
@@ -133,7 +133,7 @@ private:
 
   void updateCallback(const ros::WallTimerEvent& event);
 
-  /* Set base wheel speeds in m/s */
+  // Set base wheel speeds in m/s
   void setCommand(float left, float right);
 
   JointHandle* left_;
@@ -150,11 +150,11 @@ private:
   double max_acceleration_x_;
   double max_acceleration_r_;
 
-  /* These are the inputs from the ROS topic */
+  // These are the inputs from the ROS topic
   float desired_x_;
   float desired_r_;
 
-  /* These are from controller update */
+  // These are from controller update
   float last_sent_x_;
   float last_sent_r_;
 

@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Authors: John Hsu, Michael Ferguson */
+// Authors: John Hsu, Michael Ferguson
 
 #include <ubr1_gazebo/ubr1_gazebo_plugin.h>
 #include <ubr_controllers/base_controller.h>
@@ -108,8 +108,6 @@ void UBR1GazeboPlugin::OnUpdate()
     js.effort.push_back(j->getEffort());
   }
   joint_state_pub_.publish(js);
-
-  // TODO: Publish IMU
 
   // Publish Base Odometry
   ubr_controllers::Controller * base = this->manager_->getController("base_controller");

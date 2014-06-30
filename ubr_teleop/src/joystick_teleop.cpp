@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>

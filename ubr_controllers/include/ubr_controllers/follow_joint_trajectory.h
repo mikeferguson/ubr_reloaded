@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_CONTROLLERS_FOLLOW_JOINT_TRAJECTORY_H
 #define UBR_CONTROLLERS_FOLLOW_JOINT_TRAJECTORY_H

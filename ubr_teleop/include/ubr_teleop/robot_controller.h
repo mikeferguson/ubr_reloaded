@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H_
 #define UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H_

@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_CONTROLLERS_JOINT_HANDLE_H_
 #define UBR_CONTROLLERS_JOINT_HANDLE_H_
@@ -119,7 +119,7 @@ public:
   virtual std::string getName() { return "invalid"; }
 
 private:
-  /* You no copy... */
+  // You no copy...
   JointHandle(const JointHandle&);
   JointHandle& operator=(const JointHandle&);
 };

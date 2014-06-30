@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_CONTROLLERS_TRAJECTORY_SPLINE_SAMPLER_H_
 #define UBR_CONTROLLERS_TRAJECTORY_SPLINE_SAMPLER_H_
@@ -212,22 +212,22 @@ public:
   SplineTrajectorySampler(const Trajectory& trajectory) :
     trajectory_(trajectory)
   {
-    /* Check for invalid trajectory size */
+    // Check for invalid trajectory size
     if (trajectory.size() == 0)
     {
       throw 0;
     }
 
-    /* Check for number of joints */
+    // Check for number of joints
     int num_joints = trajectory.points[0].q.size();
 
-    /* Trajectory length one is special */
+    // Trajectory length one is special
     if (trajectory.size() == 1)
     {
       segments_.resize(1);
       segments_[0].start_time = segments_[0].end_time = trajectory.points[0].time;
 
-      /* Set up spline */
+      // Set up spline
       segments_[0].splines.resize(num_joints);
       for (size_t j = 0; j < num_joints; ++j)
       {
@@ -241,17 +241,17 @@ public:
     }
     else
     {
-      /* We put a segment in between each pair of points */
+      // We put a segment in between each pair of points
       segments_.resize(trajectory.size()-1);
 
-      /* Setup up the segments */
+      // Setup up the segments
       for (size_t p = 0; p < segments_.size(); ++p)
       {
-        /* This segment is from p to p+1 */
+        // This segment is from p to p+1
         segments_[p].start_time = trajectory.points[p].time;
         segments_[p].end_time = trajectory.points[p+1].time;
 
-        /* Set up spline */
+        // Set up spline
         segments_[p].splines.resize(num_joints);
         if (trajectory.points[p].qdd.size() == trajectory.points[p].q.size())
         {
@@ -259,7 +259,7 @@ public:
           result.qd.resize(num_joints);
           result.qdd.resize(num_joints);
 
-          /* Have accelerations, will use Quintic. */
+          // Have accelerations, will use Quintic.
           for (size_t j = 0; j < num_joints; ++j)
           {
             QuinticSpline(trajectory.points[p].q[j],
@@ -278,7 +278,7 @@ public:
           result.q.resize(num_joints);
           result.qd.resize(num_joints);
 
-          /* Velocities + Positions, do Cubic. */
+          // Velocities + Positions, do Cubic.
           for (size_t j = 0; j < num_joints; ++j)
           {
             CubicSpline(trajectory.points[p].q[j],
@@ -294,7 +294,7 @@ public:
         {
           result.q.resize(num_joints);
  
-          /* Lame -- only positions do linear */
+          // Lame -- only positions do linear
           for (size_t j = 0; j < num_joints; ++j)
           {
             LinearSpline(trajectory.points[p].q[j],
@@ -312,22 +312,22 @@ public:
   /** \brief Sample from this trajectory */
   virtual TrajectoryPoint sample(double time)
   {
-    /* Which segment to sample from. */
+    // Which segment to sample from.
     while ((seg_ + 1 < segments_.size()) &&
            (segments_[seg_ + 1].start_time < time))
     {
       ++seg_;
     }
 
-    /* Check beginning of trajectory, return empty trajectory point if not started. */
+    // Check beginning of trajectory, return empty trajectory point if not started.
     if (seg_ == -1)
       return TrajectoryPoint();
 
-    /* Check end of trajectory, restrict time. */
+    // Check end of trajectory, restrict time.
     if (time > end_time())
       time = end_time();
 
-    /* Sample segment for each joint. */
+    // Sample segment for each joint.
     for (size_t i = 0; i < segments_[seg_].splines.size(); ++i)
     {
       if (segments_[seg_].type == QUINTIC)

@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #include <pluginlib/class_list_macros.h>
 #include <ubr1_gazebo/simulated_bellows_controller.h>
@@ -44,7 +44,7 @@ namespace ubr1_gazebo_controllers
 
 bool SimulatedBellowsController::init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager)
 {
-  /* We absolutely need access to the controller manager */
+  // We absolutely need access to the controller manager
   if (!manager)
   {
     initialized_ = false;
@@ -53,7 +53,7 @@ bool SimulatedBellowsController::init(ros::NodeHandle& nh, ubr_controllers::Cont
 
   ubr_controllers::Controller::init(nh, manager);
 
-  /* Get Joint Handles */
+  // Get Joint Handles
   bellows_ = manager_->getJointHandle("bellows_joint");
   torso_lift_ = manager_->getJointHandle("torso_lift_joint");
 
@@ -81,7 +81,7 @@ bool SimulatedBellowsController::preempt(bool force)
   if (force)
     return true;
 
-  /* If we preempt -- the bellows will fall -- and the world will end! */
+  // If we preempt -- the bellows will fall -- and the world will end!
   return false;
 }
 
@@ -90,7 +90,7 @@ bool SimulatedBellowsController::update(const ros::Time now, const ros::Duration
   if (!initialized_)
     return false;
 
-  /* I warned you this controller was stupid */
+  // I warned you this controller was stupid
   bellows_->setPositionCommand(torso_lift_->getPosition() / -2.0, 0.0, 0.0);
 
   return true;

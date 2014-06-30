@@ -34,7 +34,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson, Kevin Watts */
+// Author: Michael Ferguson, Kevin Watts
 
 #include <ros/ros.h>
 #include <ubr_teleop/robot_controller.h>

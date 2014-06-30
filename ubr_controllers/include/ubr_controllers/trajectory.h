@@ -32,7 +32,7 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-/* Author: Michael Ferguson */
+// Author: Michael Ferguson
 
 #ifndef UBR_CONTROLLERS_TRAJECTORY_H_
 #define UBR_CONTROLLERS_TRAJECTORY_H_
@@ -74,7 +74,7 @@ inline bool trajectoryFromMsg(const trajectory_msgs::JointTrajectory& message,
                               const std::vector<std::string> joints,
                               Trajectory* trajectory)
 {
-  /* Find mapping of joint names into message joint names */
+  // Find mapping of joint names into message joint names
   std::vector<int> mapping(joints.size(), -1);
   for (size_t j = 0; j < joints.size(); ++j)
   {
@@ -92,14 +92,14 @@ inline bool trajectoryFromMsg(const trajectory_msgs::JointTrajectory& message,
     }
   }
 
-  /* Make sure trajectory is empty */
+  // Make sure trajectory is empty
   trajectory->points.clear();
 
   double start_time = message.header.stamp.toSec();
   if (start_time == 0.0)
     start_time = ros::Time::now().toSec();
 
-  /* Fill in Trajectory */
+  // Fill in Trajectory
   for (size_t p = 0; p < message.points.size(); ++p)
   {
     TrajectoryPoint point;
@@ -115,7 +115,7 @@ inline bool trajectoryFromMsg(const trajectory_msgs::JointTrajectory& message,
     trajectory->points.push_back(point);
   }
 
-  /* Parsed this */
+  // Parsed this
   return true;
 }
 
@@ -131,20 +131,20 @@ inline bool spliceTrajectories(const Trajectory& t1,
                                const double time,
                                Trajectory * t)
 {
-  /* Need at least one point in t2 for the following code to work */
+  // Need at least one point in t2 for the following code to work */
   if (t2.size() == 0)
   {
     *t = t1;
     return true;
   }
 
-  /* Just to be sure */
+  // Just to be sure
   t->points.clear();
 
-  /* When does t2 start? */
+  // When does t2 start?
   double start_t2 = t2.points[0].time;
 
-  /* Find points in t1 after time, but before start_t2 */
+  // Find points in t1 after time, but before start_t2
   for (size_t p = 0; p < t1.size(); ++p)
   {
     if (t1.points[p].time >= time && t1.points[p].time < start_t2)
@@ -160,7 +160,7 @@ inline bool spliceTrajectories(const Trajectory& t1,
     }
   }
 
-  /* Add points from t2 */
+  // Add points from t2
   for (size_t p = 0; p < t2.size(); ++p)
   {
     if (t2.points[p].time >= time)
@@ -231,7 +231,7 @@ public:
   virtual Trajectory getTrajectory() = 0;
 
 private:
-  /* You no copy... */
+  // You no copy...
   TrajectorySampler(const TrajectorySampler&);
   TrajectorySampler& operator=(const TrajectorySampler&);
 };
