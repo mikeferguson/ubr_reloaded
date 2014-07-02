@@ -33,7 +33,7 @@
     <param name="laser_likelihood_max_dist" value="2.0"/>
     <param name="update_min_d"              value="0.2"/>
     <param name="update_min_a"              value="0.5"/>
-    <param name="odom_frame_id"             value="odom_combined"/>
+    <param name="odom_frame_id"             value="odom"/>
     <param name="base_frame_id"             value="base_link"/>
     <param name="resample_interval"         value="2"/>
     <!-- Increase tolerance because the computer can get quite busy -->
