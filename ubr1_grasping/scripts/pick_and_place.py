@@ -174,28 +174,9 @@ if __name__=="__main__":
 
         # call move_group to pick the object
         rospy.loginfo("Beginning to pick.")
-        while True:
-            pick_result = pickplace.pickup(obj_name, grasps, support_name=support_surface)
-            if pick_result.error_code.val == MoveItErrorCodes.SUCCESS:
-                rospy.loginfo("Pick succeeded")
-                break
-            elif pick_result.error_code.val == MoveItErrorCodes.PLANNING_FAILED:
-                rospy.logerr("Pick failed in the planning stage, try again...")
-                rospy.sleep(0.5)  # short sleep to try and let state settle a bit?
-                continue
-            elif pick_result.error_code.val == MoveItErrorCodes.CONTROL_FAILED or \
-                 pick_result.error_code.val == MoveItErrorCodes.MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE or \
-                 pick_result.error_code.val == MoveItErrorCodes.TIMED_OUT:
-                rospy.logerr("Pick failed during execution, attempting to cleanup.")
-                if obj_name in scene.getKnownAttachedObjects():
-                    rospy.loginfo("Pick managed to grab object, retreat must have failed, continuing anyways")
-                    break
-                else:
-                    rospy.loginfo("Pick did not grab object, try again...")
-                    continue
-            else:
-                rospy.logerr("Pick failed with error code: %d. Will retry..." % pick_result.error_code.val)
-                continue
+        success, pick_result = pickplace.pick_with_retry(obj_name, grasps, support_name=support_surface, scene=scene)
+        if not success:
+            exit(-1)
 
         # create a set of place locations for the cube
         places = list()
@@ -219,28 +200,11 @@ if __name__=="__main__":
 
         # drop it like it's hot
         rospy.loginfo("Beginning to place.")
-        while True:
-            place_result = pickplace.place(obj_name, places, support_name=support_surface)
-            if place_result.error_code.val == MoveItErrorCodes.SUCCESS:
-                rospy.loginfo("Place succeeded")
+        while not rospy.is_shutdown():
+            # can't fail here or moveit needs to be restarted
+            success, place_result = pickplace.place_with_retry(obj_name, places, support_name=support_surface, scene=scene)
+            if success:
                 break
-            elif place_result.error_code.val == MoveItErrorCodes.PLANNING_FAILED:
-                rospy.logerr("Place failed in the planning stage, try again...")
-                rospy.sleep(0.5)  # short sleep to try and let state settle a bit?
-                continue
-            elif place_result.error_code.val == MoveItErrorCodes.CONTROL_FAILED or \
-                 place_result.error_code.val == MoveItErrorCodes.MOTION_PLAN_INVALIDATED_BY_ENVIRONMENT_CHANGE or \
-                 place_result.error_code.val == MoveItErrorCodes.TIMED_OUT:
-                rospy.logerr("Place failed during execution, attempting to cleanup.")
-                if obj_name in scene.getKnownAttachedObjects():
-                    rospy.loginfo("Place did not place object, approach must have failed, will retry...")
-                    continue
-                else:
-                    rospy.loginfo("Object no longer in gripper, must be placed, continuing...")
-                    break
-            else:
-                rospy.logerr("Place failed with error code: %d. Will retry..." % place_result.error_code.val)
-                continue
 
         # place arm back at side
         move_to_ready(move_group)
