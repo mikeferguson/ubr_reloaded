@@ -47,8 +47,12 @@ link_directories(${orocos_kdl_LIBRARY_DIRS})
 
 add_library(ubr_controllers
   src/base_controller.cpp
+  src/cartesian_pose.cpp
+  src/cartesian_wrench.cpp
+  src/cartesian_twist.cpp
   src/follow_joint_trajectory.cpp
   src/gravity_compensation.cpp
+  src/pid.cpp
   src/point_head.cpp
 )
 target_link_libraries(ubr_controllers
