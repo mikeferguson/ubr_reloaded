@@ -63,6 +63,7 @@ if __name__=="__main__":
     parser.add_argument("--once", help="Run once.", action="store_true")
     parser.add_argument("--ready", help="Move the arm to the ready position.", action="store_true")
     parser.add_argument("--plan", help="Only do planning, no execution", action="store_true")
+    parser.add_argument("--x", help="Recommended x offset, how far out an object should roughly be.", type=float, default=0.5)
     args, unknown = parser.parse_known_args()
 
     rospy.init_node("pick_and_place_demo")
@@ -101,7 +102,7 @@ if __name__=="__main__":
 
         # insert objects, find the one to grasp
         the_object = None
-        the_object_dist = 0.85
+        the_object_dist = 0.35
         count = -1
         for obj in find_result.objects:
             count += 1
@@ -109,20 +110,11 @@ if __name__=="__main__":
                                     obj.object.primitives[0],
                                     obj.object.primitive_poses[0],
                                     wait = False)
-
-            # has to be at right hieght
-            if obj.object.primitive_poses[0].position.z > 1.5 or \
-               obj.object.primitive_poses[0].position.z < 0.75:
+            # object must have usable grasps
+            if len(obj.grasps) < 1:
                 continue
-            # has to be a cube
-            if obj.object.primitives[0].type != obj.object.primitives[0].BOX:
-                continue
-            # has to be right size to be a cube
-            if obj.object.primitives[0].dimensions[0] > 0.067 or obj.object.primitives[0].dimensions[0] < 0.055 or \
-               obj.object.primitives[0].dimensions[1] > 0.067 or obj.object.primitives[0].dimensions[1] < 0.055 or \
-               obj.object.primitives[0].dimensions[2] > 0.067 or obj.object.primitives[0].dimensions[2] < 0.043:
-                continue
-            dx = obj.object.primitive_poses[0].position.x
+            # choose object in front of robot
+            dx = obj.object.primitive_poses[0].position.x - args.x
             dy = obj.object.primitive_poses[0].position.y
             d = math.sqrt((dx * dx) + (dy * dy))
             if d < the_object_dist:
@@ -165,11 +157,8 @@ if __name__=="__main__":
             else:
                 continue
 
-        # check grasps
+        # get grasps (we checked that they exist above)
         grasps = find_result.objects[the_object].grasps
-        if len(grasps) < 1:
-            rospy.logerr("No grasps planned")
-            continue
         support_surface = find_result.objects[the_object].object.support_surface
 
         # call move_group to pick the object
