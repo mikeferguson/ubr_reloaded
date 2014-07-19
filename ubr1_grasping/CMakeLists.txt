@@ -52,6 +52,11 @@ target_link_libraries(basic_grasping_perception ${Boost_LIBRARIES}
                                                 ${PCL_LIBRARIES})
 add_dependencies(basic_grasping_perception grasping_msgs_generate_messages_cpp)
 
+### Test
+if (CATKIN_ENABLE_TESTING)
+add_subdirectory(test)
+endif()
+
 ### Install
 install(TARGETS basic_grasping_perception
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
