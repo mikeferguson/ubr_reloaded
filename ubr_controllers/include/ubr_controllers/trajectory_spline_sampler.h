@@ -2,6 +2,7 @@
  *  Software License Agreement (BSD License)
  *
  *  Copyright (c) 2013, Unbounded Robotics Inc.
+ *  Copyright (c) 2009, Willow Garage, Inc.
  *  All rights reserved.
  *
  *  Redistribution and use in source and binary forms, with or without
@@ -14,9 +15,9 @@
  *     copyright notice, this list of conditions and the following
  *     disclaimer in the documentation and/or other materials provided
  *     with the distribution.
- *   * Neither the name of Unbounded Robotics nor the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
+ *   * Neither the name of Unbounded Robotics, Willow Garage nor the names
+ *     of their contributors may be used to endorse or promote products
+ *     derived from this software without specific prior written permission.
  *
  *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -32,7 +33,8 @@
  *  POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************/
 
-// Author: Michael Ferguson
+// Portions are based on splines.h of arm_navigation
+// Author: Michael Ferguson, Mrinal Kalakrishnan (splines.h)
 
 #ifndef UBR_CONTROLLERS_TRAJECTORY_SPLINE_SAMPLER_H_
 #define UBR_CONTROLLERS_TRAJECTORY_SPLINE_SAMPLER_H_
