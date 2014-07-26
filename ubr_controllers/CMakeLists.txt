@@ -59,6 +59,7 @@ target_link_libraries(ubr_controllers
   ${catkin_LIBRARIES}
   ${orocos_kdl_LIBRARIES}
 )
+add_dependencies(ubr_controllers ubr_msgs_gencpp)
 
 install(DIRECTORY include/ DESTINATION include)
 
