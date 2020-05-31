@@ -52,7 +52,7 @@ UBR1GazeboPlugin::~UBR1GazeboPlugin()
 void UBR1GazeboPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr /*_sdf*/)
 {
   this->model = _model;
-  last_publish_ = ros::Time(this->model->GetWorld()->GetSimTime().Double());
+  last_publish_ = ros::Time(this->model->GetWorld()->SimTime().Double());
 
   this->updateConnection = event::Events::ConnectWorldUpdateBegin(
           boost::bind(&UBR1GazeboPlugin::OnUpdate, this));
@@ -82,7 +82,7 @@ void UBR1GazeboPlugin::OnUpdate()
   if (!ros::ok()) return;
 
   // Get time and timestep for controllers
-  common::Time currTime = this->model->GetWorld()->GetSimTime();
+  common::Time currTime = this->model->GetWorld()->SimTime();
   common::Time stepTime = currTime - this->prevUpdateTime;
   this->prevUpdateTime = currTime;
   double dt = stepTime.Double();

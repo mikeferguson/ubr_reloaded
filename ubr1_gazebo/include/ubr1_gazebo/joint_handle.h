@@ -175,7 +175,7 @@ public:
   /** \brief Returns the position of the joint. */
   virtual double getPosition()
   {
-    return joint_->GetAngle(0).Radian();
+    return joint_->Position(0);
   }
 
   /** \brief Returns the velocity of the joint. */
@@ -193,13 +193,13 @@ public:
   /** \brief Get the lower positional limit */
   virtual float getPositionLowerLimit()
   {
-    return joint_->GetLowerLimit(0).Radian();
+    return joint_->LowerLimit(0);
   }
 
   /** \brief Get the upper positional limit */
   virtual float getPositionUpperLimit()
   {
-    return joint_->GetUpperLimit(0).Radian();
+    return joint_->UpperLimit(0);
   }
 
   /** \brief Get the velocity limit */
