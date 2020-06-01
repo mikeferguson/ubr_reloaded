@@ -9,6 +9,8 @@
   <node name="ubr_teleop" pkg="ubr_teleop" type="joystick_teleop"/>
 
   <!-- and required joy node -->
-  <node pkg="joy" type="joy_node" name="joy_node" />
+  <node pkg="joy" type="joy_node" name="joy_node" >
+    <param name="autorepeat_rate" value="1" />
+  </node>
 
 </launch>

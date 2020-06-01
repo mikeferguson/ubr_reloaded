@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -59,31 +60,31 @@ public:
     n.param("head_tilt_step", head_tilt_step_, -0.35);
     n.param("torso_step", torso_step_, 0.0125);
 
-    n.param("deadman_button", deadman_button_, 10);
-    n.param("deadman_head_button", deadman_head_button_, 8);
+    n.param("deadman_button", deadman_button_, 4);
+    n.param("deadman_head_button", deadman_head_button_, 6);
 
-    n.param("torso_up_button", torso_up_button_, 12);
-    n.param("torso_down_button", torso_down_button_, 14);
+    n.param("torso_up_button", torso_up_button_, 2);
+    n.param("torso_down_button", torso_down_button_, 0);
 
-    n.param("gripper_open", gripper_open_button_, 0);
-    n.param("gripper_close", gripper_close_button_, 3);
+    n.param("gripper_open", gripper_open_button_, 3);
+    n.param("gripper_close", gripper_close_button_, 1);
 
-    n.param("deadman_arm_linear_button", deadman_arm_linear_button_, 11);
-    n.param("deadman_arm_angular_button", deadman_arm_angular_button_, 9);
-    n.param("arm_lx_axis", arm_lx_axis_, 3);
-    n.param("arm_ly_axis", arm_ly_axis_, 2);
+    n.param("deadman_arm_linear_button", deadman_arm_linear_button_, 5);
+    n.param("deadman_arm_angular_button", deadman_arm_angular_button_, 7);
+    n.param("arm_lx_axis", arm_lx_axis_, 4);
+    n.param("arm_ly_axis", arm_ly_axis_, 3);
     n.param("arm_lz_axis", arm_lz_axis_, 1);
-    n.param("arm_ax_axis", arm_ax_axis_, 2);
+    n.param("arm_ax_axis", arm_ax_axis_, 4);
     n.param("arm_ay_axis", arm_ay_axis_, 3);
-    n.param("arm_az_axis", arm_az_axis_, 0);
+    n.param("arm_az_axis", arm_az_axis_, 1);
     n.param("arm_linear_scale", arm_linear_scale_, 0.5);
     n.param("arm_angular_scale", arm_angular_scale_, 0.5);
 
-    n.param("axis_vx", base_vx_axis_, 3);
+    n.param("axis_vx", base_vx_axis_, 4);
     n.param("axis_vw", base_vw_axis_, 0);
 
     n.param("axis_pan", head_pan_axis_, 0);
-    n.param("axis_tilt", head_tilt_axis_, 3);
+    n.param("axis_tilt", head_tilt_axis_, 4);
 
     controller_.init(n);
 
