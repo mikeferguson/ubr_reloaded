@@ -1,27 +1,23 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
+
   <name>ubr_teleop</name>
   <version>0.3.0</version>
   <description>
     Teleoperation for the robot.
   </description>
   <author>Michael Ferguson</author>
-  <maintainer email="fergs@unboundedrobotics.com">Michael Ferguson</maintainer>
+  <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/ubr_teleop</url>
   
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>actionlib</build_depend>
-  <build_depend>control_msgs</build_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>sensor_msgs</build_depend>
-  <build_depend>topic_tools</build_depend>
+  <depend>actionlib</depend>
+  <depend>control_msgs</depend>
+  <depend>geometry_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>sensor_msgs</depend>
+  <depend>topic_tools</depend>
 
-  <run_depend>actionlib</run_depend>
-  <run_depend>control_msgs</run_depend>
-  <run_depend>geometry_msgs</run_depend>
-  <run_depend>roscpp</run_depend>
-  <run_depend>sensor_msgs</run_depend>
-  <run_depend>topic_tools</run_depend>
 </package>

@@ -1,11 +1,22 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(ubr_teleop)
 
 find_package(Boost REQUIRED)
-find_package(catkin REQUIRED roscpp sensor_msgs control_msgs geometry_msgs actionlib topic_tools)
+find_package(catkin REQUIRED
+  actionlib
+  control_msgs
+  geometry_msgs
+  roscpp
+  sensor_msgs
+  topic_tools
+)
 catkin_package()
 
-include_directories(include ${Boost_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(
+  include
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+)
 
 add_executable(keyboard_teleop src/keyboard_teleop.cpp)
 target_link_libraries(keyboard_teleop ${Boost_LIBRARIES}
@@ -15,13 +26,21 @@ add_executable(joystick_teleop src/joystick_teleop.cpp)
 target_link_libraries(joystick_teleop ${Boost_LIBRARIES}
                                       ${catkin_LIBRARIES})
 
-install(TARGETS keyboard_teleop joystick_teleop
-        DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+install(
+  TARGETS keyboard_teleop joystick_teleop
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY launch
-        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(
+  DIRECTORY launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
-install(PROGRAMS scripts/set_gripper_pose.py scripts/set_head_pose.py scripts/set_torso_pose.py scripts/tuck_arm.py
-DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(
+  PROGRAMS
+    scripts/set_gripper_pose.py
+    scripts/set_head_pose.py
+    scripts/set_torso_pose.py
+    scripts/tuck_arm.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)

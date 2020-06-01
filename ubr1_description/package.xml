@@ -1,4 +1,6 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
+
   <name>ubr1_description</name>
   <version>0.3.0</version>
   <description>
@@ -6,11 +8,12 @@
   </description>
   <author>Michael Ferguson</author>
   <author>Melonee Wise</author>
-  <maintainer email="fergs@unboundedrobotics.com">Michael Ferguson</maintainer>
+  <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
   <license>All Rights Reserved</license>
   <url>http://ros.org/wiki/ubr1_description</url>
-  
+
   <buildtool_depend>catkin</buildtool_depend>
 
-  <run_depend>urdf</run_depend>
+  <exec_depend>urdf</exec_depend>
+
 </package>

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(ubr1_grasping)
 
 find_package(Boost REQUIRED)
@@ -33,13 +33,14 @@ catkin_package(
     shape_msgs
 )
 
-include_directories(include
-                    SYSTEM
-                    ${Boost_INCLUDE_DIRS}
-                    ${catkin_INCLUDE_DIRS}
-                    ${Eigen_INCLUDE_DIRS}
-                    ${PCL_INCLUDE_DIRS}
-                   )
+include_directories(
+  include
+  SYSTEM
+  ${Boost_INCLUDE_DIRS}
+  ${catkin_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
+  ${PCL_INCLUDE_DIRS}
+)
 
 ### Build basic_grasping_perception
 add_executable(basic_grasping_perception src/basic_grasping_perception.cpp
@@ -54,10 +55,11 @@ add_dependencies(basic_grasping_perception grasping_msgs_generate_messages_cpp)
 
 ### Test
 if (CATKIN_ENABLE_TESTING)
-add_subdirectory(test)
+  add_subdirectory(test)
 endif()
 
 ### Install
-install(TARGETS basic_grasping_perception
+install(
+  TARGETS basic_grasping_perception
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

@@ -1,12 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
+
   <name>ubr1_gazebo</name>
   <version>0.3.0</version>
   <description>
     Gazebo package for the UBR-1.
   </description>
   <author>Michael Ferguson</author>
-  <maintainer email="fergs@unboundedrobotics.com">Michael Ferguson</maintainer>
+  <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
   <license>BSD</license>
   <url>http://ros.org/wiki/ubr1_gazebo</url>
   
@@ -25,4 +26,5 @@
   <export>
     <robot_controllers plugin="${prefix}/ubr1_gazebo_controllers.xml"/>
   </export>
+
 </package>
