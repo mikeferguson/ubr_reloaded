@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -37,28 +38,32 @@
 #include <pluginlib/class_list_macros.h>
 #include <ubr1_gazebo/simulated_bellows_controller.h>
 
-PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedBellowsController, ubr_controllers::Controller)
+PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedBellowsController, robot_controllers::Controller)
 
 namespace ubr1_gazebo_controllers
 {
 
-bool SimulatedBellowsController::init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager)
+int SimulatedBellowsController::init(ros::NodeHandle& nh, robot_controllers::ControllerManager* manager)
 {
   // We absolutely need access to the controller manager
   if (!manager)
   {
     initialized_ = false;
-    return false;
+    return -1;
   }
 
-  ubr_controllers::Controller::init(nh, manager);
+  robot_controllers::Controller::init(nh, manager);
 
   // Get Joint Handles
-  bellows_ = manager_->getJointHandle("bellows_joint");
-  torso_lift_ = manager_->getJointHandle("torso_lift_joint");
+  bellows_ = manager->getJointHandle("bellows_joint");
+  torso_lift_ = manager->getJointHandle("torso_lift_joint");
 
   initialized_ = true;
-  return initialized_;
+
+  // Start this controller
+  manager->requestStart(getName());
+
+  return 0;
 }
 
 bool SimulatedBellowsController::start()
@@ -73,7 +78,7 @@ bool SimulatedBellowsController::start()
   return true;
 }
 
-bool SimulatedBellowsController::preempt(bool force)
+bool SimulatedBellowsController::stop(bool force)
 {
   if (!initialized_)
     return true;
@@ -85,21 +90,28 @@ bool SimulatedBellowsController::preempt(bool force)
   return false;
 }
 
-bool SimulatedBellowsController::update(const ros::Time now, const ros::Duration dt)
+bool SimulatedBellowsController::reset()
 {
-  if (!initialized_)
-    return false;
-
-  // I warned you this controller was stupid
-  bellows_->setPositionCommand(torso_lift_->getPosition() / -2.0, 0.0, 0.0);
-
   return true;
 }
 
-std::vector<std::string> SimulatedBellowsController::getJointNames()
+void SimulatedBellowsController::update(const ros::Time& now, const ros::Duration& dt)
+{
+  // I warned you this controller was stupid
+  bellows_->setPosition(torso_lift_->getPosition() / -2.0, 0.0, 0.0);
+}
+
+std::vector<std::string> SimulatedBellowsController::getCommandedNames()
 {
   std::vector<std::string> names;
   names.push_back("bellows_joint");
+  return names;
+}
+
+std::vector<std::string> SimulatedBellowsController::getClaimedNames()
+{
+  std::vector<std::string> names;
+  // No claimed names
   return names;
 }
 

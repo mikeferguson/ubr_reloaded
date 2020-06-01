@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -34,8 +35,8 @@
 
 // Authors: John Hsu, Michael Ferguson
 
+#include <ubr1_gazebo/joint_handle.h>
 #include <ubr1_gazebo/ubr1_gazebo_plugin.h>
-#include <ubr_controllers/base_controller.h>
 
 using namespace gazebo;
 GZ_REGISTER_MODEL_PLUGIN(UBR1GazeboPlugin)
@@ -60,15 +61,21 @@ void UBR1GazeboPlugin::Load(physics::ModelPtr _model, sdf::ElementPtr /*_sdf*/)
 
 void UBR1GazeboPlugin::Init()
 {
-  // Loads controllers
-  this->manager_ = new ubr1_gazebo::GazeboControllerManager(this->model);
+  // Create ControllerManager instance
+  this->manager_ = new robot_controllers::ControllerManager();
 
-  // Start gravity compensation
-  this->manager_->requestStart("arm_controller/gravity_compensation");
+  // Setup joints
+  gazebo::physics::Joint_V joints = this->model->GetJoints();
+  for (auto it = joints.begin(); it != joints.end(); ++it)
+  {
+    joints_.emplace_back(new ubr1_gazebo::GazeboJointHandle(*it));
+    robot_controllers::JointHandlePtr jh = joints_.back();
+    this->manager_->addJointHandle(jh);
+  }
 
-  // Start the simulated controllers
-  this->manager_->requestStart("gripper_controller/gripper_action");
-  this->manager_->requestStart("bellows_controller");
+  // Setup controllers
+  ros::NodeHandle nh("~");
+  this->manager_->init(nh);
 
   // Publish joint states only after controllers are fully ready
   this->joint_state_pub_ = nh_.advertise<sensor_msgs::JointState>("joint_states", 10);
@@ -91,6 +98,12 @@ void UBR1GazeboPlugin::OnUpdate()
   // Update controllers
   this->manager_->update(now, ros::Duration(dt));
 
+  // Copy commands to Gazebo
+  for (auto joint : joints_)
+  {
+    joint->update(now, ros::Duration(dt));
+  }
+
   // Limit publish rate
   if (now - last_publish_ < ros::Duration(0.01))
     return;
@@ -101,20 +114,13 @@ void UBR1GazeboPlugin::OnUpdate()
   gazebo::physics::Joint_V joints = this->model->GetJoints();
   for (gazebo::physics::Joint_V::iterator it = joints.begin(); it != joints.end(); ++it)
   {
-    ubr_controllers::JointHandle* j = this->manager_->getJointHandle((*it)->GetName());
+    robot_controllers::JointHandlePtr j = this->manager_->getJointHandle((*it)->GetName());
     js.name.push_back((*it)->GetName());
     js.position.push_back(j->getPosition());
     js.velocity.push_back(j->getVelocity());
     js.effort.push_back(j->getEffort());
   }
   joint_state_pub_.publish(js);
-
-  // Publish Base Odometry
-  ubr_controllers::Controller * base = this->manager_->getController("base_controller");
-  if (base)
-  {
-    dynamic_cast<ubr_controllers::BaseController*>(base)->publish(ros::Time::now());
-  }
 
   last_publish_ = now;
 }

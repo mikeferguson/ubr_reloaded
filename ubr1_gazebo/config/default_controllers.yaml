@@ -1,6 +1,6 @@
 arm_controller:
   follow_joint_trajectory:
-    type: "ubr_controllers/FollowJointTrajectoryController"
+    type: "robot_controllers/FollowJointTrajectoryController"
     joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
@@ -10,11 +10,14 @@ arm_controller:
       - wrist_flex_joint
       - wrist_roll_joint
   gravity_compensation:
-    type: "ubr_controllers/GravityCompensation"
+    type: "robot_controllers/GravityCompensation"
+    root: "torso_lift_link"
+    tip: "gripper_link"
+    autostart: true
 
 arm_with_torso_controller:
   follow_joint_trajectory:
-    type: "ubr_controllers/FollowJointTrajectoryController"
+    type: "robot_controllers/FollowJointTrajectoryController"
     joints:
       - torso_lift_joint
       - shoulder_pan_joint
@@ -27,21 +30,27 @@ arm_with_torso_controller:
 
 torso_controller:
   follow_joint_trajectory:
-    type: "ubr_controllers/FollowJointTrajectoryController"
+    type: "robot_controllers/FollowJointTrajectoryController"
     joints:
       - torso_lift_joint
 
 head_controller:
   point_head:
-    type: "ubr_controllers/PointHeadController"
+    type: "robot_controllers/PointHeadController"
   follow_joint_trajectory:
-    type: "ubr_controllers/FollowJointTrajectoryController"
+    type: "robot_controllers/FollowJointTrajectoryController"
     joints:
       - head_pan_joint
       - head_tilt_joint
 
 base_controller:
-  type: "ubr_controllers/BaseController"
+  type: "robot_controllers/DiffDriveBaseController"
+  max_velocity_x: 1.0
+  max_acceleration_x: 0.75
+  autostart: true
+  # name of joints
+  l_wheel_joint: base_l_wheel_joint
+  r_wheel_joint: base_r_wheel_joint
 
 gripper_controller:
   gripper_action:
@@ -51,7 +60,7 @@ bellows_controller:
   type: "ubr1_gazebo_controllers/SimulatedBellowsController"
 
 gazebo:
-  controllers:
+  default_controllers:
     - "arm_controller/follow_joint_trajectory"
     - "arm_controller/gravity_compensation"
     - "arm_with_torso_controller/follow_joint_trajectory"

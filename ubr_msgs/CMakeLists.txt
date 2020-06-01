@@ -10,14 +10,12 @@ find_package(catkin REQUIRED
 add_message_files(
   FILES
     BreakerState.msg
-    ControllerInfo.msg
     RobotState.msg
 )
 
 add_service_files(
   FILES
     BreakerCommand.srv
-    UpdateControllers.srv
 )
 
 generate_messages(DEPENDENCIES std_msgs)

@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -34,32 +35,34 @@
 
 // Author: Michael Ferguson
 
+#include <boost/pointer_cast.hpp>
 #include <pluginlib/class_list_macros.h>
 #include <ubr1_gazebo/simulated_gripper_controller.h>
 
-PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedGripperController, ubr_controllers::Controller)
+PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedGripperController, robot_controllers::Controller)
 
 namespace ubr1_gazebo_controllers
 {
 
-bool SimulatedGripperController::init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager)
+int SimulatedGripperController::init(ros::NodeHandle& nh, robot_controllers::ControllerManager* manager)
 {
   // We absolutely need access to the controller manager
   if (!manager)
   {
     initialized_ = false;
-    return false;
+    return -1;
   }
 
-  ubr_controllers::Controller::init(nh, manager);
+  robot_controllers::Controller::init(nh, manager);
+  manager_ = manager;
 
   // Set Joint Names
   joint_names_.push_back("left_gripper_joint");
   joint_names_.push_back("right_gripper_joint");
 
   // Get Joint Handles
-  left_ = dynamic_cast<ubr1_gazebo::GazeboJointHandle*>(manager_->getJointHandle("left_gripper_joint"));
-  right_ = dynamic_cast<ubr1_gazebo::GazeboJointHandle*>(manager_->getJointHandle("right_gripper_joint"));
+  left_ = boost::dynamic_pointer_cast<ubr1_gazebo::GazeboJointHandle>(manager_->getJointHandle("left_gripper_joint"));
+  right_ = boost::dynamic_pointer_cast<ubr1_gazebo::GazeboJointHandle>(manager_->getJointHandle("right_gripper_joint"));
 
   // Setup ROS interfaces
   server_.reset(new server_t(nh, "", /*"gripper_controller/gripper_action",*/
@@ -73,7 +76,7 @@ bool SimulatedGripperController::init(ros::NodeHandle& nh, ubr_controllers::Cont
 
   initialized_ = true;
 
-  return true;
+  return 0;
 }
 
 bool SimulatedGripperController::start()
@@ -88,7 +91,7 @@ bool SimulatedGripperController::start()
   return true;
 }
 
-bool SimulatedGripperController::preempt(bool force)
+bool SimulatedGripperController::stop(bool force)
 {
   if (!initialized_)
     return true;
@@ -110,15 +113,18 @@ bool SimulatedGripperController::preempt(bool force)
   return true;
 }
 
-bool SimulatedGripperController::update(const ros::Time now, const ros::Duration dt)
+bool SimulatedGripperController::reset()
+{
+  return true;
+}
+
+void SimulatedGripperController::update(const ros::Time& now, const ros::Duration& dt)
 {
   if (!initialized_)
-    return false;
+    return;
 
-  left_->setPositionCommand(goal_/2.0, 0, 0);
-  right_->setPositionCommand(goal_/2.0, 0, 0);
-
-  return true;
+  left_->setPosition(goal_/2.0, 0, 0);
+  right_->setPosition(goal_/2.0, 0, 0);
 }
 
 void SimulatedGripperController::executeCb(const control_msgs::GripperCommandGoalConstPtr& goal)
@@ -132,7 +138,7 @@ void SimulatedGripperController::executeCb(const control_msgs::GripperCommandGoa
     return;
   }
 
-  if (!manager_->requestStart(name_))
+  if (!manager_->requestStart(getName()))
   {
     server_->setAborted(result, "Cannot execute, unable to start controller.");
     ROS_ERROR("Cannot execute, unable to start controller.");
@@ -210,7 +216,12 @@ void SimulatedGripperController::executeCb(const control_msgs::GripperCommandGoa
   }
 }
 
-std::vector<std::string> SimulatedGripperController::getJointNames()
+std::vector<std::string> SimulatedGripperController::getCommandedNames()
+{
+  return joint_names_;
+}
+
+std::vector<std::string> SimulatedGripperController::getClaimedNames()
 {
   return joint_names_;
 }

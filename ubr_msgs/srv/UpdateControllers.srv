@@ -1,5 +1,0 @@
-string[] start
-string[] stop
----
-ControllerInfo[] active
-ControllerInfo[] available

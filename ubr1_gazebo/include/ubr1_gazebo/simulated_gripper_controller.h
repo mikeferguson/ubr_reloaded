@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -42,8 +43,9 @@
 
 #include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
-#include <ubr_controllers/controller.h>
-#include <ubr_controllers/joint_handle.h>
+#include <robot_controllers_interface/controller.h>
+#include <robot_controllers_interface/controller_manager.h>
+#include <robot_controllers_interface/joint_handle.h>
 #include <ubr1_gazebo/joint_handle.h>
 
 #include <control_msgs/GripperCommandAction.h>
@@ -54,7 +56,7 @@ namespace ubr1_gazebo_controllers
 /**
  *  \brief Controller for simulating the gripper
  */
-class SimulatedGripperController : public ubr_controllers::Controller
+class SimulatedGripperController : public robot_controllers::Controller
 {
   typedef actionlib::SimpleActionServer<control_msgs::GripperCommandAction> server_t;
 
@@ -63,31 +65,23 @@ public:
   virtual ~SimulatedGripperController() {}
 
   /** \brief Initialize parameters, interfaces */
-  virtual bool init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager);
+  virtual int init(ros::NodeHandle& nh, robot_controllers::ControllerManager* manager);
 
   /** \brief Start the controller. */
   virtual bool start();
 
-  /** \brief Is this controller the head of the list? */
-  virtual bool authoritative()
-  {
-    // should not run things on top of this
-    return true;
-  }
+  /** \brief Stop the controller. */
+  virtual bool stop(bool force);
 
-  /**
-   *  \brief Preempt this controller.
-   *  \param force If true, this controller will be stopped regardless
-   *         of return value.
-   *  \returns true if controller preempted successfully.
-   */
-  virtual bool preempt(bool force);
+  /** \brief Reset the controller. */
+  virtual bool reset();
 
   /** \brief Update controller, called from controller_manager update */
-  virtual bool update(const ros::Time now, const ros::Duration dt);
+  virtual void update(const ros::Time& now, const ros::Duration& dt);
 
   /** \brief Get a list of joints this controls. */
-  virtual std::vector<std::string> getJointNames();
+  virtual std::vector<std::string> getCommandedNames();
+  virtual std::vector<std::string> getClaimedNames();
 
 private:
   /** \brief Callback for goal */
@@ -95,9 +89,10 @@ private:
 
   bool initialized_;
   std::vector<std::string> joint_names_;
+  robot_controllers::ControllerManager* manager_;
 
-  ubr1_gazebo::GazeboJointHandle* left_;
-  ubr1_gazebo::GazeboJointHandle* right_;
+  ubr1_gazebo::GazeboJointHandlePtr left_;
+  ubr1_gazebo::GazeboJointHandlePtr right_;
 
   // The goal pose for the gripper
   double goal_;

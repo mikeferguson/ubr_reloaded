@@ -7,7 +7,8 @@ find_package(catkin
   REQUIRED
     control_toolbox
     gazebo_ros
-    ubr_controllers
+    robot_controllers
+    robot_controllers_interface
 )
 
 link_directories(
@@ -24,10 +25,10 @@ catkin_package(
   CATKIN_DEPENDS
     control_toolbox
     gazebo_ros
-    ubr_controllers
+    robot_controllers
+    robot_controllers_interface
   DEPENDS
     gazebo
-    ubr_controllers
 #    INCLUDE_DIRS
 #    LIBRARIES
 )

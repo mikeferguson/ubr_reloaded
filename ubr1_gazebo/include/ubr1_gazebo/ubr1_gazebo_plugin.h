@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -42,7 +43,8 @@
 #include <gazebo/gazebo.hh>
 
 #include <ros/ros.h>
-#include <ubr1_gazebo/controller_manager.h>
+#include <robot_controllers_interface/controller_manager.h>
+#include <ubr1_gazebo/joint_handle.h>
 
 #include <sensor_msgs/JointState.h>
 
@@ -69,7 +71,8 @@ private:
 
   common::Time prevUpdateTime;
 
-  ubr1_gazebo::GazeboControllerManager* manager_;
+  robot_controllers::ControllerManager* manager_;
+  std::vector<ubr1_gazebo::GazeboJointHandlePtr> joints_;
 
   ros::Publisher joint_state_pub_;
   ros::NodeHandle nh_;

@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -41,8 +42,9 @@
 #include <boost/shared_ptr.hpp>
 
 #include <ros/ros.h>
-#include <ubr_controllers/controller.h>
-#include <ubr_controllers/joint_handle.h>
+#include <robot_controllers_interface/controller.h>
+#include <robot_controllers_interface/controller_manager.h>
+#include <robot_controllers_interface/joint_handle.h>
 
 namespace ubr1_gazebo_controllers
 {
@@ -52,43 +54,40 @@ namespace ubr1_gazebo_controllers
  *         be in the right place. If you ever find yourself reading this
  *         code... I apologize in advance.
  */
-class SimulatedBellowsController : public ubr_controllers::Controller
+class SimulatedBellowsController : public robot_controllers::Controller
 {
 public:
   SimulatedBellowsController() : initialized_(false) {}
   virtual ~SimulatedBellowsController() {}
 
   /** \brief Initialize parameters, interfaces */
-  virtual bool init(ros::NodeHandle& nh, ubr_controllers::ControllerManager* manager);
+  virtual int init(ros::NodeHandle& nh, robot_controllers::ControllerManager* manager);
 
   /** \brief Start the controller. */
   virtual bool start();
 
-  /** \brief Is this controller the head of the list? */
-  virtual bool authoritative()
-  {
-    // Honestly, if you want to control the bellows, go right ahead...
-    return false;
-  }
+  /** \brief Stop the controller. */
+  virtual bool stop(bool force);
 
-  /**
-   *  \brief Preempt this controller.
-   *  \param force If true, this controller will be stopped regardless
-   *         of return value.
-   *  \returns true if controller preempted successfully.
-   */
-  virtual bool preempt(bool force);
+  /** \brief Reset the controller. */
+  virtual bool reset();
 
   /** \brief Update controller, called from controller_manager update */
-  virtual bool update(const ros::Time now, const ros::Duration dt);
+  virtual void update(const ros::Time& now, const ros::Duration& dt);
+
+  virtual std::string getType()
+  {
+    return "SimulatedBellowsController";
+  }
 
   /** \brief Get a list of joints this controls. */
-  virtual std::vector<std::string> getJointNames();
+  virtual std::vector<std::string> getCommandedNames();
+  virtual std::vector<std::string> getClaimedNames();
 
 private:
   bool initialized_;
-  ubr_controllers::JointHandle* bellows_;
-  ubr_controllers::JointHandle* torso_lift_;
+  robot_controllers::JointHandlePtr bellows_;
+  robot_controllers::JointHandlePtr torso_lift_;
 };
 
 }  // namespace ubr1_gazebo_controllers

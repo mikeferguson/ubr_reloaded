@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -41,7 +42,7 @@
 #include <angles/angles.h>
 
 #include <gazebo/physics/physics.hh>
-#include <ubr_controllers/joint_handle.h>
+#include <robot_controllers_interface/joint_handle.h>
 #include <control_toolbox/pid.h>
 
 namespace ubr1_gazebo
@@ -55,7 +56,7 @@ enum CommandState
   MODE_CONTROL_POSITION
 };
 
-class GazeboJointHandle : public ubr_controllers::JointHandle
+class GazeboJointHandle : public robot_controllers::JointHandle
 {
 public:
   GazeboJointHandle(gazebo::physics::JointPtr joint_ptr) :
@@ -78,7 +79,7 @@ public:
     nh.param(getName() + "/debug", debug_, false);
 
     if (debug_)
-      ROS_INFO_STREAM(getName() << " has limit of " << getEffortLimit() << " and offset of " << effort_offset_);
+      ROS_INFO_STREAM(getName() << " has limit of " << getEffortMax() << " and offset of " << effort_offset_);
   }
   virtual ~GazeboJointHandle()
   {
@@ -89,87 +90,48 @@ public:
    *  \param position The desired position, in radians or meters.
    *  \param velocity The desired velocity, in radians/sec or meters/sec.
    *  \param effort The desired effort, in Nm or N.
-   *  \returns true if success, false otherwise.
    */
-  virtual bool setPositionCommand(const float position,
-                                  const float velocity,
-                                  const float effort,
-                                  bool update = false)
+  virtual void setPosition(double position,
+                           double velocity,
+                           double effort)
   {
-    if (update)
-    {
-      desired_position_ += position;
-      desired_velocity_ += velocity;
-      desired_effort_ += effort;
-      mode_ = MODE_CONTROL_POSITION;
-      return true;
-    }
-    desired_position_ = position;
-    desired_velocity_ = velocity;
-    desired_effort_ = effort;
+    // ControllerManager resets these each cycle, so accumulate
+    desired_position_ += position;
+    desired_velocity_ += velocity;
+    desired_effort_ += effort;
     mode_ = MODE_CONTROL_POSITION;
-    return true;
   }
 
   /**
    *  \brief Used by controllers to set the desired velocity command of a joint.
    *  \param velocity The desired velocity, in radians/sec or meters/sec.
    *  \param effort The desired effort, in Nm or N.
-   *  \returns true if success, false otherwise.
    */
-  virtual bool setVelocityCommand(const float velocity,
-                                  const float effort,
-                                  bool update = false)
+  virtual void setVelocity(double velocity,
+                           double effort)
   {
-    if (update)
+    // ControllerManager resets these each cycle, so accumulate
+    desired_velocity_ += velocity;
+    desired_effort_ += effort;
+
+    if (!isPositionControlled())
     {
-      if (isPositionControlled())
-      {
-        desired_velocity_ += velocity;
-        desired_effort_ += effort;
-        return true;
-      }
-      desired_velocity_ += velocity;
-      desired_effort_ += effort;
       mode_ = MODE_CONTROL_VELOCITY;
-      return true;
     }
-    desired_velocity_ = velocity;
-    desired_effort_ = effort;
-    mode_ = MODE_CONTROL_VELOCITY;
-    return true;
   }
 
   /**
    *  \brief Used by controllers to set the desired effort of a joint.
    *  \param effort The desired effort, in Nm or N.
-   *  \returns true if success, false otherwise.
    */
-  virtual bool setEffortCommand(const float effort,
-                                bool update = false)
+  virtual void setEffort(double effort)
   {
-    if (update)
+    // ControllerManager resets these each cycle, so accumulate
+    desired_effort_ += effort;
+    if (!isPositionControlled() && !isVelocityControlled())
     {
-      if (isPositionControlled())
-      {
-        desired_effort_ += effort;
-        return true;
-      }
-      else if (isVelocityControlled())
-      {
-        desired_effort_ += effort;
-        return true;
-      }
-      else
-      {
-        desired_effort_ = effort;
-        mode_ = MODE_CONTROL_EFFORT;
-        return true;
-      }
+      mode_ = MODE_CONTROL_EFFORT;
     }
-    desired_effort_ = effort;
-    mode_ = MODE_CONTROL_EFFORT;
-    return true;
   }
 
   /** \brief Returns the position of the joint. */
@@ -190,26 +152,33 @@ public:
     return applied_effort_;
   }
 
+  /** \brief Is this joint continuous */
+  virtual bool isContinuous()
+  {
+    // TODO
+    return false;
+  }
+
   /** \brief Get the lower positional limit */
-  virtual float getPositionLowerLimit()
+  virtual double getPositionMin()
   {
     return joint_->LowerLimit(0);
   }
 
   /** \brief Get the upper positional limit */
-  virtual float getPositionUpperLimit()
+  virtual double getPositionMax()
   {
     return joint_->UpperLimit(0);
   }
 
   /** \brief Get the velocity limit */
-  virtual float getVelocityLimit()
+  virtual double getVelocityMax()
   {
     return joint_->GetVelocityLimit(0);
   }
 
   /** \brief Get the effort limit */
-  virtual float getEffortLimit()
+  virtual double getEffortMax()
   {
     /*
      * gzsdf has a major flaw when using continuous joints. It appears gazebo
@@ -231,7 +200,7 @@ public:
     return joint_->GetName();
   }
 
-  void clear()
+  void reset()
   {
     desired_position_ = 0.0;
     desired_velocity_ = 0.0;
@@ -254,7 +223,7 @@ public:
     return mode_ == MODE_CONTROL_EFFORT;
   }
 
-  void update(const ros::Time now, const ros::Duration dt)
+  void update(const ros::Time& now, const ros::Duration& dt)
   {
     float effort = 0.0;
     if (isEffortControlled())
@@ -275,7 +244,7 @@ public:
     }
 
     // Limit effort so robot doesn't implode
-    float lim = getEffortLimit();
+    float lim = getEffortMax();
     applied_effort_ = std::max(-lim, std::min(effort, lim));
 
     if (debug_)
@@ -289,7 +258,7 @@ public:
   double setMaxEffort(double effort)
   {
     effort_limit_ = effort;
-    return getEffortLimit();
+    return getEffortMax();
   }
 
 private:
@@ -321,6 +290,8 @@ private:
   GazeboJointHandle(const GazeboJointHandle&);
   GazeboJointHandle& operator=(const GazeboJointHandle&);
 };
+
+typedef boost::shared_ptr<GazeboJointHandle> GazeboJointHandlePtr;
 
 }  // namespace ubr1_gazebo
 
