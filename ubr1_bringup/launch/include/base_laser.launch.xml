@@ -1,0 +1,11 @@
+<launch>
+
+  <node name="base_laser_node" pkg="urg_node" type="urg_node" >
+    <param name="ip_address" value="10.42.0.10"/>
+    <param name="angle_min" value="-1.54" />
+    <param name="angle_max" value="1.54" />
+    <param name="frame_id" value="base_laser_link" />
+    <remap from="scan" to="base_scan" />
+  </node>
+
+</launch>
