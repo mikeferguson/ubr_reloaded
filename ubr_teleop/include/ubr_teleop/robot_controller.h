@@ -1,6 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
+ *  Copyright (c) 2020, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -40,6 +41,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <geometry_msgs/Twist.h>
+#include <geometry_msgs/TwistStamped.h>
 #include <control_msgs/FollowJointTrajectoryAction.h>
 #include <control_msgs/GripperCommandAction.h>
 #include <actionlib/client/simple_action_client.h>
@@ -126,7 +128,7 @@ public:
     }
 
     // Publisher for arm movements
-    arm_twist_pub_ = global.advertise<geometry_msgs::Twist>("arm_controller/cartesian_twist/command", 1);
+    arm_twist_pub_ = global.advertise<geometry_msgs::TwistStamped>("arm_controller/cartesian_twist/command", 1);
 
     // Initialized
     last_publish_ = ros::Time::now().toSec();
@@ -177,7 +179,8 @@ public:
     // If arm control is currently enabled, send message to have it stop 
     if (arm_active_)
     {
-      arm_twist_pub_.publish(cmd_msg); //re-use zeroed twist message
+      geometry_msgs::TwistStamped arm_cmd_msg;
+      arm_twist_pub_.publish(arm_cmd_msg);
       arm_active_ = false;
     }
 
@@ -282,7 +285,7 @@ public:
       // Arm twist
       if (arm_active_)
       {
-        geometry_msgs::Twist arm_cmd_msg;       
+        geometry_msgs::TwistStamped arm_cmd_msg;
         if (now - last_arm_command_ > 0.5)
         {
           // disable arm and send final zero command
@@ -290,12 +293,14 @@ public:
         }
         else
         {
-          arm_cmd_msg.linear.x = arm_lx_;
-          arm_cmd_msg.linear.y = arm_ly_;
-          arm_cmd_msg.linear.z = arm_lz_;
-          arm_cmd_msg.angular.x = arm_ax_;
-          arm_cmd_msg.angular.y = arm_ay_;
-          arm_cmd_msg.angular.z = arm_az_;
+          arm_cmd_msg.header.stamp = ros::Time::now();
+          arm_cmd_msg.header.frame_id = "wrist_roll_link";
+          arm_cmd_msg.twist.linear.x = arm_lx_;
+          arm_cmd_msg.twist.linear.y = arm_ly_;
+          arm_cmd_msg.twist.linear.z = arm_lz_;
+          arm_cmd_msg.twist.angular.x = arm_ax_;
+          arm_cmd_msg.twist.angular.y = arm_ay_;
+          arm_cmd_msg.twist.angular.z = arm_az_;
         }
         arm_twist_pub_.publish(arm_cmd_msg);
       }
@@ -377,7 +382,7 @@ public:
     if (arm_active_)
     {
       arm_active_ = false;
-      geometry_msgs::Twist cmd_msg;
+      geometry_msgs::TwistStamped cmd_msg;
       arm_twist_pub_.publish(cmd_msg);
     }
   }
