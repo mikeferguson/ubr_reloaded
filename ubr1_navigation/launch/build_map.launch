@@ -1,0 +1,10 @@
+<launch>
+
+  <arg name="scan_topic" default="base_scan"/>
+
+  <node name="slam_karto" pkg="slam_karto" type="slam_karto" output="screen">
+    <remap from="scan" to="$(arg scan_topic)" />
+  </node>
+
+</launch>
+
