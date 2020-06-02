@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package format="2">
+
+  <name>ubr_calibration</name>
+  <version>0.3.0</version>
+  <description>
+    Launch and configuration files for calibrating UBR-1 using the 'robot_calibration' package.
+  </description>
+
+  <author>Michael Ferguson</author>
+  <maintainer email="mfergs7@gmail.com">Michael Ferguson</maintainer>
+
+  <license>Apache2</license>
+  
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <exec_depend>robot_calibration</exec_depend>
+
+</package>
