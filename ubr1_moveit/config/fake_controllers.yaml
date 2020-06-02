@@ -1,8 +1,5 @@
 controller_list:
-  - name: arm_controller
-    action_ns: follow_joint_trajectory
-    type: FollowJointTrajectory
-    default: true
+  - name: fake_arm_controller
     joints:
       - shoulder_pan_joint
       - shoulder_lift_joint
@@ -11,10 +8,7 @@ controller_list:
       - forearm_roll_joint
       - wrist_flex_joint
       - wrist_roll_joint
-  - name: arm_with_torso_controller
-    action_ns: follow_joint_trajectory
-    type: FollowJointTrajectory
-    default: true
+  - name: fake_arm_with_torso_controller
     joints:
       - torso_lift_joint
       - shoulder_pan_joint
@@ -24,11 +18,10 @@ controller_list:
       - forearm_roll_joint
       - wrist_flex_joint
       - wrist_roll_joint
-  - name: gripper_controller
-    action_ns: gripper_action
-    type: GripperCommand
-    default: true
-    parallel: true
+  - name: fake_gripper_controller
     joints:
-      - right_gripper_joint
       - left_gripper_joint
+      - right_gripper_joint
+initial:  # Define initial robot poses.
+#  - group: arm
+#    pose: home

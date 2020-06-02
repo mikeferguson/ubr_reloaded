@@ -2,7 +2,10 @@ moveit_setup_assistant_config:
   URDF:
     package: ubr1_description
     relative_path: robots/ubr1_robot.urdf
+    xacro_args: ""
   SRDF:
     relative_path: config/ubr1.srdf
   CONFIG:
-    generated_timestamp: 1380007293
+    author_name: Michael Ferguson
+    author_email: mfergs7@gmail.com
+    generated_timestamp: 1591117937
