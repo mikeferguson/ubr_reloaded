@@ -9,8 +9,14 @@ find_package(catkin REQUIRED
 
 add_message_files(
   FILES
+    BoardInfo.msg
     BreakerState.msg
+    BreakerInfo.msg
+    JointInfo.msg
+    MotorInfo.msg
     RobotState.msg
+    DebugInfo.msg
+    ChargerInfo.msg
 )
 
 add_service_files(
