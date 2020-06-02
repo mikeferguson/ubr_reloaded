@@ -61,7 +61,8 @@ class ControllerResetTeleop:
         self.stop.append("head_controller/follow_joint_trajectory")
         self.stop.append("head_controller/point_head")
 
-        self.reset_button = rospy.get_param("~reset_button", 4)  # default button is the up button
+        self.reset_button = rospy.get_param("~reset_axis", 7)  # default button is the up button
+        self.reset_value = rospy.get_param("~reset_value", 1.0)
 
         self.pressed = False
         self.pressed_last = None
@@ -70,7 +71,7 @@ class ControllerResetTeleop:
 
     def joy_callback(self, msg):
         try:
-            if msg.buttons[self.reset_button] > 0:
+            if msg.axes[self.reset_button] == self.reset_value:
                 if not self.pressed:
                     self.pressed_last = rospy.Time.now()
                     self.pressed = True

@@ -25,6 +25,7 @@
       <param name="publish_frequency" value="100.0" />
     </node>
 
+    <node name="controller_reset" pkg="ubr1_bringup" type="controller_reset.py" />
     <include file="$(find ubr_teleop)/launch/ubr_teleop.launch.xml" />
 
     <include file="$(find ubr1_bringup)/launch/include/head_camera.launch.xml" >

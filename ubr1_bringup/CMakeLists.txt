@@ -13,3 +13,8 @@ install(
   DIRECTORY config
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
+
+install(
+  PROGRAMS scripts/controller_reset.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
