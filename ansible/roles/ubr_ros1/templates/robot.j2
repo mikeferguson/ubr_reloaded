@@ -1,0 +1,15 @@
+
+[Unit]
+Description=Start Velocity drivers
+After=roscore.service
+BindsTo=roscore.service
+
+[Install]
+WantedBy=roscore.service
+
+[Service]
+Environment="ROS_LOG_DIR=/var/log/ros"
+ExecStart=/bin/bash -c ". /opt/ros/{{rosdistro}}/setup.bash && roslaunch /etc/ros/{{rosdistro}}/robot.launch --wait"
+StandardOutput=file:/var/log/ros/robot.log
+StandardError=file:/var/log/ros/robot.log
+User=ros

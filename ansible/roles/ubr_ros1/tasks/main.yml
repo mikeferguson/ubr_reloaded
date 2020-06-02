@@ -1,0 +1,50 @@
+---
+# Install ROS1 Packages
+- name: Configure apt key for ROS
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+- name: Configure apt sources for ROS
+  apt_repository:
+    repo: 'deb http://packages.ros.org/ros/ubuntu {{ ansible_lsb.codename }} main'
+    filename: 'ros-latest'
+    update_cache: yes
+- name: Install base level ros packages
+  apt:
+    pkg: ros-{{rosdistro}}-ros-desktop-full
+
+# Setup ROS Workspace
+
+# Setup /etc/ros
+# TODO: uncomment these once debs are actually built
+#- name: Copy URDF file to etc
+#  copy:
+#    src: "/opt/ros/{{ rosdistro }}/velocity_description/urdf/velocity.urdf"
+#    dest: "/etc/ros/{{ rosdistro }}/robot.urdf"
+#- name: Copy launch file to etc
+#  copy:
+#    src: "/opt/ros/{{ rosdistro }}/velocity_bringup/launch/robot.launch"
+#    dest: "/etc/ros/{{ rosdistro }}/robot.launch"
+
+# Setup systemd jobs
+- name: Create a systemd service for roscore
+  template:
+    src: roscore.j2
+    dest: /etc/systemd/system/roscore.service
+- name: Start the roscore service
+  systemd:
+    name: roscore
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: Create a systemd service for robot drivers
+  template:
+    src: robot.j2
+    dest: /etc/systemd/system/robot.service
+- name: Start the robot service
+  systemd:
+    name: robot
+    enabled: yes
+    state: started
+    daemon_reload: yes

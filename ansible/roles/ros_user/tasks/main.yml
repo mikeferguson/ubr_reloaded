@@ -1,0 +1,36 @@
+---
+# Setup a "ros" user to run systemd jobs
+- name: Create the ROS user
+  user:
+    name: ros
+    groups: audio, dialout, plugdev
+    comment: ROS System User
+    shell: /bin/bash
+    home: /var/lib/ros
+    create_home: no
+    system: yes
+- name: Create /var/lib/ros
+  file:
+    path: /var/lib/ros
+    state: directory
+    owner: ros
+    group: ros
+    mode: '2775'
+- name: Create /var/log/ros
+  file:
+    path: /var/log/ros
+    state: directory
+    owner: ros
+    group: ros
+    mode: '2775'
+- name: Create robot.log
+  file:
+    path: /var/log/ros/robot.log
+    state: touch
+    owner: ros
+    group: ros
+    mode: '2775'
+- name: Rotate the robot.log
+  copy:
+    src: files/logrotate-ros.conf
+    dest: /etc/logrotate.d/ros.conf

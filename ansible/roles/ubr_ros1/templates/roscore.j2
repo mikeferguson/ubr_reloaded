@@ -1,0 +1,10 @@
+[Unit]
+Description=Start roscore through systemd
+
+[Service]
+Environment="ROS_LOG_DIR=/var/log/ros"
+ExecStart=/bin/bash -c ". /opt/ros/{{rosdistro}}/setup.bash && roscore"
+User=ros
+
+[Install]
+WantedBy=multi-user.target
