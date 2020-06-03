@@ -9,6 +9,8 @@
     home: /var/lib/ros
     create_home: no
     system: yes
+  become: yes
+
 - name: Create /var/lib/ros
   file:
     path: /var/lib/ros
@@ -16,6 +18,8 @@
     owner: ros
     group: ros
     mode: '2775'
+  become: yes
+
 - name: Create /var/log/ros
   file:
     path: /var/log/ros
@@ -23,6 +27,8 @@
     owner: ros
     group: ros
     mode: '2775'
+  become: yes
+
 - name: Create robot.log
   file:
     path: /var/log/ros/robot.log
@@ -30,7 +36,10 @@
     owner: ros
     group: ros
     mode: '2775'
+  become: yes
+
 - name: Rotate the robot.log
   copy:
     src: files/logrotate-ros.conf
     dest: /etc/logrotate.d/ros.conf
+  become: yes

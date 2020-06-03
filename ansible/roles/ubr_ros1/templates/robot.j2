@@ -1,6 +1,6 @@
 
 [Unit]
-Description=Start Velocity drivers
+Description=Start UBR-1 drivers
 After=roscore.service
 BindsTo=roscore.service
 
@@ -9,7 +9,7 @@ WantedBy=roscore.service
 
 [Service]
 Environment="ROS_LOG_DIR=/var/log/ros"
-ExecStart=/bin/bash -c ". /opt/ros/{{rosdistro}}/setup.bash && roslaunch /etc/ros/{{rosdistro}}/robot.launch --wait"
+ExecStart=/bin/bash -c ". {{ workspace_root}}/devel/setup.bash && roslaunch /etc/ros/{{rosdistro}}/robot.launch --wait"
 StandardOutput=file:/var/log/ros/robot.log
 StandardError=file:/var/log/ros/robot.log
 User=ros

@@ -1,50 +1,130 @@
 ---
-# Install ROS1 Packages
+# ROS Setup
 - name: Configure apt key for ROS
   apt_key:
     keyserver: keyserver.ubuntu.com
     id: C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  become: yes
+
 - name: Configure apt sources for ROS
   apt_repository:
     repo: 'deb http://packages.ros.org/ros/ubuntu {{ ansible_lsb.codename }} main'
     filename: 'ros-latest'
     update_cache: yes
+  become: yes
+
 - name: Install base level ros packages
   apt:
-    pkg: ros-{{rosdistro}}-ros-desktop-full
+    pkg: ros-{{rosdistro}}-desktop-full
+  become: yes
 
-# Setup ROS Workspace
+# Workspace setup
+- name: Install wstool (Python 3)
+  apt:
+    name: python3-wstool
+  when: rosdistro == "noetic"
+  become: yes
 
-# Setup /etc/ros
-# TODO: uncomment these once debs are actually built
-#- name: Copy URDF file to etc
-#  copy:
-#    src: "/opt/ros/{{ rosdistro }}/velocity_description/urdf/velocity.urdf"
-#    dest: "/etc/ros/{{ rosdistro }}/robot.urdf"
-#- name: Copy launch file to etc
-#  copy:
-#    src: "/opt/ros/{{ rosdistro }}/velocity_bringup/launch/robot.launch"
-#    dest: "/etc/ros/{{ rosdistro }}/robot.launch"
+- name: Install wstool (Python 2)
+  apt:
+    name: python-wstool
+  when: rosdistro != "noetic"
+  become: yes
 
-# Setup systemd jobs
+- name: Create workspace
+  file:
+    path: "{{ workspace_root }}/src"
+    state: directory
+    owner: ubr
+    group: ubr
+    mode: '2775'
+
+- name: Init wstool
+  shell: wstool init src
+  args:
+    chdir: "{{ workspace_root }}"
+    creates: "{{ workspace_root }}/src/.rosinstall"
+
+- name: Merge wstool
+  shell: wstool merge -t src -a -y "{{ role_path }}/files/{{ rosdistro }}.rosinstall"
+  args:
+    chdir: "{{ workspace_root }}"
+
+- name: Update code
+  shell: wstool update -t src --delete-changed-uris
+  args:
+    chdir: "{{ workspace_root }}"
+
+- name: Disable joystick_drivers metapackage
+  file:
+    path: "{{ workspace_root }}/src/joystick_drivers/joystick_drivers/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Disable ubr1_gazebo (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_gazebo/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+  when: rosdistro == "noetic"
+
+- name: Install dependencies
+  shell: rosdep update && rosdep install --from-paths src --ignore-src --rosdistro={{ rosdistro }} -y -r
+  args:
+    chdir: "{{ workspace_root }}"
+
+- name: Build code
+  shell: catkin_make -DCMAKE_BUILD_TYPE=Release
+  args:
+    chdir: "{{ workspace_root }}"
+
+# Launch setup
+- name: Create /etc/ros/distro
+  file:
+    path: /etc/ros/{{ rosdistro }}
+    state: directory
+    owner: ros
+    group: ros
+    mode: '2775'
+  become: yes
+
+- name: Copy launch file to /etc/ros
+  copy:
+    src: "{{ workspace_root }}/src/ubr_reloaded/ubr1_bringup/launch/robot.launch"
+    dest: "/etc/ros/{{ rosdistro }}/robot.launch"
+    force: no
+  become: yes
+
 - name: Create a systemd service for roscore
   template:
     src: roscore.j2
     dest: /etc/systemd/system/roscore.service
+
 - name: Start the roscore service
   systemd:
     name: roscore
     enabled: yes
     state: started
     daemon_reload: yes
+  become: yes
 
 - name: Create a systemd service for robot drivers
   template:
     src: robot.j2
     dest: /etc/systemd/system/robot.service
+  become: yes
+
 - name: Start the robot service
   systemd:
     name: robot
     enabled: yes
     state: started
     daemon_reload: yes
+  become: yes
+
+# Hardware config
+- name: Power off when button pressed
+  shell: hostnamectl set-chassis vm
+  become: yes
