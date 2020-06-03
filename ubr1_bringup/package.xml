@@ -14,7 +14,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <exec_depend>depth_image_proc</exec_depend>
-  <exec_depend>graft</exec_depend>
   <exec_depend>image_proc</exec_depend>
   <exec_depend>nodelet</exec_depend>
   <exec_depend>openni2_camera</exec_depend>
