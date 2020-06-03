@@ -128,3 +128,13 @@
 - name: Power off when button pressed
   shell: hostnamectl set-chassis vm
   become: yes
+
+- name: Hack to make python scripts work without changing shebang
+  file:
+    path: /usr/bin/python
+    src: /usr/bin/python3
+    state: link
+    owner: root
+    group: root
+    mode: '777'
+  become: yes
