@@ -12,8 +12,12 @@
   <license>All Rights Reserved</license>
   <url>http://ros.org/wiki/ubr1_description</url>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>urdf</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>
