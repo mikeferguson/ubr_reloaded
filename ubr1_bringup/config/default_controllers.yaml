@@ -2,9 +2,24 @@ ubr_driver:
   ros__parameters:
     default_controllers:
       - "arm_controller.gravity_compensation"
+      - "base_controller"
     arm_controller:
       gravity_compensation:
         type: "robot_controllers/GravityCompensation"
         root: "torso_lift_link"
         tip: "gripper_link"
         autostart: true
+    base_controller:
+      type: "robot_controllers/DiffDriveBaseController"
+      max_velocity_x: 1.0
+      max_acceleration_x: 0.75
+      # hold position
+      moving_threshold: -0.01
+      rotating_threshold: -0.01
+      # autostart to get odom
+      autostart: true
+      # use laser to only slowly collide with things
+      laser_safety_dist: 1.0
+      # name of joints
+      l_wheel_joint: "base_l_wheel_joint"
+      r_wheel_joint: "base_r_wheel_joint"
