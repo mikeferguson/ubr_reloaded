@@ -11,7 +11,7 @@
   <license>BSD</license>
   <url>http://ros.org/wiki/ubr1_bringup</url>
   
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
 
   <exec_depend>depth_image_proc</exec_depend>
   <exec_depend>image_proc</exec_depend>
@@ -21,5 +21,9 @@
   <exec_depend>pcl_ros</exec_depend>
   <exec_depend>ubr1_description</exec_depend>
   <exec_depend>urg_node</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>

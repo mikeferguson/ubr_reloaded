@@ -1,0 +1,55 @@
+#!/usr/bin/env python3
+
+import os
+import sys
+from ament_index_python.packages import get_package_share_directory
+from launch import (
+	LaunchDescription,
+	LaunchService
+)
+from launch_ros.actions import Node
+
+
+def generate_launch_description():
+    bringup_dir = get_package_share_directory('ubr1_description')
+    urdf_path = os.path.join(bringup_dir, 'robots', 'ubr1_robot.urdf')
+    urdf = open(urdf_path).read()
+
+    return LaunchDescription([
+        Node(
+        	name='ubr_driver',
+            package='ubr_drivers',
+            executable='ubr_driver',
+            parameters=[{'robot_description': urdf}],
+            output='screen',
+        ),
+        Node(
+        	name='robot_state_publisher',
+        	package='robot_state_publisher',
+        	executable='robot_state_publisher',
+        	parameters=[{'robot_description': urdf}],
+        ),
+        Node(
+        	name='base_laser_node',
+        	package='urg_node',
+        	executable='urg_node_driver',
+        	parameters=[{'ip_address': '10.42.0.10',
+        	             'angle_min': -1.54,
+        	             'angle_max': 1.54,
+        	             'laser_frame_id': 'base_laser_link'}],
+        	remappings=[('scan', 'base_scan')],
+        	output="screen",
+        )
+    ])
+
+
+def main(argv=sys.argv[1:]):
+    """Run lifecycle nodes via launch."""
+    ld = generate_launch_description()
+    ls = launch.LaunchService(argv=argv)
+    ls.include_launch_description(ld)
+    return ls.run()
+
+
+if __name__ == '__main__':
+    main()
