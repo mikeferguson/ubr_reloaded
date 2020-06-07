@@ -1,88 +1,10 @@
-arm_controller:
-  follow_joint_trajectory:
-    type: "robot_controllers/FollowJointTrajectoryController"
-    joints:
-      - shoulder_pan_joint
-      - shoulder_lift_joint
-      - upperarm_roll_joint
-      - elbow_flex_joint
-      - forearm_roll_joint
-      - wrist_flex_joint
-      - wrist_roll_joint
-  gravity_compensation:
-    type: "robot_controllers/GravityCompensation"
-    root: "torso_lift_link"
-    tip: "gripper_link"
-    autostart: true
-  cartesian_pose:
-    type: "robot_controllers/CartesianPoseController"
-    fb_trans:
-      p: 0.75
-      d: 0.0
-      i: 0.02
-      i_clamp: 0.1
-    fb_rot:
-      p: 0.25
-      d: 0.0
-      i: 0.02
-      i_clamp: 0.1
-  cartesian_wrench:
-    type: "robot_controllers/CartesianWrenchController"
-  cartesian_twist:
-    type: "robot_controllers/CartesianTwistController"
-
-arm_with_torso_controller:
-  follow_joint_trajectory:
-    type: "robot_controllers/FollowJointTrajectoryController"
-    joints:
-      - torso_lift_joint
-      - shoulder_pan_joint
-      - shoulder_lift_joint
-      - upperarm_roll_joint
-      - elbow_flex_joint
-      - forearm_roll_joint
-      - wrist_flex_joint
-      - wrist_roll_joint
-
-torso_controller:
-  follow_joint_trajectory:
-    type: "robot_controllers/FollowJointTrajectoryController"
-    joints:
-      - torso_lift_joint
-
-head_controller:
-  point_head:
-    type: "robot_controllers/PointHeadController"
-  follow_joint_trajectory:
-    type: "robot_controllers/FollowJointTrajectoryController"
-    joints:
-      - head_pan_joint
-      - head_tilt_joint
-
-base_controller:
-  type: "robot_controllers/DiffDriveBaseController"
-  max_velocity_x: 1.0
-  max_acceleration_x: 0.75
-  # hold position
-  moving_threshold: -0.01
-  rotating_threshold: -0.01
-  # autostart to get odom
-  autostart: true
-  # use laser to only slowly collide with things
-  laser_safety_dist: 1.0
-  # name of joints
-  l_wheel_joint: base_l_wheel_joint
-  r_wheel_joint: base_r_wheel_joint
-
 ubr_driver:
-  default_controllers:
-    - "arm_controller/cartesian_pose"
-    - "arm_controller/cartesian_wrench"
-    - "arm_controller/cartesian_twist"
-    - "arm_controller/follow_joint_trajectory"
-    - "arm_controller/gravity_compensation"
-    - "arm_with_torso_controller/follow_joint_trajectory"
-    - "base_controller"
-    - "head_controller/follow_joint_trajectory"
-    - "head_controller/point_head"
-    - "torso_controller/follow_joint_trajectory"
+  ros__parameters:
+    default_controllers:
+      - "arm_controller.gravity_compensation"
+    arm_controller:
+      gravity_compensation:
+        type: "robot_controllers/GravityCompensation"
+        root: "torso_lift_link"
+        tip: "gripper_link"
+        autostart: true
