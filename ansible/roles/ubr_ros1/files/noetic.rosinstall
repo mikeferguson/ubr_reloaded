@@ -25,11 +25,11 @@
 - git:
     local-name: ubr_drivers
     uri: git@github.com:mikeferguson/ubr_drivers.git
-    version: master
+    version: ros1
 - git:
     local-name: ubr_reloaded
     uri: git@github.com:mikeferguson/ubr_reloaded.git
-    version: master
+    version: ros1
 - git:
     local-name: urg_node
     uri: https://github.com/ros-drivers/urg_node.git
