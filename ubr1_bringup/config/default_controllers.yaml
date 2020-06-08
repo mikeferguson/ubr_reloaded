@@ -1,14 +1,44 @@
 ubr_driver:
   ros__parameters:
     default_controllers:
+      - "arm_controller.follow_joint_trajectory"
       - "arm_controller.gravity_compensation"
+      - "arm_with_torso_controller.follow_joint_trajectory"
       - "base_controller"
+      - "torso_controller.follow_joint_trajectory"
     arm_controller:
       gravity_compensation:
         type: "robot_controllers/GravityCompensation"
         root: "torso_lift_link"
         tip: "gripper_link"
         autostart: true
+      follow_joint_trajectory:
+        type: "robot_controllers/FollowJointTrajectoryController"
+        joints:
+          - shoulder_pan_joint
+          - shoulder_lift_joint
+          - upperarm_roll_joint
+          - elbow_flex_joint
+          - forearm_roll_joint
+          - wrist_flex_joint
+          - wrist_roll_joint
+    arm_with_torso_controller:
+      follow_joint_trajectory:
+        type: "robot_controllers/FollowJointTrajectoryController"
+        joints:
+          - torso_lift_joint
+          - shoulder_pan_joint
+          - shoulder_lift_joint
+          - upperarm_roll_joint
+          - elbow_flex_joint
+          - forearm_roll_joint
+          - wrist_flex_joint
+          - wrist_roll_joint
+    torso_controller:
+      follow_joint_trajectory:
+        type: "robot_controllers/FollowJointTrajectoryController"
+        joints:
+          - torso_lift_joint
     base_controller:
       type: "robot_controllers/DiffDriveBaseController"
       max_velocity_x: 1.0
