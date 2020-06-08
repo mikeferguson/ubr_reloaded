@@ -1,9 +1,0 @@
-
----
-- hosts: all
-  roles:
-    - ros_user
-    - ubr_ros1
-  vars:
-    rosdistro: noetic
-    workspace_root: /home/ubr/noetic

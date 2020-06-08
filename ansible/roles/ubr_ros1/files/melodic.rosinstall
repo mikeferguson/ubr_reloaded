@@ -1,8 +1,0 @@
-- git:
-    local-name: ubr_drivers
-    uri: git@github.com:mikeferguson/ubr_drivers.git
-    version: master
-- git:
-    local-name: ubr_reloaded
-    uri: git@github.com:mikeferguson/ubr_reloaded.git
-    version: master
