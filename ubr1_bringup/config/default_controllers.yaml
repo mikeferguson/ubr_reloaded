@@ -5,6 +5,8 @@ ubr_driver:
       - "arm_controller.gravity_compensation"
       - "arm_with_torso_controller.follow_joint_trajectory"
       - "base_controller"
+      - "head_controller.follow_joint_trajectory"
+      - "head_controller.point_head"
       - "torso_controller.follow_joint_trajectory"
     arm_controller:
       gravity_compensation:
@@ -34,6 +36,14 @@ ubr_driver:
           - forearm_roll_joint
           - wrist_flex_joint
           - wrist_roll_joint
+    head_controller:
+      follow_joint_trajectory:
+        type: "robot_controllers/FollowJointTrajectoryController"
+        joints:
+          - head_pan_joint
+          - head_tilt_joint
+      point_head:
+        type: "robot_controllers/PointHeadController"
     torso_controller:
       follow_joint_trajectory:
         type: "robot_controllers/FollowJointTrajectoryController"
