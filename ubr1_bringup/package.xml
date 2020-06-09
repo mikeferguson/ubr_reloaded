@@ -15,10 +15,12 @@
 
   <exec_depend>depth_image_proc</exec_depend>
   <exec_depend>image_proc</exec_depend>
+  <exec_depend>joy</exec_depend>
   <exec_depend>nodelet</exec_depend>
   <exec_depend>openni2_camera</exec_depend>
   <exec_depend>openni2_launch</exec_depend>
   <exec_depend>pcl_ros</exec_depend>
+  <exec_depend>ubr_teleop</exec_depend>
   <exec_depend>ubr1_description</exec_depend>
   <exec_depend>urg_node</exec_depend>
 

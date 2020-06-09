@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+# Copyright (c) 2020, Michael Ferguson
 # Copyright (c) 2015, Fetch Robotics Inc.
 # All rights reserved.
 #
@@ -28,85 +29,98 @@
 
 # Author: Michael Ferguson
 
-import rospy
-import actionlib
-from actionlib_msgs.msg import GoalStatus
-from control_msgs.msg import GripperCommandAction, GripperCommandGoal
-from sensor_msgs.msg import Joy
-from robot_controllers_msgs.msg import QueryControllerStatesAction, \
-                                       QueryControllerStatesGoal, \
-                                       ControllerState
+import sys
 
-# Listen to joy messages, when button held, reset controllers
-class ControllerResetTeleop:
-    CONTROLLER_ACTION_NAME = "/query_controller_states"
-    GRIPPER_ACTION_NAME = "/gripper_controller/gripper_action"
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.action import ActionClient
+
+from control_msgs.action import GripperCommand
+from robot_controllers_msgs.msg import ControllerState
+from robot_controllers_msgs.srv import QueryControllerStates
+from sensor_msgs.msg import Joy
+
+
+class ControllerResetTeleop(Node):
 
     def __init__(self):
-        rospy.loginfo("Connecting to %s..." % self.CONTROLLER_ACTION_NAME)
-        self.controller_client = actionlib.SimpleActionClient(self.CONTROLLER_ACTION_NAME, QueryControllerStatesAction)
-        self.controller_client.wait_for_server()
-        rospy.loginfo("Done.")
+        super().__init__("controller_reset")
 
-        rospy.loginfo("Connecting to %s..." % self.GRIPPER_ACTION_NAME)
-        self.gripper_client = actionlib.SimpleActionClient(self.GRIPPER_ACTION_NAME, GripperCommandAction)
+        # ROS Service connection to controller state query
+        self.client = self.create_client(QueryControllerStates, "query_controller_states")
+        while not self.client.wait_for_service(timeout_sec=1.0):
+            print('query_controller_states not available, waiting again...')
+
+        # Connection gripper controller
+        self.gripper_client = ActionClient(self, GripperCommand, 'gripper_controller/command')
+        while not self.gripper_client.wait_for_server(timeout_sec=1.0):
+            print('gripper_controller/command not available, waiting again...')
 
         self.start = list()
-        self.start.append("arm_controller/gravity_compensation")
+        self.start.append("arm_controller.gravity_compensation")
 
         self.stop = list()
-        self.stop.append("arm_controller/follow_joint_trajectory")
-        self.stop.append("arm_with_torso_controller/follow_joint_trajectory")
-        self.stop.append("torso_controller/follow_joint_trajectory")
-        self.stop.append("head_controller/follow_joint_trajectory")
-        self.stop.append("head_controller/point_head")
+        self.stop.append("arm_controller.follow_joint_trajectory")
+        self.stop.append("arm_with_torso_controller.follow_joint_trajectory")
+        self.stop.append("torso_controller.follow_joint_trajectory")
+        self.stop.append("head_controller.follow_joint_trajectory")
+        self.stop.append("head_controller.point_head")
 
-        self.reset_button = rospy.get_param("~reset_axis", 7)  # default button is the up button
-        self.reset_value = rospy.get_param("~reset_value", 1.0)
+        self.reset_button = self.declare_parameter("reset_axis", 7).get_parameter_value().integer_value
+        self.reset_value = self.declare_parameter("reset_value", 1.0).get_parameter_value().double_value
+
+        print(self.reset_button)
+        print(self.reset_value)
+#my_param = self.get_parameter("my_parameter").get_parameter_value().string_value
+
+        #self.reset_button = rospy.get_param("~reset_axis", 7)  # default button is the up button
+        #self.reset_value = rospy.get_param("~reset_value", 1.0)
 
         self.pressed = False
         self.pressed_last = None
 
-        self.joy_sub = rospy.Subscriber("joy", Joy, self.joy_callback)
+        self.joy_sub = self.create_subscription(Joy, "joy", self.joy_callback, 10)
 
     def joy_callback(self, msg):
         try:
             if msg.axes[self.reset_button] == self.reset_value:
                 if not self.pressed:
-                    self.pressed_last = rospy.Time.now()
+                    self.pressed_last = self.get_clock().now()
                     self.pressed = True
-                elif self.pressed_last and rospy.Time.now() > self.pressed_last + rospy.Duration(1.0):
+                elif self.pressed_last and self.get_clock().now() > self.pressed_last + Duration(seconds=1):
                     self.reset()
                     self.pressed_last = None
             else:
                 self.pressed = False
         except KeyError:
-            rospy.logwarn("reset_button is out of range")
+            self.get_logger().warn("reset_button is out of range")
 
     def reset(self):
         # Reset controllers
-        goal = QueryControllerStatesGoal()
+        req = QueryControllerStates.Request()
     
         for controller in self.start:
             state = ControllerState()
             state.name = controller
             state.state = state.RUNNING
-            goal.updates.append(state)
+            req.updates.append(state)
 
         for controller in self.stop:
             state = ControllerState()
             state.name = controller
             state.state = state.STOPPED
-            goal.updates.append(state)
+            req.updates.append(state)
 
-        self.controller_client.send_goal(goal)
+        self.future = self.client.call_async(req)
 
         # Disable gripper torque
-        goal = GripperCommandGoal()
+        goal = GripperCommand.Goal()
         goal.command.max_effort = -1.0
-        self.gripper_client.send_goal(goal)
+        self.gripper_client.send_goal_async(goal)
 
 if __name__ == "__main__":
-    rospy.init_node("controller_reset")
+    rclpy.init()
+
     c = ControllerResetTeleop()
-    rospy.spin()
+    rclpy.spin(c)

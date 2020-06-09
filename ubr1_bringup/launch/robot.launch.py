@@ -23,6 +23,7 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        # Drivers
         Node(
             name='ubr_driver',
             package='ubr_drivers',
@@ -49,11 +50,28 @@ def generate_launch_description():
             remappings=[('scan', 'base_scan')],
             output='screen',
         ),
+        # TODO: head camera drivers
+        # Teleop
         Node(
             name='joy',
             package='joy',
             executable='joy_node',
             parameters=[{'autorepeat_rate': 1.0},],
+        ),
+        Node(
+            name='teleop',
+            package='ubr_teleop',
+            executable='joystick_teleop',
+            parameters=[{'autorepeat_rate': 1.0},],
+            remappings=[('arm_controller_command', 'arm_controller/cartesian_twist/command'),
+                        ('cmd_vel_in', 'cmd_vel'),
+                        ('cmd_vel_out', 'base_controller/command')],
+            output='screen',
+        ),
+        Node(
+            name='controller_reset',
+            package='ubr1_bringup',
+            executable='controller_reset.py',
         )
     ])
 

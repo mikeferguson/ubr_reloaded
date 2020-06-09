@@ -13,9 +13,9 @@ install(
   DESTINATION share/${PROJECT_NAME}/
 )
 
-#install(
-#  PROGRAMS scripts/controller_reset.py
-#  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-#)
+install(
+  PROGRAMS scripts/controller_reset.py
+  DESTINATION lib/${PROJECT_NAME}
+)
 
 ament_package()

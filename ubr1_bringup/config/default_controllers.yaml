@@ -1,6 +1,9 @@
 ubr_driver:
   ros__parameters:
     default_controllers:
+      - "arm_controller.cartesian_pose"
+      - "arm_controller.cartesian_twist"
+      - "arm_controller.cartesian_wrench"
       - "arm_controller.follow_joint_trajectory"
       - "arm_controller.gravity_compensation"
       - "arm_with_torso_controller.follow_joint_trajectory"
@@ -9,6 +12,22 @@ ubr_driver:
       - "head_controller.point_head"
       - "torso_controller.follow_joint_trajectory"
     arm_controller:
+      cartesian_pose:
+        type: "robot_controllers/CartesianPoseController"
+        fb_trans:
+          p: 0.75
+          d: 0.0
+          i: 0.02
+          i_clamp: 0.1
+        fb_rot:
+          p: 0.25
+          d: 0.0
+          i: 0.02
+          i_clamp: 0.1
+      cartesian_twist:
+        type: "robot_controllers/CartesianTwistController"
+      cartesian_wrench:
+        type: "robot_controllers/CartesianWrenchController"
       gravity_compensation:
         type: "robot_controllers/GravityCompensation"
         root: "torso_lift_link"
