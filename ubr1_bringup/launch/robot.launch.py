@@ -30,7 +30,7 @@ def generate_launch_description():
             parameters=[{'robot_description': urdf},
                         driver_config],
             output='screen',
-            #prefix=['xterm -e gdb --args'],
+            prefix=['xterm -e gdb --args'],
         ),
         Node(
             name='robot_state_publisher',
@@ -47,7 +47,13 @@ def generate_launch_description():
                          'angle_max': 1.54,
                          'laser_frame_id': 'base_laser_link'}],
             remappings=[('scan', 'base_scan')],
-            output="screen",
+            output='screen',
+        ),
+        Node(
+            name='joy',
+            package='joy',
+            executable='joy_node',
+            parameters=[{'autorepeat_rate': 1.0},],
         )
     ])
 
