@@ -36,7 +36,9 @@
 
 // Author: Michael Ferguson, Kevin Watts
 
-#include <ros/ros.h>
+#include <memory>
+#include <unistd.h>
+#include <rclcpp/rclcpp.hpp>
 #include <ubr_teleop/robot_controller.h>
 
 #include <termios.h>
@@ -63,36 +65,37 @@
 
 int kfd = 0;
 struct termios cooked, raw;
-RobotController robot;
-ros::Time last;
+std::shared_ptr<RobotController> robot;
+rclcpp::Time last;
 
 void quit(int sig)
 {
-  robot.stop();
+  robot->stop();
   tcsetattr(kfd, TCSANOW, &cooked);
-  ros::shutdown();
+  rclcpp::shutdown();
   exit(0);
 }
 
-void callback(const ros::TimerEvent&)
+void callback()
 {
-  if ((ros::Time::now() - last) > ros::Duration(0.5))
-    robot.stop();
-  robot.sendCommands();
+  if ((robot->now() - last) > rclcpp::Duration(0, 5e8))
+    robot->stop();
+  robot->sendCommands();
 }
 
 int main(int argc, char ** argv)
 {
-  ros::init(argc, argv, "teleop");
+  rclcpp::init(argc, argv);
 
-  ros::NodeHandle n("~");
-  robot.init(n);
-  robot.start();
+  robot.reset(new RobotController("keyboard_teleop"));
+  robot->start();
 
-  ros::Timer timer = n.createTimer(ros::Duration(0.05), callback);
+  last = robot->now();
+  rclcpp::TimerBase::SharedPtr timer =
+    robot->create_wall_timer(std::chrono::milliseconds(50), callback);
 
-  ros::AsyncSpinner spinner(1);
-  spinner.start();
+  //ros::AsyncSpinner spinner(1);
+  //spinner.start();
 
   signal(SIGINT, quit);
 
@@ -114,7 +117,7 @@ int main(int argc, char ** argv)
   puts("Use arrow keys to move head");
   puts("Any other key to stop");
 
-  while (ros::ok())
+  while (rclcpp::ok())
   {
     // get the next event from the keyboard
     if (read(kfd, &c, 1) < 0)
@@ -123,41 +126,41 @@ int main(int argc, char ** argv)
       exit(-1);
     }
 
-    last = ros::Time::now();
-    robot.start();
+    last = robot->now();
+    robot->start();
 
     switch (c)
     {
 
     case KEYCODE_W:
-      robot.setBaseVelocity(0.5, 0);
+      robot->setBaseVelocity(0.5, 0);
       break;
     case KEYCODE_S:
-      robot.setBaseVelocity(-0.5, 0);
+      robot->setBaseVelocity(-0.5, 0);
       break;
     case KEYCODE_A:
-      robot.setBaseVelocity(0, 1.0);
+      robot->setBaseVelocity(0, 1.0);
       break;
     case KEYCODE_D:
-      robot.setBaseVelocity(0, -1.0);
+      robot->setBaseVelocity(0, -1.0);
       break;
 
     case KEYCODE_RIGHT:
-      robot.setHeadPosition(robot.getHeadPan() - 0.1, robot.getHeadTilt());
+      robot->setHeadPosition(robot->getHeadPan() - 0.1, robot->getHeadTilt());
       break;
     case KEYCODE_LEFT:
-      robot.setHeadPosition(robot.getHeadPan() + 0.1, robot.getHeadTilt());
+      robot->setHeadPosition(robot->getHeadPan() + 0.1, robot->getHeadTilt());
       break;
 
     case KEYCODE_DOWN:
-      robot.setHeadPosition(robot.getHeadPan(), robot.getHeadTilt() - 0.1);
+      robot->setHeadPosition(robot->getHeadPan(), robot->getHeadTilt() - 0.1);
       break;
     case KEYCODE_UP:
-      robot.setHeadPosition(robot.getHeadPan(), robot.getHeadTilt() + 0.1);
+      robot->setHeadPosition(robot->getHeadPan(), robot->getHeadTilt() + 0.1);
       break;
 
     default:
-      robot.setBaseVelocity(0, 0);
+      robot->setBaseVelocity(0, 0);
     }
   }
 

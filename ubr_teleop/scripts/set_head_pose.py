@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+# Copryight (c) 2020 Michael Ferguson
 # Copyright (c) 2013-2014 Unbounded Robotics Inc. 
 # All right reserved.
 #
@@ -33,34 +34,42 @@ Usage: set_head_pose.py <pan> <tilt>
 """
 
 import sys
-import rospy
-import actionlib
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.action import ActionClient
+
+from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+
+
+class FollowJointTrajectoryClient(Node):
+
+    def __init__(self):
+        super().__init__("set_head_pose")
+        self._action_client = ActionClient(self, FollowJointTrajectory, 'head_controller/follow_joint_trajectory')
+
+    def run(self, trajectory):
+        goal = FollowJointTrajectory.Goal()
+        goal.trajectory = trajectory
+        goal.goal_time_tolerance = Duration(seconds=0).to_msg()
+        self._action_client.wait_for_server()
+        self._action_client.send_goal_async(goal)
+
 
 if __name__=='__main__':
     if len(sys.argv) < 3:
         print(__doc__)
         exit(-1)
 
-    rospy.init_node('set_head_pose')
-
-    rospy.loginfo('Waiting for head_controller...')
-    client = actionlib.SimpleActionClient('head_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
-    client.wait_for_server()
-    rospy.loginfo('...connected.')
-
     trajectory = JointTrajectory()
     trajectory.joint_names = ['head_pan_joint', 'head_tilt_joint']
     trajectory.points.append(JointTrajectoryPoint())
     trajectory.points[0].positions = [float(sys.argv[1]), float(sys.argv[2])]
     trajectory.points[0].velocities = [0.0, 0.0]
-    trajectory.points[0].time_from_start = rospy.Duration(1.0)
+    trajectory.points[0].time_from_start = Duration(seconds=1).to_msg()
 
-    goal = FollowJointTrajectoryGoal()
-    goal.trajectory = trajectory
-    goal.goal_time_tolerance = rospy.Duration(0.0)
-    client.send_goal(goal)
-    client.wait_for_result(rospy.Duration(20.0))
-    rospy.loginfo('...done')
-    
+    rclpy.init()
+    action_client = FollowJointTrajectoryClient()
+    action_client.run(trajectory)

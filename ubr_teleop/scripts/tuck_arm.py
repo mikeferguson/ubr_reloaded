@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+# Copryight (c) 2020 Michael Ferguson
 # Copyright (c) 2013-2014 Unbounded Robotics Inc. 
 # All right reserved.
 #
@@ -31,53 +32,43 @@ Usage: tuck_arm.py
   Tucks the robot arm (does not perform collision avoidance)
 """
 
-import rospy
-import actionlib
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
-from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
-from sensor_msgs.msg import JointState
+import sys
 
-class TuckArm:
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.action import ActionClient
+
+from control_msgs.action import FollowJointTrajectory
+from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+
+
+class TuckArm(Node):
+
     joint_names = ["shoulder_pan_joint", "shoulder_lift_joint", "upperarm_roll_joint",
                    "elbow_flex_joint", "forearm_roll_joint", "wrist_flex_joint", "wrist_roll_joint"]
     tucked  = [-1.3901, 1.3439, -2.8327, -1.8119, 0.0, -1.6571, 0.0]
 
     def __init__(self):
-        rospy.loginfo("Waiting for arm_controller...")
-        self.client = actionlib.SimpleActionClient("arm_controller/follow_joint_trajectory", FollowJointTrajectoryAction)
-        self.client.wait_for_server()
-        rospy.loginfo("...connected.")
+        super().__init__("tuck_arm")
+        self._action_client = ActionClient(self, FollowJointTrajectory, 'arm_controller/follow_joint_trajectory')
 
-        self.state_recv = False
-        self.sub = rospy.Subscriber("joint_states", JointState, self.state_callback)
-
-    def state_callback(self, msg):
-        self.state_recv = True
-
-    def tuck_arm(self):
-        while not self.state_recv:
-            rospy.loginfo("Waiting for controllers to be up...")
-            rospy.sleep(0.1)
-
+    def tuck(self):
+        goal = FollowJointTrajectory.Goal()
         trajectory = JointTrajectory()
         trajectory.joint_names = self.joint_names
         trajectory.points.append(JointTrajectoryPoint())
         trajectory.points[0].positions = self.tucked
         trajectory.points[0].velocities = [0.0 for i in self.joint_names]
         trajectory.points[0].accelerations = [0.0 for i in self.joint_names]
-        trajectory.points[0].time_from_start = rospy.Duration(5.0)
-
-        rospy.loginfo("Tucking arm...")
-        goal = FollowJointTrajectoryGoal()
+        trajectory.points[0].time_from_start = Duration(seconds=5).to_msg()
         goal.trajectory = trajectory
-        goal.goal_time_tolerance = rospy.Duration(0.0)
+        goal.goal_time_tolerance = Duration(seconds=0).to_msg()
+        self._action_client.wait_for_server()
+        self._action_client.send_goal_async(goal)
 
-        self.client.send_goal(goal)
-        self.client.wait_for_result(rospy.Duration(6.0))
-        rospy.loginfo("...done")
 
-if __name__ == "__main__":
-    rospy.init_node("tuck_my_arm")
-    t = TuckArm()
-    t.tuck_arm()
-
+if __name__=='__main__':
+    rclpy.init()
+    action_client = TuckArm()
+    action_client.tuck()

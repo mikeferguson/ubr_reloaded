@@ -1,5 +1,6 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
+# Copryight (c) 2020 Michael Ferguson
 # Copyright (c) 2013-2014 Unbounded Robotics Inc. 
 # All right reserved.
 #
@@ -33,34 +34,46 @@ Usage: set_gripper_pose.py <pose> <effort=28.0>
 """
 
 import sys
-import rospy
-import actionlib
-from control_msgs.msg import *
+
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.action import ActionClient
+
+from control_msgs.action import GripperCommand
+
+
+class GripperClient(Node):
+
+    def __init__(self):
+        super().__init__("set_gripper_pose")
+        self._action_client = ActionClient(self, GripperCommand, 'gripper_controller/command')
+
+    def run(self, position, max_effort):
+        goal = GripperCommand.Goal()
+        goal.command.position = position
+        goal.command.max_effort = max_effort
+        self._action_client.wait_for_server()
+        self._action_client.send_goal_async(goal)
+
 
 if __name__ == "__main__":
-    goal = GripperCommandGoal()
 
     if len(sys.argv) < 2:
         print(__doc__)
         exit(-1)
     else:
+        position = 0.0
+        max_effort = 28.0
         if len(sys.argv) == 3:
-            goal.command.max_effort = float(sys.argv[2])
+            max_effort = float(sys.argv[2])
         if sys.argv[1] == "open":
-            goal.command.position = 0.09
+            position = 0.09
         elif sys.argv[1] == "closed":
-            goal.command.position = 0.0
+            position = 0.0
         else:
-            goal.command.position = float(sys.argv[1])
-    
-    rospy.init_node("open_gripper")
-    rospy.loginfo("Waiting for gripper_controller...")
-    client = actionlib.SimpleActionClient("gripper_controller/gripper_action", GripperCommandAction)
-    client.wait_for_server()
-    rospy.loginfo("...connected")
-    rospy.loginfo("Setting gripper pose to %f" % goal.command.position)
-    client.send_goal(goal)
-    client.wait_for_result(rospy.Duration.from_sec(5.0))
-    rospy.loginfo("Results:")
-    print(client.get_result())
+            position = float(sys.argv[1])
 
+        rclpy.init()
+        action_client = GripperClient()
+        action_client.run(position, max_effort)

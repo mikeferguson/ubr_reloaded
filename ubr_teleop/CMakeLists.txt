@@ -1,39 +1,49 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.5)
 project(ubr_teleop)
 
-find_package(Boost REQUIRED)
-find_package(catkin REQUIRED
-  actionlib
-  control_msgs
-  geometry_msgs
-  roscpp
-  sensor_msgs
-  topic_tools
-)
-catkin_package()
+if(NOT CMAKE_CXX_STANDARD)
+  set(CMAKE_CXX_STANDARD 14)
+endif()
 
-include_directories(
-  include
-  ${Boost_INCLUDE_DIRS}
-  ${catkin_INCLUDE_DIRS}
-)
+find_package(ament_cmake REQUIRED)
+find_package(control_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
+find_package(sensor_msgs REQUIRED)
+
+include_directories(include)
 
 add_executable(keyboard_teleop src/keyboard_teleop.cpp)
-target_link_libraries(keyboard_teleop ${Boost_LIBRARIES}
-                                      ${catkin_LIBRARIES})
+ament_target_dependencies(keyboard_teleop
+  control_msgs
+  geometry_msgs
+  rclcpp
+  rclcpp_action
+  sensor_msgs
+)
 
 add_executable(joystick_teleop src/joystick_teleop.cpp)
-target_link_libraries(joystick_teleop ${Boost_LIBRARIES}
-                                      ${catkin_LIBRARIES})
+ament_target_dependencies(joystick_teleop
+  control_msgs
+  geometry_msgs
+  rclcpp
+  rclcpp_action
+  sensor_msgs
+)
 
 install(
-  TARGETS keyboard_teleop joystick_teleop
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  TARGETS
+    keyboard_teleop
+    joystick_teleop
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION lib/${PROJECT_NAME}
 )
 
 install(
   DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 install(
@@ -42,5 +52,17 @@ install(
     scripts/set_head_pose.py
     scripts/set_torso_pose.py
     scripts/tuck_arm.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION
+    lib/${PROJECT_NAME}
 )
+
+ament_export_include_directories(include)
+ament_export_dependencies(
+  control_msgs
+  geometry_msgs
+  rclcpp
+  rclcpp_action
+  sensor_msgs
+)
+ament_package()
+

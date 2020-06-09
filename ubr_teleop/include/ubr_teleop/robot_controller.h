@@ -35,103 +35,101 @@
 
 // Author: Michael Ferguson
 
-#ifndef UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H_
-#define UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H_
+#ifndef UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H
+#define UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H
 
-#include <ros/ros.h>
-#include <sensor_msgs/JointState.h>
-#include <geometry_msgs/Twist.h>
-#include <geometry_msgs/TwistStamped.h>
-#include <control_msgs/FollowJointTrajectoryAction.h>
-#include <control_msgs/GripperCommandAction.h>
-#include <actionlib/client/simple_action_client.h>
-#include <topic_tools/MuxSelect.h>
+#include <cmath>
+#include <memory>
 
-class RobotController
+#include <rclcpp/rclcpp.hpp>
+#include <rclcpp_action/rclcpp_action.hpp>
+
+#include <sensor_msgs/msg/joint_state.hpp>
+#include <geometry_msgs/msg/twist.hpp>
+#include <geometry_msgs/msg/twist_stamped.hpp>
+#include <control_msgs/action/follow_joint_trajectory.hpp>
+#include <control_msgs/action/gripper_command.hpp>
+
+using std::placeholders::_1;
+
+class RobotController : public rclcpp::Node
 {
-typedef actionlib::SimpleActionClient<control_msgs::FollowJointTrajectoryAction> TrajClient;
-typedef actionlib::SimpleActionClient<control_msgs::GripperCommandAction> GripperClient;
+  using FollowJointTrajectoryAction = control_msgs::action::FollowJointTrajectory;
+  using FollowJointTrajectoryClient = rclcpp_action::Client<FollowJointTrajectoryAction>;
+
+  using GripperCommandAction = control_msgs::action::GripperCommand;
+  using GripperCommandClient = rclcpp_action::Client<GripperCommandAction>;
 
 public:
-  RobotController() : active_(false)
+  RobotController(const std::string& name) :
+    rclcpp::Node(name),
+    active_(false)
   {
     rvx_ = rvw_ = vx_ = vw_ = 0.0;
     rpan_ = rtilt_ = pan_ = tilt_ = 0.0;
     rtorso_ = torso_ = 0.0;
-    last_command_ = last_publish_ = last_arm_command_ = 0.0;
     arm_active_ = false;
     gripper_open_ = gripper_close_ = false;
     arm_lx_ = arm_ly_ = arm_lz_ = 0.0;
     arm_ax_ = arm_ay_ = arm_az_ = 0.0;
-  }
 
-  /**
-   *  \brief Initialize things.
-   *  \param n The node handle to use for finding parameters. Should be properly namespaced.
-   */
-  void init(ros::NodeHandle n)
-  {
-    // Get a node handle in the global namespace for publishers and action clients
-    ros::NodeHandle global;
+    base_max_vel_x_ = declare_parameter<double>("base_max_vel_x", 0.75);
+    base_max_vel_w_ = declare_parameter<double>("base_max_vel_w", 2.00);
+    base_max_acc_x_ = declare_parameter<double>("base_max_acc_x", 0.75);
+    base_max_acc_w_ = declare_parameter<double>("base_max_acc_w", 3.00);
 
-    n.param("base_max_vel_x", base_max_vel_x_, 0.75);
-    n.param("base_max_vel_w", base_max_vel_w_, 2.00);
-    n.param("base_max_acc_x", base_max_acc_x_, 0.75);
-    n.param("base_max_acc_w", base_max_acc_w_, 3.0);
+    head_pan_min_pos_ = declare_parameter<double>("head_pan_min_pos", -1.57079633);
+    head_pan_max_pos_ = declare_parameter<double>("head_pan_max_pos", 1.57079633);
+    head_pan_max_vel_ = declare_parameter<double>("head_pan_max_vel", 0.5);
 
-    n.param("head_pan_min_pos", head_pan_min_pos_, -1.57079633);
-    n.param("head_pan_max_pos", head_pan_max_pos_, 1.57079633);
-    n.param("head_pan_max_vel", head_pan_max_vel_, 0.5);
+    head_tilt_min_pos_ = declare_parameter<double>("head_tilt_min_pos", -0.785398163);
+    head_tilt_max_pos_ = declare_parameter<double>("head_tilt_max_pos", 1.57079633);
+    head_tilt_max_vel_ = declare_parameter<double>("head_tilt_max_vel", 0.5);
 
-    n.param("head_tilt_min_pos", head_tilt_min_pos_, -0.785398163);
-    n.param("head_tilt_max_pos", head_tilt_max_pos_, 1.57079633);
-    n.param("head_tilt_max_vel", head_tilt_max_vel_, 0.5);
+    torso_min_pos_ = declare_parameter<double>("torso_min_pos", 0.0);
+    torso_max_pos_ = declare_parameter<double>("torso_max_pos", 0.35);
+    torso_max_vel_ = declare_parameter<double>("torso_max_vel", 0.05);
 
-    n.param("torso_min_pos", torso_min_pos_, 0.0);
-    n.param("torso_max_pos", torso_max_pos_, 0.35);
-    n.param("torso_max_vel", torso_max_vel_, 0.05);
-
-    n.param("gripper_open_pos", gripper_open_pos_, 0.09);
-    n.param("gripper_close_pos", gripper_close_pos_, 0.0);
-    n.param("gripper_max_effort", gripper_max_effort_, 28.0);
+    gripper_open_pos_ = declare_parameter<double>("gripper_open_pos", 0.09);
+    gripper_close_pos_ = declare_parameter<double>("gripper_close_pos", 0.0);
+    gripper_max_effort_ = declare_parameter<double>("gripper_max_effort", 28.0);
 
     // Subscribe to joint_states to update positions when inactive
-    state_sub_ = global.subscribe("joint_states", 10, &RobotController::stateCb, this);
+    state_sub_ = create_subscription<sensor_msgs::msg::JointState>("joint_states", 1,
+                     std::bind(&RobotController::stateCb, this, _1));
+
+    cmd_vel_sub_ = create_subscription<geometry_msgs::msg::Twist>("cmd_vel_in", 1,
+                     std::bind(&RobotController::cmdvelCb, this, _1));
 
     // Base and base mux
-    cmd_vel_pub_ = global.advertise<geometry_msgs::Twist>("/teleop/cmd_vel", 1);
-    n.param("use_mux", use_mux_, true);
-    if(use_mux_)
-    {
-      mux_client_ = global.serviceClient<topic_tools::MuxSelect>("cmd_vel_mux/select");
-    }
+    cmd_vel_pub_ = create_publisher<geometry_msgs::msg::Twist>("cmd_vel_out", 1);
 
     // Head action setup
-    head_client_.reset( new TrajClient("head_controller/follow_joint_trajectory", true) );
-    if (!head_client_->waitForServer(ros::Duration(2.0)))
-    {
-      ROS_ERROR("head_controller/follow_joint_trajectory may not be connected. Head may not move.");
-    }
+    head_client_ = rclcpp_action::create_client<FollowJointTrajectoryAction>(
+      this,
+      "head_controller/follow_joint_trajectory"
+    );
 
     // Torso action setup
-    torso_client_.reset( new TrajClient("torso_controller/follow_joint_trajectory", true) );
-    if (!torso_client_->waitForServer(ros::Duration(2.0)))
-    {
-      ROS_ERROR("torso_controller/follow_joint_trajectory may not be connected. Torso may not move.");
-    }
+    torso_client_ = rclcpp_action::create_client<FollowJointTrajectoryAction>(
+      this,
+      "torso_controller/follow_joint_trajectory"
+    );
 
     // Gripper action setup
-    gripper_client_.reset( new GripperClient("gripper_controller/gripper_action", true) );
-    if (!gripper_client_->waitForServer(ros::Duration(2.0)))
-    {
-      ROS_ERROR("gripper_controller/gripper_action may not be connected. Gripper may not move.");
-    }
+    gripper_client_ = rclcpp_action::create_client<GripperCommandAction>(
+      this,
+      "gripper_controller/command"
+    );
 
     // Publisher for arm movements
-    arm_twist_pub_ = global.advertise<geometry_msgs::TwistStamped>("arm_controller/cartesian_twist/command", 1);
+    arm_twist_pub_ = create_publisher<geometry_msgs::msg::TwistStamped>("arm_controller_command", 1);
 
     // Initialized
-    last_publish_ = ros::Time::now().toSec();
+    last_publish_ = now();
+    last_command_ = now();
+    last_arm_command_ = now();
+    last_base_command_ = now();
   }
 
   /**
@@ -139,25 +137,6 @@ public:
    */
   void start()
   {
-    if (active_)
-      return;
-
-    // Set mux
-    if(use_mux_)
-    {
-      topic_tools::MuxSelect mux_req;
-      mux_req.request.topic = cmd_vel_pub_.getTopic();
-      if(mux_client_.call(mux_req))
-      {
-        prev_topic_ = mux_req.response.prev_topic;
-      }
-      else
-      {
-        ROS_ERROR("Failed to switch mux");
-      }
-    }
-
-    // Go active regardless of mux state
     active_ = true;
   }
 
@@ -173,29 +152,17 @@ public:
     rvx_ = rvw_ = vx_ = vw_ = 0.0;
 
     // Have to publish an empty Twist message
-    geometry_msgs::Twist cmd_msg;
-    cmd_vel_pub_.publish(cmd_msg);
+    geometry_msgs::msg::Twist cmd_msg;
+    cmd_vel_pub_->publish(cmd_msg);
 
     // If arm control is currently enabled, send message to have it stop 
     if (arm_active_)
     {
-      geometry_msgs::TwistStamped arm_cmd_msg;
-      arm_twist_pub_.publish(arm_cmd_msg);
+      geometry_msgs::msg::TwistStamped arm_cmd_msg;
+      arm_twist_pub_->publish(arm_cmd_msg);
       arm_active_ = false;
     }
 
-    // Set mux
-    if(use_mux_)
-    {
-      topic_tools::MuxSelect mux_req;
-      mux_req.request.topic = prev_topic_;
-      if(!mux_client_.call(mux_req)){
-        ROS_ERROR("Failed to to switch mux");
-        return;
-      }
-    }
-
-    // Only go inactive when mux succeeded
     active_ = false;
   }
 
@@ -206,10 +173,11 @@ public:
   void sendCommands()
   {
     // Update time
-    double now = ros::Time::now().toSec();
-    double elapsed = now - last_publish_;
+    rclcpp::Time now = this->now();
+    auto elapsed_ns = (now - last_publish_).nanoseconds();
+    double elapsed = double (elapsed_ns) / 1e9;
 
-    if (now - last_command_ > 0.5)
+    if (now - last_command_ > rclcpp::Duration(0, 5e8))
     {
       rvx_ = rvw_ = 0.0;
     }
@@ -221,79 +189,79 @@ public:
       // Publish cmd_vel (limit acceleration)
       vx_ = integrate(rvx_, vx_, base_max_acc_x_, elapsed);
       vw_ = integrate(rvw_, vw_, base_max_acc_w_, elapsed);
-      geometry_msgs::Twist cmd_msg;
+      geometry_msgs::msg::Twist cmd_msg;
       cmd_msg.linear.x = vx_;
       cmd_msg.angular.z = vw_;
-      cmd_vel_pub_.publish(cmd_msg);
+      cmd_vel_pub_->publish(cmd_msg);
 
       // Head action
       double pan_vel = integrate(rpan_-pan_, 0, head_pan_max_vel_, 1.0);
       double tilt_vel = integrate(rtilt_-tilt_, 0, head_tilt_max_vel_, 1.0);
-      pan_ = integrate(rpan_, pan_, fabs(pan_vel), 4*elapsed);
-      tilt_ = integrate(rtilt_, tilt_, fabs(tilt_vel), 4*elapsed);
+      pan_ = integrate(rpan_, pan_, std::fabs(pan_vel), 4*elapsed);
+      tilt_ = integrate(rtilt_, tilt_, std::fabs(tilt_vel), 4*elapsed);
 
-      if (fabs(pan_vel) > 0.01 || fabs(tilt_vel) > 0.01)
+      if (std::fabs(pan_vel) > 0.01 || std::fabs(tilt_vel) > 0.01)
       {
-        control_msgs::FollowJointTrajectoryGoal goal;
+        FollowJointTrajectoryAction::Goal goal;
         goal.trajectory.joint_names.push_back("head_pan_joint");
         goal.trajectory.joint_names.push_back("head_tilt_joint");
-        trajectory_msgs::JointTrajectoryPoint p;
+        trajectory_msgs::msg::JointTrajectoryPoint p;
         p.positions.push_back(pan_);
         p.positions.push_back(tilt_);
         p.velocities.push_back(pan_vel);
         p.velocities.push_back(tilt_vel);
-        p.time_from_start = ros::Duration(4*elapsed);
+        p.time_from_start = rclcpp::Duration(4 * elapsed_ns);
         goal.trajectory.points.push_back(p);
-        goal.goal_time_tolerance = ros::Duration(0.0);
-        head_client_->sendGoal(goal);
+        goal.goal_time_tolerance = rclcpp::Duration(0, 0);
+        head_client_->async_send_goal(goal);
       }
 
       // Torso action
       double torso_vel = integrate(rtorso_-torso_, 0, torso_max_vel_, 1.0);
-      torso_ = integrate(rtorso_, torso_, fabs(torso_vel), 4*elapsed);
-      if (fabs(torso_vel) > 0.01)
+      torso_ = integrate(rtorso_, torso_, std::fabs(torso_vel), 4*elapsed);
+      if (std::fabs(torso_vel) > 0.01)
       {
-        control_msgs::FollowJointTrajectoryGoal goal;
+        FollowJointTrajectoryAction::Goal goal;
         goal.trajectory.joint_names.push_back("torso_lift_joint");
-        trajectory_msgs::JointTrajectoryPoint p;
+        trajectory_msgs::msg::JointTrajectoryPoint p;
         p.positions.push_back(torso_);
         p.velocities.push_back(torso_vel);
-        p.time_from_start = ros::Duration(4*elapsed);
+        p.time_from_start = rclcpp::Duration(4 * elapsed_ns);
         goal.trajectory.points.push_back(p);
-        goal.goal_time_tolerance = ros::Duration(0.0);
-        torso_client_->sendGoal(goal);
+        goal.goal_time_tolerance = rclcpp::Duration(0, 0);
+        torso_client_->async_send_goal(goal);
       }
 
       // Gripper action
       if (gripper_open_)
       {
-        control_msgs::GripperCommandGoal goal;
+        GripperCommandAction::Goal goal;
         goal.command.position = gripper_open_pos_;
         goal.command.max_effort = gripper_max_effort_;
-        gripper_client_->sendGoal(goal);
+        gripper_client_->async_send_goal(goal);
         gripper_open_ = false;
       }
-      else if(gripper_close_)
+      else if (gripper_close_)
       {
-        control_msgs::GripperCommandGoal goal;
+        GripperCommandAction::Goal goal;
         goal.command.position = gripper_close_pos_;
         goal.command.max_effort = gripper_max_effort_;
-        gripper_client_->sendGoal(goal);
+        gripper_client_->async_send_goal(goal);
         gripper_close_ = false;
       }
 
       // Arm twist
       if (arm_active_)
       {
-        geometry_msgs::TwistStamped arm_cmd_msg;
-        if (now - last_arm_command_ > 0.5)
+        geometry_msgs::msg::TwistStamped arm_cmd_msg;
+        if (now - last_arm_command_ > rclcpp::Duration(0, 5e8))
         {
           // disable arm and send final zero command
           arm_active_ = false;
         }
         else
         {
-          arm_cmd_msg.header.stamp = ros::Time::now();
+          arm_cmd_msg.header.stamp = this->now();
           arm_cmd_msg.header.frame_id = "wrist_roll_link";
           arm_cmd_msg.twist.linear.x = arm_lx_;
           arm_cmd_msg.twist.linear.y = arm_ly_;
@@ -302,7 +270,15 @@ public:
           arm_cmd_msg.twist.angular.y = arm_ay_;
           arm_cmd_msg.twist.angular.z = arm_az_;
         }
-        arm_twist_pub_.publish(arm_cmd_msg);
+        arm_twist_pub_->publish(arm_cmd_msg);
+      }
+    }
+    else
+    {
+      // Forward base commands from subscriber
+      if (last_base_msg_ && (this->now() - last_base_command_) < rclcpp::Duration(2e8))
+      {
+        cmd_vel_pub_->publish(*last_base_msg_);
       }
     }
   }
@@ -317,7 +293,7 @@ public:
     // Limit top speed
     rvx_ = fmax(fmin(vx, base_max_vel_x_), -base_max_vel_x_);
     rvw_ = fmax(fmin(vw, base_max_vel_w_), -base_max_vel_w_);
-    last_command_ = ros::Time::now().toSec();
+    last_command_ = now();
   }
 
   double getBaseVelX() { return vx_; }
@@ -333,7 +309,7 @@ public:
     // Limit position
     rpan_ = fmax(fmin(pan, head_pan_max_pos_), head_pan_min_pos_);
     rtilt_ = fmax(fmin(tilt, head_tilt_max_pos_), head_tilt_min_pos_);
-    last_command_ = ros::Time::now().toSec();
+    last_command_ = now();
   }
 
   double getHeadPan() { return pan_; }
@@ -344,7 +320,7 @@ public:
   {
     // Limit position
     rtorso_ = fmax(fmin(torso, torso_max_pos_), torso_min_pos_);
-    last_command_ = ros::Time::now().toSec();
+    last_command_ = now();
   }
 
   double getTorsoPosition() { return torso_; }
@@ -371,7 +347,7 @@ public:
     arm_ax_ = angular_x;
     arm_ay_ = angular_y;
     arm_az_ = angular_z;
-    last_arm_command_ = ros::Time::now().toSec();
+    last_arm_command_ = now();
   }
 
 
@@ -382,12 +358,12 @@ public:
     if (arm_active_)
     {
       arm_active_ = false;
-      geometry_msgs::TwistStamped cmd_msg;
-      arm_twist_pub_.publish(cmd_msg);
+      geometry_msgs::msg::TwistStamped cmd_msg;
+      arm_twist_pub_->publish(cmd_msg);
     }
   }
 
-private:
+protected:
 
   /**
    *  \brief Integrate a new value based on a desired value, the actual value,
@@ -396,16 +372,16 @@ private:
   double integrate(double desired, double actual, double rate, double elapsed)
   {
     if (desired > actual)
-      return fmin(desired, actual + rate*elapsed);
+      return fmin(desired, actual + rate * elapsed);
     else
-      return fmax(desired, actual - rate*elapsed);
+      return fmax(desired, actual - rate * elapsed);
   }
 
   /**
    *  \brief Callback for joint_states, updates current requested position
    *         to actual position when we are not commanded.
    */
-  void stateCb(const sensor_msgs::JointState::ConstPtr& msg)
+  void stateCb(const sensor_msgs::msg::JointState::SharedPtr msg)
   {
     if (!active_)
     {
@@ -428,6 +404,16 @@ private:
     }
   }
 
+  /**
+   *  \brief Mux doesn't exist in ROS2 (and might never).
+   *         Pass outside commands through teleop to stop them.
+   */
+  void cmdvelCb(const geometry_msgs::msg::Twist::SharedPtr msg)
+  {
+    last_base_msg_ = msg;
+    last_base_command_ = now();
+  }
+
   // Requested Position
   double rvx_, rvw_;
   double rpan_, rtilt_;
@@ -441,8 +427,7 @@ private:
   // Arm related values
   double arm_lx_, arm_ly_, arm_lz_;
   double arm_ax_, arm_ay_, arm_az_;
-  double arm_active_;
-  double last_arm_command_;
+  bool arm_active_;
 
   // Base Limts
   double base_max_vel_x_;
@@ -465,20 +450,19 @@ private:
   bool gripper_open_, gripper_close_;
 
   // ROS Stuff
-  ros::Subscriber state_sub_;
-  ros::Publisher cmd_vel_pub_;
-  ros::Publisher arm_twist_pub_;
-  boost::shared_ptr< TrajClient > head_client_;
-  boost::shared_ptr< TrajClient > torso_client_;
-  boost::shared_ptr< GripperClient> gripper_client_;
-  ros::ServiceClient mux_client_;
+  rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr state_sub_;
+  rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_pub_;
+  rclcpp::Publisher<geometry_msgs::msg::TwistStamped>::SharedPtr arm_twist_pub_;
+  FollowJointTrajectoryClient::SharedPtr head_client_;
+  FollowJointTrajectoryClient::SharedPtr torso_client_;
+  GripperCommandClient::SharedPtr gripper_client_;
 
-  // Are we doing a mux with navigation?
-  bool use_mux_;
-  std::string prev_topic_;
+  // Pass through
+  std::shared_ptr<geometry_msgs::msg::Twist> last_base_msg_;
 
   bool active_;
-  double last_publish_, last_command_;
+  rclcpp::Time last_publish_, last_command_, last_arm_command_, last_base_command_;
 };
 
-#endif  // UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H_
+#endif  // UBR_TELEOP_INCLUDE_UBR_TELEOP_ROBOT_CONTROLLER_H

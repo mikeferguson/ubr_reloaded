@@ -1,5 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+# Copryight (c) 2020 Michael Ferguson
 # Copyright (c) 2013-2014 Unbounded Robotics Inc. 
 # All right reserved.
 #
@@ -32,41 +33,43 @@ Usage: set_torso_pose.py <pose>
 """
 
 import sys
-import rospy
-import actionlib
-from control_msgs.msg import FollowJointTrajectoryAction, FollowJointTrajectoryGoal
+
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.action import ActionClient
+
+from control_msgs.action import FollowJointTrajectory
 from trajectory_msgs.msg import JointTrajectory, JointTrajectoryPoint
+
+
+class FollowJointTrajectoryClient(Node):
+
+    def __init__(self):
+        super().__init__("set_torso_pose")
+        self._action_client = ActionClient(self, FollowJointTrajectory, 'torso_controller/follow_joint_trajectory')
+
+    def run(self, trajectory):
+        goal = FollowJointTrajectory.Goal()
+        goal.trajectory = trajectory
+        goal.goal_time_tolerance = Duration(seconds=0).to_msg()
+        self._action_client.wait_for_server()
+        self._action_client.send_goal_async(goal)
+
 
 if __name__=='__main__':
     if len(sys.argv) < 2:
         print(__doc__)
         exit(-1)
 
-    rospy.init_node('set_torso_pose')
-
-    # The arm is controlled by a joint trajectory action
-    rospy.loginfo('Waiting for torso_controller...')
-    client = actionlib.SimpleActionClient('torso_controller/follow_joint_trajectory', FollowJointTrajectoryAction)
-    client.wait_for_server()
-    rospy.loginfo('...connected.')
-
-    # Create a trajectory
     trajectory = JointTrajectory()
     trajectory.joint_names = ["torso_lift_joint"]
     trajectory.points.append(JointTrajectoryPoint())
     trajectory.points[0].positions = [float(sys.argv[1])]
     trajectory.points[0].velocities = [0.0]
     trajectory.points[0].accelerations = [0.0]
-    trajectory.points[0].time_from_start = rospy.Duration(7.0)  # we can get anywhere by 7s
+    trajectory.points[0].time_from_start = Duration(seconds=7).to_msg()  # we can get anywhere by 7s
 
-    # Put this trajectory in an action goal
-    rospy.loginfo("Setting torso pose to %f" % trajectory.points[0].positions[0])
-    goal = FollowJointTrajectoryGoal()
-    goal.trajectory = trajectory
-    goal.goal_time_tolerance = rospy.Duration(0.0)
-
-    # Send the goal
-    client.send_goal(goal)
-    client.wait_for_result(rospy.Duration(8.0))
-    rospy.loginfo('...done')
-
+    rclpy.init()
+    action_client = FollowJointTrajectoryClient()
+    action_client.run(trajectory)

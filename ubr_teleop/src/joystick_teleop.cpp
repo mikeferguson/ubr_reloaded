@@ -35,69 +35,64 @@
 
 // Author: Michael Ferguson
 
-#include <ros/ros.h>
-#include <sensor_msgs/Joy.h>
+#include <rclcpp/rclcpp.hpp>
+#include <sensor_msgs/msg/joy.hpp>
 #include <ubr_teleop/robot_controller.h>
 
-class JoyTeleop
+class JoyTeleop : public RobotController
 {
 public:
-  JoyTeleop() : deadman_(false), deadman_head_(false),
-                deadman_arm_linear_(false), deadman_arm_angular_(false)
+  JoyTeleop(const std::string& name) :
+      RobotController(name),
+      deadman_(false),
+      deadman_head_(false),
+      deadman_arm_linear_(false),
+      deadman_arm_angular_(false)
   {
-    vx = vw = 0.0;
-    pan = tilt = 0.0;
-    torso = 0.0;
-    arm_lx, arm_ly, arm_lz, arm_ax, arm_ay, arm_az = 0.0;
-  }
+    head_pan_step_ = declare_parameter<double>("head_pan_step", 0.35);
+    head_tilt_step_ = declare_parameter<double>("head_tilt_step", -0.35);
+    torso_step_ = declare_parameter<double>("torso_step", 0.0125);
 
-  void init(ros::NodeHandle n)
-  {
-    n.param("base_max_vel_x", base_max_vel_x_, 1.0);
-    n.param("base_max_vel_w", base_max_vel_w_, 3.0);
+    deadman_button_ = declare_parameter<int>("deadman_button", 4);
+    deadman_head_button_ = declare_parameter<int>("deadman_head_button", 6);
 
-    n.param("head_pan_step", head_pan_step_, 0.35);
-    n.param("head_tilt_step", head_tilt_step_, -0.35);
-    n.param("torso_step", torso_step_, 0.0125);
+    torso_up_button_ = declare_parameter<int>("torso_up_button", 2);
+    torso_down_button_ = declare_parameter<int>("torso_down_button", 0);
 
-    n.param("deadman_button", deadman_button_, 4);
-    n.param("deadman_head_button", deadman_head_button_, 6);
+    gripper_open_button_ = declare_parameter<int>("gripper_open_button", 3);
+    gripper_close_button_ = declare_parameter<int>("gripper_close_button", 1);
 
-    n.param("torso_up_button", torso_up_button_, 2);
-    n.param("torso_down_button", torso_down_button_, 0);
+    deadman_arm_linear_button_ = declare_parameter<int>("deadman_arm_linear_button", 5);
+    deadman_arm_angular_button_ = declare_parameter<int>("deadman_arm_angular_button", 7);
+    arm_lx_axis_ = declare_parameter<int>("arm_lx_axis", 4);
+    arm_ly_axis_ = declare_parameter<int>("arm_ly_axis", 3);
+    arm_lz_axis_ = declare_parameter<int>("arm_lz_axis", 1);
+    arm_ax_axis_ = declare_parameter<int>("arm_ax_axis", 4);
+    arm_ay_axis_ = declare_parameter<int>("arm_ay_axis", 3);
+    arm_az_axis_ = declare_parameter<int>("arm_az_axis", 1);
 
-    n.param("gripper_open", gripper_open_button_, 3);
-    n.param("gripper_close", gripper_close_button_, 1);
+    arm_linear_scale_ = declare_parameter<double>("arm_linear_scale", 0.5);
+    arm_angular_scale_ = declare_parameter<double>("arm_angular_scale", 0.5);
 
-    n.param("deadman_arm_linear_button", deadman_arm_linear_button_, 5);
-    n.param("deadman_arm_angular_button", deadman_arm_angular_button_, 7);
-    n.param("arm_lx_axis", arm_lx_axis_, 4);
-    n.param("arm_ly_axis", arm_ly_axis_, 3);
-    n.param("arm_lz_axis", arm_lz_axis_, 1);
-    n.param("arm_ax_axis", arm_ax_axis_, 4);
-    n.param("arm_ay_axis", arm_ay_axis_, 3);
-    n.param("arm_az_axis", arm_az_axis_, 1);
-    n.param("arm_linear_scale", arm_linear_scale_, 0.5);
-    n.param("arm_angular_scale", arm_angular_scale_, 0.5);
+    base_vx_axis_ = declare_parameter<int>("axis_vx", 4);
+    base_vw_axis_ = declare_parameter<int>("axis_vw", 0);
 
-    n.param("axis_vx", base_vx_axis_, 4);
-    n.param("axis_vw", base_vw_axis_, 0);
+    head_pan_axis_ = declare_parameter<int>("axis_pan", 0);
+    head_tilt_axis_ = declare_parameter<int>("axis_tilt", 4);
 
-    n.param("axis_pan", head_pan_axis_, 0);
-    n.param("axis_tilt", head_tilt_axis_, 4);
+    sub_ = create_subscription<sensor_msgs::msg::Joy>("joy", 10,
+             std::bind(&JoyTeleop::joyCb, this, _1));
 
-    controller_.init(n);
-
-    ros::NodeHandle nh;
-    sub_ = nh.subscribe("joy", 10, &JoyTeleop::joyCb, this);
+    timer_ = create_wall_timer(std::chrono::milliseconds(50),
+               std::bind(&JoyTeleop::update, this));
   }
 
   /**
    *  \brief Callback for the joystick topic.
    */
-  void joyCb(const sensor_msgs::Joy::ConstPtr& msg)
+  void joyCb(const sensor_msgs::msg::Joy::SharedPtr msg)
   {
-    last_recv_ = ros::Time::now();
+    last_recv_ = now();
 
     deadman_ = msg->buttons[deadman_button_];
     deadman_head_ = msg->buttons[deadman_head_button_];
@@ -106,109 +101,99 @@ public:
 
     if (!deadman_)
     {
-      controller_.stop();
+      stop();
       return;
     }
 
-    controller_.start();
+    start();
 
     if (deadman_arm_angular_ || deadman_arm_linear_)
     {
       // Stop moving base
-      vx = 0.0;
-      vw = 0.0;
+      setBaseVelocity(0.0, 0.0);
 
       // Stop head
-      pan = 0.0;
-      tilt = 0.0;
+      pan_command_ = 0.0;
+      tilt_command_ = 0.0;
 
       // Stop moving torso
-      torso = 0.0;
+      torso_command_ = 0.0;
 
+      double lx, ly, lz, ax, ay, az;
       if (deadman_arm_linear_)
       {
         // Linear takes precedence over angular
-        arm_lx = msg->axes[arm_lx_axis_]*arm_linear_scale_;
-        arm_ly = msg->axes[arm_ly_axis_]*arm_linear_scale_;
-        arm_lz = msg->axes[arm_lz_axis_]*arm_linear_scale_;
-        arm_ax = 0.0;
-        arm_ay = 0.0;
-        arm_az = 0.0;
+        lx = msg->axes[arm_lx_axis_]*arm_linear_scale_;
+        ly = msg->axes[arm_ly_axis_]*arm_linear_scale_;
+        lz = msg->axes[arm_lz_axis_]*arm_linear_scale_;
+        ax = 0.0;
+        ay = 0.0;
+        az = 0.0;
       }
       else
       {
-        arm_lx = 0.0;
-        arm_ly = 0.0;
-        arm_lz = 0.0;
-        arm_ax = -msg->axes[arm_ax_axis_]*arm_angular_scale_;
-        arm_ay = msg->axes[arm_ay_axis_]*arm_angular_scale_;
-        arm_az = msg->axes[arm_az_axis_]*arm_angular_scale_;
+        lx = 0.0;
+        ly = 0.0;
+        lz = 0.0;
+        ax = -msg->axes[arm_ax_axis_]*arm_angular_scale_;
+        ay = msg->axes[arm_ay_axis_]*arm_angular_scale_;
+        az = msg->axes[arm_az_axis_]*arm_angular_scale_;
       }
-
-      controller_.setArmTwist(arm_lx, arm_ly, arm_lz, arm_ax, arm_ay, arm_az);
+      setArmTwist(lx, ly, lz, ax, ay, az);
     }
     else if (deadman_head_)
     {
       // Stop moving base
-      vx = 0.0;
-      vw = 0.0;
+      setBaseVelocity(0.0, 0.0);
 
       // Get head
-      pan = msg->axes[head_pan_axis_]*head_pan_step_;
-      tilt = msg->axes[head_tilt_axis_]*head_tilt_step_;
+      pan_command_ = msg->axes[head_pan_axis_]*head_pan_step_;
+      tilt_command_ = msg->axes[head_tilt_axis_]*head_tilt_step_;
 
       // Stop moving torso
-      torso = 0.0;
+      torso_command_ = 0.0;
 
       // Stop moving arm
-      controller_.disableArm();
+      disableArm();
     }
     else
     {
       // Get base velocities
-      vx = msg->axes[base_vx_axis_] * base_max_vel_x_;
-      vw = msg->axes[base_vw_axis_] * base_max_vel_w_;
-
-      // Limit velocities
-      vx = fmax(fmin(vx, base_max_vel_x_), -base_max_vel_x_);
-      vw = fmax(fmin(vw, base_max_vel_w_), -base_max_vel_w_);
+      setBaseVelocity(msg->axes[base_vx_axis_] * base_max_vel_x_,
+                      msg->axes[base_vw_axis_] * base_max_vel_w_);
 
       // Stop moving head
-      pan = 0.0;
-      tilt = 0.0;
+      pan_command_ = 0.0;
+      tilt_command_ = 0.0;
 
       // Get torso
       if (msg->buttons[torso_down_button_])
-        torso = -torso_step_;
+        torso_command_ = -torso_step_;
       else if (msg->buttons[torso_up_button_])
-        torso = torso_step_;
+        torso_command_ = torso_step_;
       else
-        torso = 0.0;
+        torso_command_ = 0.0;
 
       // Get Gripper
       if (msg->buttons[gripper_open_button_])
-        controller_.openGripper();
+        openGripper();
       else if (msg->buttons[gripper_close_button_])
-        controller_.closeGripper();
+        closeGripper();
 
       // Stop moving arm
-      controller_.disableArm();
+      disableArm();
     }
   }
 
   void update()
   {
-    controller_.setBaseVelocity(vx, vw);
-    controller_.setHeadPosition(controller_.getHeadPan() + pan,
-                                controller_.getHeadTilt() + tilt);
-    controller_.setTorsoPosition(controller_.getTorsoPosition() + torso);
-    controller_.sendCommands();
+    setHeadPosition(getHeadPan() + pan_command_,
+                    getHeadTilt() + tilt_command_);
+    setTorsoPosition(getTorsoPosition() + torso_command_);
+    sendCommands();
   }
 
 private:
-  // Base Limits
-  double base_max_vel_x_, base_max_vel_w_;
-
   // Head Limits
   double head_pan_step_;
   double head_tilt_step_;
@@ -245,33 +230,17 @@ private:
   // Scaling factor for arm linear and angular scale
   double arm_linear_scale_, arm_angular_scale_;
 
-  // Current publishing values
-  double vx, vw;
-  double pan, tilt;
-  double torso;
-  double arm_lx, arm_ly, arm_lz, arm_ax, arm_ay, arm_az;
+  // Command to periodically apply
+  double pan_command_, tilt_command_, torso_command_;
 
-  ros::Time last_recv_;
-  ros::Subscriber sub_;
-
-  RobotController controller_;
+  rclcpp::Time last_recv_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr sub_;
+  rclcpp::TimerBase::SharedPtr timer_;
 };
 
 int main(int argc, char** argv)
 {
-  ros::init(argc, argv, "teleop");
-  JoyTeleop teleop;
-
-  ros::NodeHandle n("~");
-  teleop.init(n);
-  
-  ros::Rate r(20.0);
-  while (ros::ok())
-  {
-    ros::spinOnce();
-    teleop.update();
-    r.sleep();
-  }
-
-  return 0;
+  rclcpp::init(argc, argv);
+  std::shared_ptr<JoyTeleop> teleop(new JoyTeleop("teleop"));
+  rclcpp::spin(teleop);
 }
