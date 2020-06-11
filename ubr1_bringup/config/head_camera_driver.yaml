@@ -8,3 +8,4 @@ depth_frame_id: head_camera_rgb_depth_optical_frame
 # depth_camera_info_url?
 depth_registration: true
 data_skip: 1  # throttle to 15hz
+use_device_time: false
