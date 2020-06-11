@@ -1,0 +1,10 @@
+# Namespacing parameters doesn't work for components
+# See https://github.com/ros2/rclcpp/issues/715
+#head_camera_driver:
+#  ros__parameters:
+rgb_frame_id: head_camera_rgb_optical_frame
+depth_frame_id: head_camera_rgb_depth_optical_frame
+# rgb_camera_info_url?
+# depth_camera_info_url?
+depth_registration: true
+data_skip: 1  # throttle to 15hz
