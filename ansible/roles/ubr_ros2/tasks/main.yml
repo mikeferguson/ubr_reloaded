@@ -1,0 +1,19 @@
+---
+# ROS2 Setup
+- name: Configure apt key for ROS2
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
+  become: yes
+
+- name: Configure apt sources for ROS2
+  apt_repository:
+    repo: 'deb [arch=amd64,arm64] http://packages.ros.org/ros2-testing/ubuntu {{ ansible_lsb.codename }} main'
+    filename: 'ros2-latest'
+    update_cache: yes
+  become: yes
+
+- name: Install base level ROS2 packages
+  apt:
+    pkg: ros-{{rosdistro}}-desktop
+  become: yes
