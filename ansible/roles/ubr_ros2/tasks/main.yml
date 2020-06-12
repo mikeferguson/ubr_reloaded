@@ -17,3 +17,100 @@
   apt:
     pkg: ros-{{rosdistro}}-desktop
   become: yes
+
+# Workspace setup
+# TODO: install vcstool
+
+- name: Create workspace
+  file:
+    path: "{{ workspace_root }}/src"
+    state: directory
+    owner: ubr
+    group: ubr
+    mode: '2775'
+
+# TODO: init workspace with vcstool
+# TODO: setup workspace with vcstool
+
+- name: Disable openni2_launch (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/openni2_camera/openni2_launch/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Disable robot_calibration (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/robot_calibration/robot_calibration/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Disable ubr1_calibration (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_calibration/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Disable ubr1_gazebo (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_gazebo/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Disable ubr1_moveit (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_moveit/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Disable ubr1_navigation (not currently building right)
+  file:
+    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_navigation/CATKIN_IGNORE"
+    state: touch
+    owner: ubr
+    group: ubr
+
+- name: Install dependencies
+  shell: rosdep update && rosdep install --from-paths src --ignore-src --rosdistro={{ rosdistro }} -y -r
+  args:
+    chdir: "{{ workspace_root }}"
+
+# Launch setup
+- name: Create /etc/ros/distro
+  file:
+    path: /etc/ros/{{ rosdistro }}
+    state: directory
+    owner: ros
+    group: ros
+    mode: '2775'
+  become: yes
+
+- name: Copy launch file to /etc/ros
+  copy:
+    src: "{{ workspace_root }}/src/ubr_reloaded/ubr1_bringup/launch/robot.launch.py"
+    dest: "/etc/ros/{{ rosdistro }}/robot.launch.py"
+    force: no
+  become: yes
+
+- name: Create a systemd service for robot drivers
+  template:
+    src: robot.j2
+    dest: /etc/systemd/system/robot.service
+  become: yes
+
+- name: Start the robot service
+  systemd:
+    name: robot
+    enabled: yes
+    state: started
+    daemon_reload: yes
+  become: yes
+
+# Hardware config
+- name: Power off when button pressed
+  shell: hostnamectl set-chassis vm
+  become: yes

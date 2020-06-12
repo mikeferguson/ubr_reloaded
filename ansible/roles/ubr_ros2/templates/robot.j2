@@ -1,0 +1,13 @@
+
+[Unit]
+Description=Start UBR-1 drivers (ROS2)
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Environment="ROS_LOG_DIR=/var/log/ros"
+ExecStart=/bin/bash -c ". {{workspace_root}}/install/setup.bash && /etc/ros/{{rosdistro}}/robot.launch.py"
+StandardOutput=file:/var/log/ros/robot.log
+StandardError=file:/var/log/ros/robot.log
+User=ros
