@@ -37,8 +37,10 @@ import sys
 
 from ament_index_python.packages import get_package_share_directory
 
-import launch
-import launch_ros.actions
+from launch import LaunchDescription
+from launch.actions import IncludeLaunchDescription
+from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch_ros.actions import Node
 
 
 def generate_launch_description():
@@ -50,27 +52,36 @@ def generate_launch_description():
     # Load the driver config
     driver_config = os.path.join(
         get_package_share_directory('ubr1_bringup'),
-        'config', 'default_controllers.yaml'
+        'config',
+        'default_controllers.yaml'
     )
 
-    return launch.LaunchDescription([
+    # Get path to the head camera launch file
+    head_camera_launch = os.path.join(
+        get_package_share_directory('ubr1_bringup'),
+        'launch',
+        'head_camera.launch.py'
+    )
+
+    return LaunchDescription([
         # Drivers
-        launch_ros.actions.Node(
+        Node(
             name='ubr_driver',
             package='ubr_drivers',
             executable='ubr_driver',
             parameters=[{'robot_description': urdf},
                         driver_config],
             output='screen',
-            prefix=['xterm -e gdb --args'],
+            # TODO use debug param
+            #prefix=['xterm -e gdb --args'],
         ),
-        launch_ros.actions.Node(
+        Node(
             name='robot_state_publisher',
             package='robot_state_publisher',
             executable='robot_state_publisher',
             parameters=[{'robot_description': urdf}],
         ),
-        launch_ros.actions.Node(
+        Node(
             name='base_laser_node',
             package='urg_node',
             executable='urg_node_driver',
@@ -81,15 +92,17 @@ def generate_launch_description():
             remappings=[('scan', 'base_scan'), ],
             output='screen',
         ),
-        # TODO: head camera drivers
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource([head_camera_launch])
+        ),
         # Teleop
-        launch_ros.actions.Node(
+        Node(
             name='joy',
             package='joy',
             executable='joy_node',
             parameters=[{'autorepeat_rate': 1.0}, ],
         ),
-        launch_ros.actions.Node(
+        Node(
             name='teleop',
             package='ubr_teleop',
             executable='joystick_teleop',
@@ -99,7 +112,7 @@ def generate_launch_description():
                         ('cmd_vel_out', 'base_controller/command')],
             output='screen',
         ),
-        launch_ros.actions.Node(
+        Node(
             name='controller_reset',
             package='ubr1_bringup',
             executable='controller_reset.py',
