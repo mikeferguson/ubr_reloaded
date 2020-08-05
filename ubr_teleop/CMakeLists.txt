@@ -42,11 +42,6 @@ install(
 )
 
 install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
-)
-
-install(
   PROGRAMS
     scripts/set_gripper_pose.py
     scripts/set_head_pose.py
