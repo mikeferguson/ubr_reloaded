@@ -8,11 +8,11 @@
   <license>BSD</license>
   <author>Michael Ferguson</author>
 
-  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>slam_toolbox</exec_depend>
 
-  <build_depend>message_generation</build_depend>
-
-  <exec_depend>message_runtime</exec_depend>
-  <exec_depend>navigation</exec_depend>
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
 
 </package>
