@@ -80,5 +80,7 @@ ubr_driver:
       # use laser to only slowly collide with things
       laser_safety_dist: 1.0
       # name of joints
-      l_wheel_joint: "base_l_wheel_joint"
-      r_wheel_joint: "base_r_wheel_joint"
+      l_wheel_joints:
+       - "base_l_wheel_joint"
+      r_wheel_joints:
+       - "base_r_wheel_joint"
