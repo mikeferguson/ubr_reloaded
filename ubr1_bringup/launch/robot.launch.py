@@ -37,7 +37,7 @@ import sys
 
 from ament_index_python.packages import get_package_share_directory
 
-from launch import LaunchDescription
+from launch import LaunchDescription, LaunchService
 from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
@@ -123,7 +123,7 @@ def generate_launch_description():
 def main(argv=sys.argv[1:]):
     """Run lifecycle nodes via launch."""
     ld = generate_launch_description()
-    ls = launch.LaunchService(argv=argv)
+    ls = LaunchService(argv=argv)
     ls.include_launch_description(ld)
     return ls.run()
 
