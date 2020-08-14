@@ -1,0 +1,25 @@
+repositories:
+  image_pipeline:
+    type: git
+    url: https://github.com/ros-perception/image_pipeline.git
+    version: ros2
+  openni2_camera:
+    type: git
+    url: https://github.com/mikeferguson/openni2_camera.git
+    version: ros2
+  robot_calibration:
+    type: git
+    url: git@github.com:mikeferguson/robot_calibration.git
+    version: ros2
+  robot_controllers:
+    type: git
+    url: git@github.com:mikeferguson/robot_controllers.git
+    version: ros2
+  ubr_drivers:
+    type: git
+    url: git@github.com:mikeferguson/ubr_drivers.git
+    version: ros2
+  ubr_reloaded:
+    type: git
+    url: git@github.com:mikeferguson/ubr_reloaded.git
+    version: ros2

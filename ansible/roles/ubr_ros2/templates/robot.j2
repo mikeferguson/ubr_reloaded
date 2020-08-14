@@ -7,6 +7,8 @@ WantedBy=multi-user.target
 
 [Service]
 Environment="ROS_LOG_DIR=/var/log/ros"
+Environment="RMW_IMPLEMENTATION=rmw_cyclonedds_cpp"
+Environment="CYCLONEDDS_URI=/etc/ros/{{rosdistro}}/cyclonedds.xml"
 ExecStart=/bin/bash -c ". {{workspace_root}}/install/setup.bash && /etc/ros/{{rosdistro}}/robot.launch.py"
 StandardOutput=file:/var/log/ros/robot.log
 StandardError=file:/var/log/ros/robot.log

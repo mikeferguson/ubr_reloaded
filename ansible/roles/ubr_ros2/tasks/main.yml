@@ -8,7 +8,7 @@
 
 - name: Configure apt sources for ROS2
   apt_repository:
-    repo: 'deb [arch=amd64,arm64] http://packages.ros.org/ros2-testing/ubuntu {{ ansible_lsb.codename }} main'
+    repo: 'deb [arch=amd64,arm64] http://packages.ros.org/ros2/ubuntu {{ ansible_lsb.codename }} main'
     filename: 'ros2-latest'
     update_cache: yes
   become: yes
@@ -19,7 +19,10 @@
   become: yes
 
 # Workspace setup
-# TODO: install vcstool
+- name: Install vcstool
+  apt:
+    pkg: python3-vcstool
+  become: yes
 
 - name: Create workspace
   file:
@@ -29,15 +32,15 @@
     group: ubr
     mode: '2775'
 
-# TODO: init workspace with vcstool
-# TODO: setup workspace with vcstool
+- name: Setup workspace with vcstool
+  shell: "vcs import src < {{ role_path }}/files/{{ rosdistro }}.repos"
+  args:
+    chdir: "{{ workspace_root }}"
 
-- name: Disable openni2_launch (not currently building right)
-  file:
-    path: "{{ workspace_root }}/src/openni2_camera/openni2_launch/CATKIN_IGNORE"
-    state: touch
-    owner: ubr
-    group: ubr
+- name: Update workspace with vcstool
+  shell: "vcs pull src"
+  args:
+    chdir: "{{ workspace_root }}"
 
 - name: Disable robot_calibration (not currently building right)
   file:
@@ -67,15 +70,13 @@
     owner: ubr
     group: ubr
 
-- name: Disable ubr1_navigation (not currently building right)
-  file:
-    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_navigation/CATKIN_IGNORE"
-    state: touch
-    owner: ubr
-    group: ubr
-
 - name: Install dependencies
   shell: rosdep update && rosdep install --from-paths src --ignore-src --rosdistro={{ rosdistro }} -y -r
+  args:
+    chdir: "{{ workspace_root }}"
+
+- name: Build workspace
+  shell: "colcon build --symlink-install"
   args:
     chdir: "{{ workspace_root }}"
 
@@ -94,6 +95,13 @@
     src: "{{ workspace_root }}/src/ubr_reloaded/ubr1_bringup/launch/robot.launch.py"
     dest: "/etc/ros/{{ rosdistro }}/robot.launch.py"
     force: no
+    mode: '0755'
+  become: yes
+
+- name: Copy cyclonedds.xml to /etc/ros
+  template:
+    src: cyclonedds.j2
+    dest: /etc/ros/{{ rosdistro }}/cyclonedds.xml
   become: yes
 
 - name: Create a systemd service for robot drivers
