@@ -1,6 +1,7 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-# Copyright (c) 2013-2014 Unbounded Robotics Inc. 
+# Copyright (c) 2020, Michael Ferguson
+# Copyright (c) 2013-2014 Unbounded Robotics Inc.
 # All right reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -11,8 +12,8 @@
 #   * Redistributions in binary form must reproduce the above copyright
 #     notice, this list of conditions and the following disclaimer in the
 #     documentation and/or other materials provided with the distribution.
-#   * Neither the name of Unbounded Robotics Inc. nor the names of its 
-#     contributors may be used to endorse or promote products derived 
+#   * Neither the name of Unbounded Robotics Inc. nor the names of its
+#     contributors may be used to endorse or promote products derived
 #     from this software without specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
@@ -30,126 +31,151 @@
 # Tilt head for navigation obstacle avoidance.
 #
 
-from __future__ import print_function
-
 from threading import Lock
 
-import rospy
-import actionlib
+import rclpy
+from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.action import ActionClient
+from action_msgs.msg import GoalStatus
 
-from tf.listener import TransformListener
-from tf.transformations import quaternion_matrix
+from tf2_ros.buffer import Buffer
+from tf2_ros.transform_listener import TransformListener
+import tf2_geometry_msgs
 
-from actionlib_msgs.msg import GoalStatus, GoalStatusArray
-from control_msgs.msg import PointHeadAction, PointHeadGoal
+import numpy as np
+
+# sudo pip3 install transforms3d
+from transforms3d.quaternions import quat2mat
+
+from control_msgs.action import PointHead
 from geometry_msgs.msg import PointStamped
 from nav_msgs.msg import Path
-from ubr1_navigation.srv import TiltControl, TiltControlResponse
 
-class NavHeadController:
+class NavHeadController(Node):
 
     def __init__(self):
-        # enables
-        self.enable_tilt = True
-        self.enable_look = True
-        self.has_goal = False
+        super().__init__("tilt_head_node")
 
-        # pose and lock
-        self.x = 1.0
-        self.y = 0.0
-        self.mutex = Lock()
+        # tilt head goal to send
+        self.goal = PointHead.Goal()
+        self.goal.target.header.frame_id = 'base_link'
+        self.goal.min_duration = Duration(seconds=1).to_msg()
+        self.goal.target.point.x = 1.0
+        self.goal.target.point.y = 0.0
+        self.goal.target.point.z = 0.0
 
-        self.listener = TransformListener()
+        # last time our goal was updated (because a plan was recieved)
+        self.goal_update_time = None
 
-        self.client = actionlib.SimpleActionClient('head_controller/point_head', PointHeadAction)
+        # future (which indicates a goal is active)
+        self.goal_future = None
+
+        # lock covering goal*
+        self.goal_mutex = Lock()
+
+        self.buffer = Buffer()
+        self.listener = TransformListener(self.buffer, self)
+
+        self.get_logger().info("Waiting for point_head action...")
+        self.client = ActionClient(self, PointHead, '/head_controller/point_head')
         self.client.wait_for_server()
+        self.get_logger().info("...OK")
 
-        self.service = rospy.Service('~configure', TiltControl, self.serviceHandler)
+        self.plan_sub = self.create_subscription(Path, '/local_plan', self.plan_callback, 10)
 
-        self.plan_sub = rospy.Subscriber('move_base/TrajectoryPlannerROS/local_plan', Path, self.planCallback)
-        self.stat_sub = rospy.Subscriber('move_base/status', GoalStatusArray, self.statCallback)
-
-    def serviceHandler(self, req):
-        self.enable_tilt = req.enable_tilt
-        self.enable_look = req.enable_look and self.enable_tilt  # tilt has to be enabled to look
-        return TiltControlResponse()
-
-    def statCallback(self, msg):
-        goal = False
-        for status in msg.status_list:
-            if status.status == GoalStatus.ACTIVE:
-                goal = True
-                break
-        self.has_goal = goal
-
-    def planCallback(self, msg):
-        # Only need to do this if we are looking
-        if not self.enable_look:
-            return
-
+    def plan_callback(self, msg):
         # get the goal
-        pose_stamped = msg.poses[-1]
+        try:
+            pose_stamped = msg.poses[-1]
+        except IndexError:
+            self.get_logger().warn("Unable to parse empty plan")
+            return
         pose = pose_stamped.pose
 
         # look ahead one meter
-        R = quaternion_matrix([pose.orientation.x, pose.orientation.y, pose.orientation.z, pose.orientation.w])
-        point = [1, 0, 0, 1]
-        M = R*point
+        R = quat2mat([pose.orientation.w, pose.orientation.x, pose.orientation.y, pose.orientation.z])
+        point = np.array([1, 0, 0]).reshape((3, 1))
+        M = np.dot(R, point)
 
         p = PointStamped()
         p.header.frame_id = pose_stamped.header.frame_id
-        p.header.stamp = rospy.Time(0)
-        p.point.x += pose_stamped.pose.position.x + M[0,0]
-        p.point.y += pose_stamped.pose.position.y + M[1,0]
-        p.point.z += pose_stamped.pose.position.z + M[2,0]
+        p.point.x += pose_stamped.pose.position.x + M[0, 0]
+        p.point.y += pose_stamped.pose.position.y + M[1, 0]
+        p.point.z += pose_stamped.pose.position.z + M[2, 0]
 
         # transform to base_link
-        p = self.listener.transformPoint('base_link', p)
+        p = self.buffer.transform(p, self.goal.target.header.frame_id)
 
         # update
-        with self.mutex:
+        with self.goal_mutex:
             if p.point.x < 0.65:
-                self.x = 0.65
+                self.goal.target.point.x = 0.65
             else:
-                self.x = p.point.x
+                self.goal.target.point.x = p.point.x
             if p.point.y > 0.5:
-                self.y = 0.5
+                self.goal.target.point.y = 0.5
             elif p.point.y < -0.5:
-                self.y = -0.5
+                self.goal.target.point.y = -0.5
             else:
-                self.y = p.point.y
+                self.goal.target.point.y = p.point.y
+            self.goal_update_time = self.get_clock().now()
 
-    def loop(self):
-        while not rospy.is_shutdown():
-            if self.has_goal and self.enable_tilt:
-                goal = PointHeadGoal()
-                goal.target.header.stamp = rospy.Time.now()
-                goal.target.header.frame_id = 'base_link'
-                with self.mutex:
-                    goal.target.point.x = self.x
-                    goal.target.point.y = self.y
-                    self.x = 1
-                    self.y = 0
-                goal.target.point.z = 0.75
-                goal.min_duration = rospy.Duration(1.0)
+        # Start moving head (if not already)
+        self.update()
 
-                self.client.send_goal(goal)
-                self.client.wait_for_result()
+    def goal_callback(self, future):
+        # This gets called when the goal is accepted or rejected
+        goal_handle = future.result()
 
-                with self.mutex:
-                    goal.target.point.x = self.x
-                    goal.target.point.y = self.y
-                    self.x = 1
-                    self.y = 0
-                goal.target.point.z = 0.0
+        if not goal_handle.accepted:
+            self.get_logger().warn("Failed to send goal")
+            with self.goal_mutex:
+                self.goal_future = None
+                return
 
-                self.client.send_goal(goal)
-                self.client.wait_for_result()
+        self.result_future = goal_handle.get_result_async()
+        self.result_future.add_done_callback(self.result_callback)
+
+    def result_callback(self, future):
+        status = future.result().status
+
+        if status == GoalStatus.STATUS_SUCCEEDED:
+            self.get_logger().debug("Goal complete")
+        else:
+            self.get_logger().debug('Goal failed with status: {0}'.format(status))
+
+        with self.goal_mutex:
+            self.goal_future = None
+            self.result_future = None
+
+        self.update()
+
+    def update(self):
+        if self.goal_future:
+            self.get_logger().debug("Active tilt head goal - not updating")
+            return
+
+        if self.goal_update_time and self.get_clock().now() <= self.goal_update_time + Duration(seconds=1):
+            if self.goal.target.point.z == 0.0:
+                self.get_logger().debug("Tilting up")
+                self.goal.target.point.z = 0.75
             else:
-                rospy.sleep(1.0)
+                self.get_logger().debug("Tilting down")
+                self.goal.target.point.z = 0.0
+
+            with self.goal_mutex:
+                self.goal.target.header.stamp = self.get_clock().now().to_msg()
+                self.goal_future = self.client.send_goal_async(self.goal)
+                self.goal_future.add_done_callback(self.goal_callback)
+        else:
+            self.get_logger().debug("No updates")
+
 
 if __name__=='__main__':
-    rospy.init_node("tilt_head_node")
-    h = NavHeadController()
-    h.loop()
+    rclpy.init()
 
+    h = NavHeadController()
+    rclpy.spin(h)
+    h.destroy_node()
+    rclpy.shutdown()
