@@ -37,8 +37,7 @@ def generate_launch_description():
     lifecycle_nodes = ['controller_server',
                        'planner_server',
                        'recoveries_server',
-                       'bt_navigator',
-                       'waypoint_follower']
+                       'bt_navigator']
 
     # Map fully qualified names to relative ones so the node's namespace can be prepended.
     # In case of the transforms (tf), currently, there doesn't seem to be a better alternative
@@ -91,7 +90,7 @@ def generate_launch_description():
             description='Full path to the behavior tree xml file to use'),
 
         DeclareLaunchArgument(
-            'map_subscribe_transient_local', default_value='false',
+            'map_subscribe_transient_local', default_value='true',
             description='Whether to set the map subscriber QoS to transient local'),
 
         Node(
@@ -126,14 +125,6 @@ def generate_launch_description():
             remappings=remappings),
 
         Node(
-            package='nav2_waypoint_follower',
-            executable='waypoint_follower',
-            name='waypoint_follower',
-            output='screen',
-            parameters=[configured_params],
-            remappings=remappings),
-
-        Node(
             package='nav2_lifecycle_manager',
             executable='lifecycle_manager',
             name='lifecycle_manager_navigation',
@@ -142,5 +133,10 @@ def generate_launch_description():
                         {'autostart': autostart},
                         {'node_names': lifecycle_nodes}]),
 
+        Node(
+            package='ubr1_navigation',
+            executable='tilt_head.py',
+            name='tilt_head_node',
+        ),
     ])
 

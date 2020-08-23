@@ -1,8 +1,8 @@
 amcl:
   ros__parameters:
-    alpha1: 0.1
+    alpha1: 0.3
     alpha2: 0.2
-    alpha3: 0.3
+    alpha3: 0.1
     alpha4: 0.2
     base_frame_id: "base_link"
     global_frame_id: "map"
@@ -66,7 +66,7 @@ controller_server:
     # Goal checker parameters
     goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
-      xy_goal_tolerance: 0.1
+      xy_goal_tolerance: 0.125
       yaw_goal_tolerance: 0.25
       stateful: True
     # DWB parameters
@@ -86,7 +86,7 @@ controller_server:
       acc_lim_theta: 1.0
       decel_lim_x: -0.5
       decel_lim_y: 0.0
-      decel_lim_theta: -0.6
+      decel_lim_theta: -1.0
       vx_samples: 20
       vy_samples: 1
       vtheta_samples: 20
@@ -94,18 +94,18 @@ controller_server:
       linear_granularity: 0.05
       angular_granularity: 0.025
       transform_tolerance: 0.2
-      xy_goal_tolerance: 0.25
+      xy_goal_tolerance: 0.05
       trans_stopped_velocity: 0.25
       short_circuit_trajectory_evaluation: True
       stateful: True
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 0.02
       PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.25
-      GoalAlign.scale: 24.0
-      GoalAlign.forward_point_distance: 0.25
+      PathAlign.forward_point_distance: 0.3
+      GoalAlign.scale: 12.0
+      GoalAlign.forward_point_distance: 0.3
       PathDist.scale: 32.0
-      GoalDist.scale: 24.0
+      GoalDist.scale: 12.0
       RotateToGoal.scale: 32.0
       RotateToGoal.slowing_factor: 5.0
       RotateToGoal.lookahead_time: -1.0
@@ -122,10 +122,12 @@ local_costmap:
       height: 3
       resolution: 0.05
       robot_radius: 0.2413
+      footprint_padding: 0.025
       plugins: ["voxel_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
-        cost_scaling_factor: 3.0
+        cost_scaling_factor: 10.0
+        inflation_radius: 0.65
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
@@ -135,13 +137,27 @@ local_costmap:
         z_voxels: 16
         max_obstacle_height: 2.0
         mark_threshold: 0
-        observation_sources: scan
-        scan:
+        observation_sources: base_scan tilting_cloud tilting_cloud_clearing
+        base_scan:
           topic: /base_scan
           max_obstacle_height: 2.0
           clearing: True
           marking: True
           data_type: "LaserScan"
+        tilting_cloud:
+          topic: /head_camera/depth_downsample/points
+          min_obstacle_height: 0.2
+          max_obstacle_height: 2.0
+          clearing: False
+          marking: True
+          data_type: "PointCloud2"
+        tilting_cloud_clearing:
+          topic: /head_camera/depth_downsample/points
+          min_obstacle_height: 0.0
+          max_obstacle_height: 0.5
+          clearing: True
+          marking: False
+          data_type: "PointCloud2"
       always_send_full_costmap: True
 
 global_costmap:
@@ -152,6 +168,7 @@ global_costmap:
       global_frame: map
       robot_base_frame: base_link
       robot_radius: 0.2413
+      footprint_padding: 0.025
       resolution: 0.05
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
       obstacle_layer:
@@ -169,6 +186,8 @@ global_costmap:
 #       map_subscribe_transient_local: True
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
+        cost_scaling_factor: 10.0
+        inflation_radius: 0.65
       always_send_full_costmap: True
 
 map_server:

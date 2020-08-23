@@ -18,4 +18,10 @@ install(
   DESTINATION share/${PROJECT_NAME}/
 )
 
+install(
+  PROGRAMS
+    scripts/tilt_head.py
+  DESTINATION lib/${PROJECT_NAME}
+)
+
 ament_package()
