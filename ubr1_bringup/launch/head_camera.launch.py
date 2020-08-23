@@ -145,6 +145,7 @@ def generate_launch_description():
                     plugin='image_proc::CropDecimateNode',
                     name='depth_downsample',
                     namespace=LaunchConfiguration('namespace'),
+                    parameters=[{'decimation_x': 4, 'decimation_y': 4}],
                     remappings=[('in/image', 'depth_registered/image_rect'),
                                 ('in/camera_info', 'depth/camera_info'),
                                 ('out/image', 'depth_downsample/image'),
