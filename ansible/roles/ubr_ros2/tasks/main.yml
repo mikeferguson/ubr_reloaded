@@ -63,13 +63,6 @@
     owner: ubr
     group: ubr
 
-- name: Disable ubr1_moveit (not currently building right)
-  file:
-    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_moveit/CATKIN_IGNORE"
-    state: touch
-    owner: ubr
-    group: ubr
-
 - name: Install dependencies
   shell: rosdep update && rosdep install --from-paths src --ignore-src --rosdistro={{ rosdistro }} -y -r
   args:
