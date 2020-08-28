@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2020, Michael Ferguson
  * Copyright (c) 2015-2016, Fetch Robotics Inc.
  * All rights reserved.
  *
@@ -28,17 +29,20 @@
 
 // Author: Anuj Pasricha, Michael Ferguson
 
-#ifndef FETCH_DEPTH_LAYER_DEPTH_LAYER_H
-#define FETCH_DEPTH_LAYER_DEPTH_LAYER_H
+#ifndef UBR1_NAVIGATION__DEPTH_LAYER_HPP_
+#define UBR1_NAVIGATION__DEPTH_LAYER_HPP_
 
-#include <boost/thread/mutex.hpp>
-#include <boost/shared_ptr.hpp>
-#include <costmap_2d/voxel_layer.h>
-#include <cv_bridge/cv_bridge.h>
-#include <image_transport/image_transport.h>
-#include <sensor_msgs/image_encodings.h>
-#include <tf2_ros/message_filter.h>
-#include <message_filters/subscriber.h>
+#include <mutex>
+
+#include "nav2_costmap_2d/observation_buffer.hpp"
+#include "nav2_costmap_2d/voxel_layer.hpp"
+#include "cv_bridge/cv_bridge.h"
+#include "image_transport/image_transport.hpp"
+#include "sensor_msgs/image_encodings.hpp"
+#include "sensor_msgs/msg/image.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "tf2_ros/message_filter.h"
+//#include <message_filters/subscriber.h>
 
 #include <opencv2/rgbd.hpp>
 using cv::rgbd::DepthCleaner;
@@ -46,25 +50,25 @@ using cv::rgbd::RgbdNormals;
 using cv::rgbd::RgbdPlane;
 using cv::rgbd::depthTo3d;
 
-namespace costmap_2d
+namespace nav2_costmap_2d
 {
 
 /**
- * @class FetchDepthLayer
+ * @class DepthLayer
  * @brief A costmap layer that extracts ground plane and clears it.
  */
-class FetchDepthLayer : public VoxelLayer
+class DepthLayer : public VoxelLayer
 {
 public:
   /**
    * @brief Constructor
    */
-  FetchDepthLayer();
+  DepthLayer();
 
   /**
    * @brief Destructor for the depth costmap layer
    */
-  virtual ~FetchDepthLayer();
+  virtual ~DepthLayer();
 
   /**
    * @brief Initialization function for the DepthLayer
@@ -72,13 +76,11 @@ public:
   virtual void onInitialize();
 
 private:
-  void cameraInfoCallback(
-    const sensor_msgs::CameraInfo::ConstPtr& msg);
-  void depthImageCallback(
-    const sensor_msgs::Image::ConstPtr& msg);
+  void cameraInfoCallback(const sensor_msgs::msg::CameraInfo::SharedPtr msg);
+  void depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg);
 
-  boost::shared_ptr<costmap_2d::ObservationBuffer> marking_buf_;
-  boost::shared_ptr<costmap_2d::ObservationBuffer> clearing_buf_;
+  std::shared_ptr<nav2_costmap_2d::ObservationBuffer> marking_buf_;
+  std::shared_ptr<nav2_costmap_2d::ObservationBuffer> clearing_buf_;
 
   // should we publish the marking/clearing observations
   bool publish_observations_;
@@ -86,9 +88,6 @@ private:
   // distance away from ground plane at which
   // something is considered an obstacle
   double observations_threshold_;
-
-  // should we dynamically find the ground plane?
-  bool find_ground_plane_;
 
   // if finding ground plane, limit the tilt
   // with respect to base_link frame
@@ -108,21 +107,21 @@ private:
 
   // retrieves depth image from head_camera
   // used to fit ground plane to
-  boost::shared_ptr< message_filters::Subscriber<sensor_msgs::Image> > depth_image_sub_;
-  boost::shared_ptr< tf2_ros::MessageFilter<sensor_msgs::Image> > depth_image_filter_;
+  std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image>> depth_image_sub_;
+  std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::Image>> depth_image_filter_;
 
   // retrieves camera matrix for head_camera
   // used in calculating ground plane
-  ros::Subscriber camera_info_sub_;
+  rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
 
   // publishes clearing observations
-  ros::Publisher clearing_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr clearing_pub_;
 
   // publishes marking observations
-  ros::Publisher marking_pub_;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr marking_pub_;
 
   // camera intrinsics
-  boost::mutex mutex_K_;
+  std::mutex mutex_K_;
   cv::Mat K_;
 
   // clean the depth image
@@ -133,7 +132,6 @@ private:
   cv::Ptr<RgbdPlane> plane_estimator_;
 };
 
-}  // namespace costmap_2d
+}  // namespace nav2_costmap_2d
 
-#endif  // FETCH_DEPTH_LAYER_DEPTH_LAYER_H
-
+#endif  // UBR1_NAVIGATION__DEPTH_LAYER_HPP

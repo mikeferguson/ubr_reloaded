@@ -1,0 +1,7 @@
+<class_libraries>
+  <library path="depth_layer">
+    <class type="nav2_costmap_2d::DepthLayer"  base_class_type="nav2_costmap_2d::Layer">
+      <description>A costmap layer that extracts ground plane and clears it.</description>
+    </class>
+  </library>
+</class_libraries>

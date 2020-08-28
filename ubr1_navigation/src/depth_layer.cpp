@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2020, Michael Ferguson
  * Copyright (c) 2015-2016, Fetch Robotics Inc.
  * All rights reserved.
  *
@@ -28,143 +29,154 @@
 
 // Author: Anuj Pasricha, Michael Ferguson
 
-#include <pluginlib/class_list_macros.hpp>
-#include <fetch_depth_layer/depth_layer.h>
 #include <limits>
-#include <geometry_msgs/Vector3Stamped.h>
 
-PLUGINLIB_EXPORT_CLASS(costmap_2d::FetchDepthLayer, costmap_2d::Layer)
+#include "ubr1_navigation/depth_layer.hpp"
 
-namespace costmap_2d
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/vector3_stamped.hpp"
+#include "pluginlib/class_list_macros.hpp"
+#include "sensor_msgs/point_cloud_conversion.hpp"
+
+PLUGINLIB_EXPORT_CLASS(nav2_costmap_2d::DepthLayer, nav2_costmap_2d::Layer)
+
+namespace nav2_costmap_2d
 {
 
-FetchDepthLayer::FetchDepthLayer()
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("basic_grasping_perception");
+
+DepthLayer::DepthLayer()
 {
 }
 
-void FetchDepthLayer::onInitialize()
+void DepthLayer::onInitialize()
 {
   VoxelLayer::onInitialize();
 
+  declareParameter("publish_observations", rclcpp::ParameterValue(false));
+  declareParameter("observations_separation_threshold", rclcpp::ParameterValue(0.06));
+
+  // Detect the ground plane
+  declareParameter("ground_orientation_threshold", rclcpp::ParameterValue(0.9));
+
+  // Should NANs be used as clearing observations?
+  declareParameter("clear_nans", rclcpp::ParameterValue(false));
+
+  // Observation range values for both marking and clearing
+  declareParameter("min_obstacle_height", rclcpp::ParameterValue(0.0));
+  declareParameter("max_obstacle_height", rclcpp::ParameterValue(2.0));
+  declareParameter("min_clearing_height", rclcpp::ParameterValue(-std::numeric_limits<double>::infinity()));
+  declareParameter("max_clearing_height", rclcpp::ParameterValue(std::numeric_limits<double>::infinity()));
+  declareParameter("observation_range", rclcpp::ParameterValue(2.5));
+  declareParameter("raytrace_range", rclcpp::ParameterValue(3.0));
+
+  // Skipping of potentially noisy rays near the edge of the image
+  declareParameter("skip_rays_bottom", rclcpp::ParameterValue(20));
+  declareParameter("skip_rays_top", rclcpp::ParameterValue(20));
+  declareParameter("skip_rays_left", rclcpp::ParameterValue(20));
+  declareParameter("skip_rays_right", rclcpp::ParameterValue(20));
+
+  // Should skipped edge rays be used for clearing?
+  declareParameter("clear_with_skipped_rays", rclcpp::ParameterValue(false));
+
+  // How long should observations persist?
+  declareParameter("observation_persistence", rclcpp::ParameterValue(0.0));
+
+  // How often should we expect to get sensor updates?
+  declareParameter("expected_update_rate", rclcpp::ParameterValue(0.0));
+
+  // How long to wait for transforms to be available?
+  declareParameter("transform_tolerance", rclcpp::ParameterValue(0.5));
+
+  // Topic names
+  declareParameter("depth_topic", rclcpp::ParameterValue(std::string("/head_camera/depth_downsample/image_raw")));
+  declareParameter("info_topic", rclcpp::ParameterValue(std::string("/head_camera/depth_downsample/camera_info")));
+
+  // Get parameters
+  node_->get_parameter(name_ + ".publish_observations", publish_observations_);
+  node_->get_parameter(name_ + ".observations_separation_threshold", observations_threshold_);
+  node_->get_parameter(name_ + ".ground_orientation_threshold", ground_threshold_);
+  node_->get_parameter(name_ + ".clear_nans", clear_nans_);
+  double min_obstacle_height, max_obstacle_height, min_clearing_height, max_clearing_height;
+  node_->get_parameter(name_ + ".min_obstacle_height", min_obstacle_height);
+  node_->get_parameter(name_ + ".max_obstacle_height", max_obstacle_height);
+  node_->get_parameter(name_ + ".min_clearing_height", min_clearing_height);
+  node_->get_parameter(name_ + ".max_clearing_height", max_clearing_height);
+  node_->get_parameter(name_ + ".skip_rays_bottom", skip_rays_bottom_);
+  node_->get_parameter(name_ + ".skip_rays_top",    skip_rays_top_);
+  node_->get_parameter(name_ + ".skip_rays_left",   skip_rays_left_);
+  node_->get_parameter(name_ + ".skip_rays_right",  skip_rays_right_);
+  node_->get_parameter(name_ + ".clear_with_skipped_rays", clear_with_skipped_rays_);
   double observation_keep_time;
+  node_->get_parameter(name_ + ".observation_persistence", observation_keep_time);
   double expected_update_rate;
+  node_->get_parameter(name_ + ".expected_update_rate", expected_update_rate);
   double transform_tolerance;
-  double obstacle_range;
-  double raytrace_range;
-  double min_obstacle_height;
-  double max_obstacle_height;
-  double min_clearing_height;
-  double max_clearing_height;
+  node_->get_parameter(name_ + ".transform_tolerance", transform_tolerance);
+  double obstacle_range, raytrace_range;
+  node_->get_parameter(name_ + ".obstacle_range", obstacle_range);
+  node_->get_parameter(name_ + ".raytrace_range", raytrace_range);
+
   std::string topic = "";
   std::string sensor_frame = "";
 
-  ros::NodeHandle private_nh("~/" + name_);
-
-  private_nh.param("publish_observations", publish_observations_, false);
-  private_nh.param("observations_separation_threshold", observations_threshold_, 0.06);
-
-  // Optionally detect the ground plane
-  private_nh.param("find_ground_plane", find_ground_plane_, true);
-  private_nh.param("ground_orientation_threshold", ground_threshold_, 0.9);
-
-  // Should NANs be used as clearing observations?
-  private_nh.param("clear_nans", clear_nans_, false);
-
-  // Observation range values for both marking and clearing
-  private_nh.param("min_obstacle_height", min_obstacle_height, 0.0);
-  private_nh.param("max_obstacle_height", max_obstacle_height, 2.0);
-  private_nh.param("min_clearing_height", min_clearing_height, -std::numeric_limits<double>::infinity());
-  private_nh.param("max_clearing_height", max_clearing_height, std::numeric_limits<double>::infinity());
-
-  // Skipping of potentially noisy rays near the edge of the image
-  private_nh.param("skip_rays_bottom", skip_rays_bottom_, 20);
-  private_nh.param("skip_rays_top",    skip_rays_top_,    20);
-  private_nh.param("skip_rays_left",   skip_rays_left_,   20);
-  private_nh.param("skip_rays_right",  skip_rays_right_,  20);
-
-  // Should skipped edge rays be used for clearing?
-  private_nh.param("clear_with_skipped_rays", clear_with_skipped_rays_, false);
-
-  // How long should observations persist?
-  private_nh.param("observation_persistence", observation_keep_time, 0.0);
-
-  // How often should we expect to get sensor updates?
-  private_nh.param("expected_update_rate", expected_update_rate, 0.0);
-
-  // How long to wait for transforms to be available?
-  private_nh.param("transform_tolerance", transform_tolerance, 0.5);
-
-  std::string raytrace_range_param_name, obstacle_range_param_name;
-
-  // get the obstacle range for the sensor
-  obstacle_range = 2.5;
-  if (private_nh.searchParam("obstacle_range", obstacle_range_param_name))
-  {
-    private_nh.getParam(obstacle_range_param_name, obstacle_range);
-  }
-
-  // get the raytrace range for the sensor
-  raytrace_range = 3.0;
-  if (private_nh.searchParam("raytrace_range", raytrace_range_param_name))
-  {
-    private_nh.getParam(raytrace_range_param_name, raytrace_range);
-  }
-
-  marking_buf_ = boost::shared_ptr<costmap_2d::ObservationBuffer> (
-  	new costmap_2d::ObservationBuffer(topic, observation_keep_time,
-  	  expected_update_rate, min_obstacle_height, max_obstacle_height,
-  	  obstacle_range, raytrace_range, *tf_, global_frame_,
-  	  sensor_frame, transform_tolerance));
+  marking_buf_ = std::make_shared<nav2_costmap_2d::ObservationBuffer>(
+    node_, topic, observation_keep_time, expected_update_rate,
+    min_obstacle_height, max_obstacle_height, obstacle_range, raytrace_range,
+    *tf_, global_frame_, sensor_frame, transform_tolerance);
   marking_buffers_.push_back(marking_buf_);
   observation_buffers_.push_back(marking_buf_);
 
   min_obstacle_height = 0.0;
 
-  clearing_buf_ =  boost::shared_ptr<costmap_2d::ObservationBuffer> (
-  	new costmap_2d::ObservationBuffer(topic, observation_keep_time,
-  	  expected_update_rate, min_clearing_height, max_clearing_height,
-  	  obstacle_range, raytrace_range, *tf_, global_frame_,
-  	  sensor_frame, transform_tolerance));
+  clearing_buf_ =  std::make_shared<nav2_costmap_2d::ObservationBuffer>(
+    node_, topic, observation_keep_time, expected_update_rate,
+    min_clearing_height, max_clearing_height, obstacle_range, raytrace_range,
+    *tf_, global_frame_, sensor_frame, transform_tolerance);
   clearing_buffers_.push_back(clearing_buf_);
   observation_buffers_.push_back(clearing_buf_);
 
+  rclcpp::QoS points_qos(1);
+  points_qos.best_effort();
   if (publish_observations_)
   {
-    clearing_pub_ = private_nh.advertise<sensor_msgs::PointCloud>("clearing_obs", 1);
-    marking_pub_ = private_nh.advertise<sensor_msgs::PointCloud>("marking_obs", 1);
+    clearing_pub_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>("clearing_obs", points_qos);
+    marking_pub_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>("marking_obs", points_qos);
   }
 
-  // subscribe to camera/info topics
+  // Subscribe to camera/info topics
   std::string camera_depth_topic, camera_info_topic;
-  private_nh.param("depth_topic", camera_depth_topic,
-                   std::string("/head_camera/depth_downsample/image_raw"));
-  private_nh.param("info_topic", camera_info_topic,
-                   std::string("/head_camera/depth_downsample/camera_info"));
-  camera_info_sub_ = private_nh.subscribe<sensor_msgs::CameraInfo>(
-    camera_info_topic, 10, &FetchDepthLayer::cameraInfoCallback, this);
+  node_->get_parameter("depth_topic", camera_depth_topic);
+  node_->get_parameter("info_topic", camera_info_topic);
 
-  depth_image_sub_.reset(new message_filters::Subscriber<sensor_msgs::Image>(private_nh, camera_depth_topic, 10));
-  depth_image_filter_ = boost::shared_ptr< tf2_ros::MessageFilter<sensor_msgs::Image> >(
-    new tf2_ros::MessageFilter<sensor_msgs::Image>(*depth_image_sub_, *tf_, global_frame_, 10, private_nh));
-  depth_image_filter_->registerCallback(boost::bind(&FetchDepthLayer::depthImageCallback, this, _1));
+  camera_info_sub_ = node_->create_subscription<sensor_msgs::msg::CameraInfo>(
+    camera_info_topic,
+    points_qos,
+    std::bind(&DepthLayer::cameraInfoCallback, this, std::placeholders::_1));
+
+  depth_image_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image>>(
+    rclcpp_node_, camera_depth_topic, rmw_qos_profile_sensor_data);
+  depth_image_filter_ = std::shared_ptr< tf2_ros::MessageFilter<sensor_msgs::msg::Image> >(
+    new tf2_ros::MessageFilter<sensor_msgs::msg::Image>(
+      *depth_image_sub_, *tf_, global_frame_, 10, rclcpp_node_));
+  depth_image_filter_->registerCallback(
+    std::bind(&DepthLayer::depthImageCallback, this, std::placeholders::_1));
   observation_subscribers_.push_back(depth_image_sub_);
   observation_notifiers_.push_back(depth_image_filter_);
-  observation_notifiers_.back()->setTolerance(ros::Duration(0.05));
 }
 
-FetchDepthLayer::~FetchDepthLayer()
+DepthLayer::~DepthLayer()
 {
 }
 
-void FetchDepthLayer::cameraInfoCallback(
-  const sensor_msgs::CameraInfo::ConstPtr& msg)
+void DepthLayer::cameraInfoCallback(const sensor_msgs::msg::CameraInfo::SharedPtr msg)
 {
   // Lock mutex before updating K
-  boost::unique_lock<boost::mutex> lock(mutex_K_);
+  std::lock_guard<std::mutex> lock(mutex_K_);
 
-  float focal_pixels_ = msg->P[0];
-  float center_x_ = msg->P[2];
-  float center_y_ = msg->P[6];
+  float focal_pixels_ = msg->p[0];
+  float center_x_ = msg->p[2];
+  float center_y_ = msg->p[6];
 
   if (msg->binning_x == msg->binning_y)
   {
@@ -185,19 +197,18 @@ void FetchDepthLayer::cameraInfoCallback(
   }
   else
   {
-    ROS_ERROR("binning_x is not equal to binning_y");
+    RCLCPP_ERROR(LOGGER, "binning_x is not equal to binning_y");
   }
 }
 
-void FetchDepthLayer::depthImageCallback(
-  const sensor_msgs::Image::ConstPtr& msg)
+void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
 {
   // Lock mutex before using K
-  boost::unique_lock<boost::mutex> lock(mutex_K_);
+  std::lock_guard<std::mutex> lock(mutex_K_);
 
   if (K_.empty())
   {
-    ROS_DEBUG_NAMED("depth_layer", "Camera info not yet received.");
+    RCLCPP_DEBUG(LOGGER, "Camera info not yet received.");
     return;
   }
 
@@ -208,7 +219,7 @@ void FetchDepthLayer::depthImageCallback(
   }
   catch (cv_bridge::Exception& e)
   {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
+    RCLCPP_ERROR(LOGGER, "cv_bridge exception: %s", e.what());
     return;
   }
 
@@ -226,94 +237,65 @@ void FetchDepthLayer::depthImageCallback(
   cv::Mat points3d;
   depthTo3d(cv_ptr->image, K_, points3d);
 
-  // Determine ground plane, either through camera or TF
+  // Get normals
+  if (normals_estimator_.empty())
+  {
+    normals_estimator_.reset(new RgbdNormals(cv_ptr->image.rows,
+                                             cv_ptr->image.cols,
+                                             cv_ptr->image.depth(),
+                                             K_));
+  }
+  cv::Mat normals;
+  (*normals_estimator_)(points3d, normals);
+
+  // Find plane(s)
+  if (plane_estimator_.empty())
+  {
+    plane_estimator_.reset(new RgbdPlane());
+    // Model parameters are based on notes in opencv_candidate
+    plane_estimator_->setSensorErrorA(0.0075);
+    plane_estimator_->setSensorErrorB(0.0);
+    plane_estimator_->setSensorErrorC(0.0);
+    // Image/cloud height/width must be multiple of block size
+    plane_estimator_->setBlockSize(40);
+    // Distance a point can be from plane and still be part of it
+    plane_estimator_->setThreshold(observations_threshold_);
+    // Minimum cluster size to be a plane
+    plane_estimator_->setMinSize(1000);
+  }
+  cv::Mat planes_mask;
+  std::vector<cv::Vec4f> plane_coefficients;
+  (*plane_estimator_)(points3d, normals, planes_mask, plane_coefficients);
+
   cv::Vec4f ground_plane;
-  if (find_ground_plane_)
+  for (size_t i = 0; i < plane_coefficients.size(); i++)
   {
-    // Get normals
-    if (normals_estimator_.empty())
+    // check plane orientation
+    if ((fabs(0.0 - plane_coefficients[i][0]) <= ground_threshold_) &&
+        (fabs(1.0 + plane_coefficients[i][1]) <= ground_threshold_) &&
+        (fabs(0.0 - plane_coefficients[i][2]) <= ground_threshold_))
     {
-      normals_estimator_.reset(new RgbdNormals(cv_ptr->image.rows,
-                                               cv_ptr->image.cols,
-                                               cv_ptr->image.depth(),
-                                               K_));
-    }
-    cv::Mat normals;
-    (*normals_estimator_)(points3d, normals);
-
-    // Find plane(s)
-    if (plane_estimator_.empty())
-    {
-      plane_estimator_.reset(new RgbdPlane());
-      // Model parameters are based on notes in opencv_candidate
-      plane_estimator_->setSensorErrorA(0.0075);
-      plane_estimator_->setSensorErrorB(0.0);
-      plane_estimator_->setSensorErrorC(0.0);
-      // Image/cloud height/width must be multiple of block size
-      plane_estimator_->setBlockSize(40);
-      // Distance a point can be from plane and still be part of it
-      plane_estimator_->setThreshold(observations_threshold_);
-      // Minimum cluster size to be a plane
-      plane_estimator_->setMinSize(1000);
-    }
-    cv::Mat planes_mask;
-    std::vector<cv::Vec4f> plane_coefficients;
-    (*plane_estimator_)(points3d, normals, planes_mask, plane_coefficients);
-
-    for (size_t i = 0; i < plane_coefficients.size(); i++)
-    {
-      // check plane orientation
-      if ((fabs(0.0 - plane_coefficients[i][0]) <= ground_threshold_) &&
-          (fabs(1.0 + plane_coefficients[i][1]) <= ground_threshold_) &&
-          (fabs(0.0 - plane_coefficients[i][2]) <= ground_threshold_))
-      {
-        ground_plane = plane_coefficients[i];
-        break;
-      }
-    }
-  }
-  else
-  {
-    // find ground plane in camera coordinates using tf
-    // transform normal axis
-    geometry_msgs::Vector3Stamped vector;
-    vector.vector.x = 0;
-    vector.vector.y = 0;
-    vector.vector.z = 1;
-    vector.header.frame_id = "base_link";
-    vector.header.stamp = ros::Time();
-    tf_->transform(vector, vector, msg->header.frame_id);
-    ground_plane[0] = vector.vector.x;
-    ground_plane[1] = vector.vector.y;
-    ground_plane[2] = vector.vector.z;
-
-    // find offset
-    geometry_msgs::TransformStamped transform;
-    try {
-      transform = tf_->lookupTransform("base_link", msg->header.frame_id, msg->header.stamp);
-      ground_plane[3] = transform.transform.translation.z;
-    } catch (tf2::TransformException){
-      ROS_WARN("Failed to lookup transform!");
-      return;
+      ground_plane = plane_coefficients[i];
+      break;
     }
   }
 
-  // check that ground plane actually exists, so it doesn't count as marking observations
+  // Check that ground plane actually exists, so it doesn't count as marking observations
   if (ground_plane[0] == 0.0 && ground_plane[1] == 0.0 &&
       ground_plane[2] == 0.0 && ground_plane[3] == 0.0)
   {
-    ROS_DEBUG_NAMED("depth_layer", "Invalid ground plane.");
+    RCLCPP_DEBUG(LOGGER, "Invalid ground plane.");
     return;
   }
 
   cv::Mat channels[3];
   cv::split(points3d, channels);
 
-  sensor_msgs::PointCloud clearing_points;
+  sensor_msgs::msg::PointCloud clearing_points;
   clearing_points.header.stamp = msg->header.stamp;
   clearing_points.header.frame_id = msg->header.frame_id;
 
-  sensor_msgs::PointCloud marking_points;
+  sensor_msgs::msg::PointCloud marking_points;
   marking_points.header.stamp = msg->header.stamp;
   marking_points.header.frame_id = msg->header.frame_id;
 
@@ -323,7 +305,7 @@ void FetchDepthLayer::depthImageCallback(
     for (size_t j = 0; j < points3d.cols; j++)
     {
       // Get next point
-      geometry_msgs::Point32 current_point;
+      geometry_msgs::msg::Point32 current_point;
       current_point.x = channels[0].at<float>(i, j);
       current_point.y = channels[1].at<float>(i, j);
       current_point.z = channels[2].at<float>(i, j);
@@ -399,41 +381,41 @@ void FetchDepthLayer::depthImageCallback(
     }  // for i (x)
   }
 
+  sensor_msgs::msg::PointCloud2 clearing_cloud;
+  if (!sensor_msgs::convertPointCloudToPointCloud2(clearing_points, clearing_cloud))
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to convert a PointCloud to a PointCloud2, dropping message");
+    return;
+  }
+
   // Publish and buffer our clearing point cloud
   if (publish_observations_)
   {
-    clearing_pub_.publish(clearing_points);
-  }
-
-  sensor_msgs::PointCloud2 clearing_cloud2;
-  if (!sensor_msgs::convertPointCloudToPointCloud2(clearing_points, clearing_cloud2))
-  {
-    ROS_ERROR("Failed to convert a PointCloud to a PointCloud2, dropping message");
-    return;
+    clearing_pub_->publish(clearing_cloud);
   }
 
   // buffer the ground plane observation
   clearing_buf_->lock();
-  clearing_buf_->bufferCloud(clearing_cloud2);
+  clearing_buf_->bufferCloud(clearing_cloud);
   clearing_buf_->unlock();
+
+  sensor_msgs::msg::PointCloud2 marking_cloud;
+  if (!sensor_msgs::convertPointCloudToPointCloud2(marking_points, marking_cloud))
+  {
+    RCLCPP_ERROR(LOGGER, "Failed to convert a PointCloud to a PointCloud2, dropping message");
+    return;
+  }
 
   // Publish and buffer our marking point cloud
   if (publish_observations_)
   {
-    marking_pub_.publish(marking_points);
-  }
-
-  sensor_msgs::PointCloud2 marking_cloud2;
-  if (!sensor_msgs::convertPointCloudToPointCloud2(marking_points, marking_cloud2))
-  {
-    ROS_ERROR("Failed to convert a PointCloud to a PointCloud2, dropping message");
-    return;
+    marking_pub_->publish(marking_cloud);
   }
 
   marking_buf_->lock();
-  marking_buf_->bufferCloud(marking_cloud2);
+  marking_buf_->bufferCloud(marking_cloud);
   marking_buf_->unlock();
 }
 
-}  // namespace costmap_2d
+}  // namespace nav2_costmap_2d
 
