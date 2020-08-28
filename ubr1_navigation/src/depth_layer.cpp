@@ -36,7 +36,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/vector3_stamped.hpp"
 #include "pluginlib/class_list_macros.hpp"
-#include "sensor_msgs/point_cloud_conversion.hpp"
+#include "sensor_msgs/point_cloud2_iterator.hpp"
 
 PLUGINLIB_EXPORT_CLASS(nav2_costmap_2d::DepthLayer, nav2_costmap_2d::Layer)
 
@@ -291,13 +291,29 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
   cv::Mat channels[3];
   cv::split(points3d, channels);
 
-  sensor_msgs::msg::PointCloud clearing_points;
-  clearing_points.header.stamp = msg->header.stamp;
-  clearing_points.header.frame_id = msg->header.frame_id;
+  // Create clearing cloud
+  int clearing_points = 0;
+  sensor_msgs::msg::PointCloud2 clearing_msg;
+  clearing_msg.header.stamp = msg->header.stamp;
+  clearing_msg.header.frame_id = msg->header.frame_id;
+  sensor_msgs::PointCloud2Modifier clearing_mod(clearing_msg);
+  clearing_mod.setPointCloud2FieldsByString(1, "xyz");
+  clearing_mod.resize(cv_ptr->image.rows * cv_ptr->image.cols);
+  sensor_msgs::PointCloud2Iterator<float> clearing_x(clearing_msg, "x");
+  sensor_msgs::PointCloud2Iterator<float> clearing_y(clearing_msg, "y");
+  sensor_msgs::PointCloud2Iterator<float> clearing_z(clearing_msg, "z");
 
-  sensor_msgs::msg::PointCloud marking_points;
-  marking_points.header.stamp = msg->header.stamp;
-  marking_points.header.frame_id = msg->header.frame_id;
+  // Create marking cloud
+  int marking_points = 0;
+  sensor_msgs::msg::PointCloud2 marking_msg;
+  marking_msg.header.stamp = msg->header.stamp;
+  marking_msg.header.frame_id = msg->header.frame_id;
+  sensor_msgs::PointCloud2Modifier marking_mod(marking_msg);
+  marking_mod.setPointCloud2FieldsByString(1, "xyz");
+  marking_mod.resize(cv_ptr->image.rows * cv_ptr->image.cols);
+  sensor_msgs::PointCloud2Iterator<float> marking_x(marking_msg, "x");
+  sensor_msgs::PointCloud2Iterator<float> marking_y(marking_msg, "y");
+  sensor_msgs::PointCloud2Iterator<float> marking_z(marking_msg, "z");
 
   // Put points in clearing/marking clouds
   for (size_t i = 0; i < points3d.rows; i++)
@@ -306,114 +322,124 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
     {
       // Get next point
       geometry_msgs::msg::Point32 current_point;
-      current_point.x = channels[0].at<float>(i, j);
-      current_point.y = channels[1].at<float>(i, j);
-      current_point.z = channels[2].at<float>(i, j);
+      float x = channels[0].at<float>(i, j);
+      float y = channels[1].at<float>(i, j);
+      float z = channels[2].at<float>(i, j);
       // Check point validity
-      if (current_point.x != 0.0 &&
-          current_point.y != 0.0 &&
-          current_point.z != 0.0 &&
-          !std::isnan(current_point.x) &&
-          !std::isnan(current_point.y) &&
-          !std::isnan(current_point.z))
+      if (x != 0.0 && !std::isnan(x) &&
+          y != 0.0 && !std::isnan(y) &&
+          z != 0.0 && !std::isnan(z))
       {
-        if (clear_with_skipped_rays_)
-        {
-          // If edge rays are to be used for clearing, go ahead and add them now.
-          clearing_points.points.push_back(current_point);
-        }
-
-        // Do not consider boundary points for obstacles marking since they are very noisy.
-        if (i < skip_rays_top_ ||
-            i >= points3d.rows - skip_rays_bottom_ ||
-            j < skip_rays_left_ ||
-            j >= points3d.cols - skip_rays_right_)
-        {
-          continue;
-        }
-
-        if (!clear_with_skipped_rays_)
-        {
-          // If edge rays are not to be used for clearing, only add them after the edge check.
-          clearing_points.points.push_back(current_point);
-        }
-
         // Check if point is part of the ground plane
         if (fabs(ground_plane[0] * current_point.x +
                  ground_plane[1] * current_point.y +
                  ground_plane[2] * current_point.z +
                  ground_plane[3]) <= observations_threshold_)
         {
-          continue;  // Do not mark points near the floor.
-        }
-
-        // Check for outliers, mark non-outliers as obstacles.
-        int num_valid = 0;
-        for (int x = -1; x < 2; x++)
-        {
-          for (int y = -1; y < 2; y++)
+          if (clear_with_skipped_rays_)
           {
-            if (x == 0 && y == 0)
-            {
-              continue;
-            }
-            float px = channels[0].at<float>(i+x, j+y);
-            float py = channels[1].at<float>(i+x, j+y);
-            float pz = channels[2].at<float>(i+x, j+y);
-            if (px != 0.0 && py != 0.0 && pz != 0.0 &&
-                !std::isnan(px) && !std::isnan(py) && !std::isnan(pz))
-            {
-              if ( fabs(px - current_point.x) < 0.1 &&
-                    fabs(py - current_point.y) < 0.1 &&
-                    fabs(pz - current_point.z) < 0.1)
-              {
-                num_valid++;
-              }
-            }
-          }  // for y
-        }  // for x
-
-        if (num_valid >= 7)
+            // If edge rays are to be used for clearing, go ahead and add them now.
+            *clearing_x = x;
+            *clearing_y = y;
+            *clearing_z = z;
+            ++clearing_points;
+            ++clearing_x;
+            ++clearing_y;
+            ++clearing_z;
+          }
+          else if (i < skip_rays_top_ ||
+                   i >= points3d.rows - skip_rays_bottom_ ||
+                   j < skip_rays_left_ ||
+                   j >= points3d.cols - skip_rays_right_)
+          {
+            // Do not consider boundary points for clearing since they are very noisy.
+          }
+          else 
+          {
+            // If edge rays are not to be used for clearing, only add them after the edge check.
+            *clearing_x = x;
+            *clearing_y = y;
+            *clearing_z = z;
+            ++clearing_points;
+            ++clearing_x;
+            ++clearing_y;
+            ++clearing_z;
+          }
+        }
+        else  // is marking
         {
-          marking_points.points.push_back(current_point);
+          // Do not consider boundary points for obstacles marking since they are very noisy.
+          if (i < skip_rays_top_ ||
+              i >= points3d.rows - skip_rays_bottom_ ||
+              j < skip_rays_left_ ||
+              j >= points3d.cols - skip_rays_right_)
+          {
+            continue;
+          }
+
+          // Check for outliers, mark non-outliers as obstacles.
+          int num_valid = 0;
+          for (int x = -1; x < 2; x++)
+          {
+            for (int y = -1; y < 2; y++)
+            {
+              if (x == 0 && y == 0)
+              {
+                continue;
+              }
+              float px = channels[0].at<float>(i+x, j+y);
+              float py = channels[1].at<float>(i+x, j+y);
+              float pz = channels[2].at<float>(i+x, j+y);
+              if (px != 0.0 && py != 0.0 && pz != 0.0 &&
+                  !std::isnan(px) && !std::isnan(py) && !std::isnan(pz))
+              {
+                if ( fabs(px - current_point.x) < 0.1 &&
+                      fabs(py - current_point.y) < 0.1 &&
+                      fabs(pz - current_point.z) < 0.1)
+                {
+                  num_valid++;
+                }
+              }
+            }  // for y
+          }  // for x
+
+          if (num_valid >= 7)
+          {
+            *marking_x = x;
+            *marking_y = y;
+            *marking_z = z;
+            ++marking_points;
+            ++marking_x;
+            ++marking_y;
+            ++marking_z;
+          }
         }
       }  // for j (y)
     }  // for i (x)
   }
 
-  sensor_msgs::msg::PointCloud2 clearing_cloud;
-  if (!sensor_msgs::convertPointCloudToPointCloud2(clearing_points, clearing_cloud))
-  {
-    RCLCPP_ERROR(LOGGER, "Failed to convert a PointCloud to a PointCloud2, dropping message");
-    return;
-  }
+  clearing_mod.resize(clearing_points);
+  marking_mod.resize(marking_points);
 
   // Publish and buffer our clearing point cloud
   if (publish_observations_)
   {
-    clearing_pub_->publish(clearing_cloud);
+    clearing_pub_->publish(clearing_msg);
   }
 
   // buffer the ground plane observation
   clearing_buf_->lock();
-  clearing_buf_->bufferCloud(clearing_cloud);
+  clearing_buf_->bufferCloud(clearing_msg);
   clearing_buf_->unlock();
-
-  sensor_msgs::msg::PointCloud2 marking_cloud;
-  if (!sensor_msgs::convertPointCloudToPointCloud2(marking_points, marking_cloud))
-  {
-    RCLCPP_ERROR(LOGGER, "Failed to convert a PointCloud to a PointCloud2, dropping message");
-    return;
-  }
 
   // Publish and buffer our marking point cloud
   if (publish_observations_)
   {
-    marking_pub_->publish(marking_cloud);
+    marking_pub_->publish(marking_msg);
   }
 
   marking_buf_->lock();
-  marking_buf_->bufferCloud(marking_cloud);
+  marking_buf_->bufferCloud(marking_msg);
   marking_buf_->unlock();
 }
 
