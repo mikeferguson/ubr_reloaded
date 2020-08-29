@@ -43,7 +43,7 @@ PLUGINLIB_EXPORT_CLASS(nav2_costmap_2d::DepthLayer, nav2_costmap_2d::Layer)
 namespace nav2_costmap_2d
 {
 
-static const rclcpp::Logger LOGGER = rclcpp::get_logger("basic_grasping_perception");
+static const rclcpp::Logger LOGGER = rclcpp::get_logger("depth_layer");
 
 DepthLayer::DepthLayer()
 {
@@ -67,14 +67,14 @@ void DepthLayer::onInitialize()
   declareParameter("max_obstacle_height", rclcpp::ParameterValue(2.0));
   declareParameter("min_clearing_height", rclcpp::ParameterValue(-std::numeric_limits<double>::infinity()));
   declareParameter("max_clearing_height", rclcpp::ParameterValue(std::numeric_limits<double>::infinity()));
-  declareParameter("observation_range", rclcpp::ParameterValue(2.5));
+  declareParameter("obstacle_range", rclcpp::ParameterValue(2.5));
   declareParameter("raytrace_range", rclcpp::ParameterValue(3.0));
 
   // Skipping of potentially noisy rays near the edge of the image
-  declareParameter("skip_rays_bottom", rclcpp::ParameterValue(20));
-  declareParameter("skip_rays_top", rclcpp::ParameterValue(20));
-  declareParameter("skip_rays_left", rclcpp::ParameterValue(20));
-  declareParameter("skip_rays_right", rclcpp::ParameterValue(20));
+  declareParameter("skip_rays_bottom", rclcpp::ParameterValue(10));
+  declareParameter("skip_rays_top", rclcpp::ParameterValue(10));
+  declareParameter("skip_rays_left", rclcpp::ParameterValue(10));
+  declareParameter("skip_rays_right", rclcpp::ParameterValue(10));
 
   // Should skipped edge rays be used for clearing?
   declareParameter("clear_with_skipped_rays", rclcpp::ParameterValue(false));
@@ -117,20 +117,17 @@ void DepthLayer::onInitialize()
   node_->get_parameter(name_ + ".obstacle_range", obstacle_range);
   node_->get_parameter(name_ + ".raytrace_range", raytrace_range);
 
-  std::string topic = "";
   std::string sensor_frame = "";
 
   marking_buf_ = std::make_shared<nav2_costmap_2d::ObservationBuffer>(
-    node_, topic, observation_keep_time, expected_update_rate,
+    node_, name_, observation_keep_time, expected_update_rate,
     min_obstacle_height, max_obstacle_height, obstacle_range, raytrace_range,
     *tf_, global_frame_, sensor_frame, transform_tolerance);
   marking_buffers_.push_back(marking_buf_);
   observation_buffers_.push_back(marking_buf_);
 
-  min_obstacle_height = 0.0;
-
-  clearing_buf_ =  std::make_shared<nav2_costmap_2d::ObservationBuffer>(
-    node_, topic, observation_keep_time, expected_update_rate,
+  clearing_buf_ = std::make_shared<nav2_costmap_2d::ObservationBuffer>(
+    node_, name_, observation_keep_time, expected_update_rate,
     min_clearing_height, max_clearing_height, obstacle_range, raytrace_range,
     *tf_, global_frame_, sensor_frame, transform_tolerance);
   clearing_buffers_.push_back(clearing_buf_);
@@ -142,12 +139,14 @@ void DepthLayer::onInitialize()
   {
     clearing_pub_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>("clearing_obs", points_qos);
     marking_pub_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>("marking_obs", points_qos);
+    clearing_pub_->on_activate();
+    marking_pub_->on_activate();
   }
 
   // Subscribe to camera/info topics
   std::string camera_depth_topic, camera_info_topic;
-  node_->get_parameter("depth_topic", camera_depth_topic);
-  node_->get_parameter("info_topic", camera_info_topic);
+  node_->get_parameter(name_ + ".depth_topic", camera_depth_topic);
+  node_->get_parameter(name_ + ".info_topic", camera_info_topic);
 
   camera_info_sub_ = node_->create_subscription<sensor_msgs::msg::CameraInfo>(
     camera_info_topic,
@@ -208,7 +207,7 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
 
   if (K_.empty())
   {
-    RCLCPP_DEBUG(LOGGER, "Camera info not yet received.");
+    RCLCPP_WARN(LOGGER, "Camera info not yet received.");
     return;
   }
 
@@ -232,6 +231,9 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
         cv_ptr->image.at<float>(i) = 25.0;
     }
   }
+
+  // Filter noise
+  cv::medianBlur(cv_ptr->image, cv_ptr->image, 5);
 
   // Convert to 3d
   cv::Mat points3d;
@@ -284,7 +286,7 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
   if (ground_plane[0] == 0.0 && ground_plane[1] == 0.0 &&
       ground_plane[2] == 0.0 && ground_plane[3] == 0.0)
   {
-    RCLCPP_DEBUG(LOGGER, "Invalid ground plane.");
+    RCLCPP_WARN(LOGGER, "Invalid ground plane.");
     return;
   }
 
@@ -321,7 +323,6 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
     for (size_t j = 0; j < points3d.cols; j++)
     {
       // Get next point
-      geometry_msgs::msg::Point32 current_point;
       float x = channels[0].at<float>(i, j);
       float y = channels[1].at<float>(i, j);
       float z = channels[2].at<float>(i, j);
@@ -331,9 +332,9 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
           z != 0.0 && !std::isnan(z))
       {
         // Check if point is part of the ground plane
-        if (fabs(ground_plane[0] * current_point.x +
-                 ground_plane[1] * current_point.y +
-                 ground_plane[2] * current_point.z +
+        if (fabs(ground_plane[0] * x +
+                 ground_plane[1] * y +
+                 ground_plane[2] * z +
                  ground_plane[3]) <= observations_threshold_)
         {
           if (clear_with_skipped_rays_)
@@ -377,46 +378,17 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
             continue;
           }
 
-          // Check for outliers, mark non-outliers as obstacles.
-          int num_valid = 0;
-          for (int x = -1; x < 2; x++)
-          {
-            for (int y = -1; y < 2; y++)
-            {
-              if (x == 0 && y == 0)
-              {
-                continue;
-              }
-              float px = channels[0].at<float>(i+x, j+y);
-              float py = channels[1].at<float>(i+x, j+y);
-              float pz = channels[2].at<float>(i+x, j+y);
-              if (px != 0.0 && py != 0.0 && pz != 0.0 &&
-                  !std::isnan(px) && !std::isnan(py) && !std::isnan(pz))
-              {
-                if ( fabs(px - current_point.x) < 0.1 &&
-                      fabs(py - current_point.y) < 0.1 &&
-                      fabs(pz - current_point.z) < 0.1)
-                {
-                  num_valid++;
-                }
-              }
-            }  // for y
-          }  // for x
-
-          if (num_valid >= 7)
-          {
-            *marking_x = x;
-            *marking_y = y;
-            *marking_z = z;
-            ++marking_points;
-            ++marking_x;
-            ++marking_y;
-            ++marking_z;
-          }
+          *marking_x = x;
+          *marking_y = y;
+          *marking_z = z;
+          ++marking_points;
+          ++marking_x;
+          ++marking_y;
+          ++marking_z;
         }
-      }  // for j (y)
-    }  // for i (x)
-  }
+      }
+    }  // for j (y)
+  }  // for i (x)
 
   clearing_mod.resize(clearing_points);
   marking_mod.resize(marking_points);
@@ -425,18 +397,13 @@ void DepthLayer::depthImageCallback(sensor_msgs::msg::Image::ConstSharedPtr msg)
   if (publish_observations_)
   {
     clearing_pub_->publish(clearing_msg);
+    marking_pub_->publish(marking_msg);
   }
 
-  // buffer the ground plane observation
+  // buffer the observations
   clearing_buf_->lock();
   clearing_buf_->bufferCloud(clearing_msg);
   clearing_buf_->unlock();
-
-  // Publish and buffer our marking point cloud
-  if (publish_observations_)
-  {
-    marking_pub_->publish(marking_msg);
-  }
 
   marking_buf_->lock();
   marking_buf_->bufferCloud(marking_msg);

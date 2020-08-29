@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5)
 project(ubr1_navigation)
 
 find_package(ament_cmake REQUIRED)
+find_package(cv_bridge REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -17,6 +18,7 @@ add_library(depth_layer SHARED
   src/depth_layer.cpp
 )
 ament_target_dependencies(depth_layer
+  cv_bridge
   nav2_costmap_2d
   pluginlib
   sensor_msgs

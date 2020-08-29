@@ -115,10 +115,10 @@ private:
   rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr camera_info_sub_;
 
   // publishes clearing observations
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr clearing_pub_;
+  rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr clearing_pub_;
 
   // publishes marking observations
-  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr marking_pub_;
+  rclcpp_lifecycle::LifecyclePublisher<sensor_msgs::msg::PointCloud2>::SharedPtr marking_pub_;
 
   // camera intrinsics
   std::mutex mutex_K_;
