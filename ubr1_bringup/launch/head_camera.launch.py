@@ -139,7 +139,7 @@ def generate_launch_description():
                     remappings=[('image_raw', 'depth_registered/image_rect'),
                                 ('image', 'depth_registered/image')],
                 ),
-                # Decimate cloud to 160x120
+                # Decimate cloud to 160x120 (for navigation)
                 ComposableNode(
                     package='image_proc',
                     plugin='image_proc::CropDecimateNode',
@@ -148,18 +148,8 @@ def generate_launch_description():
                     parameters=[{'decimation_x': 4, 'decimation_y': 4}],
                     remappings=[('in/image', 'depth_registered/image_rect'),
                                 ('in/camera_info', 'depth/camera_info'),
-                                ('out/image', 'depth_downsample/image'),
+                                ('out/image', 'depth_downsample/image_raw'),
                                 ('out/camera_info', 'depth_downsample/camera_info')],
-                ),
-                # Downsampled XYZ point cloud (mainly for navigation)
-                ComposableNode(
-                    package='depth_image_proc',
-                    plugin='depth_image_proc::PointCloudXyzNode',
-                    name='points_downsample',
-                    namespace=LaunchConfiguration('namespace'),
-                    remappings=[('image_rect', 'depth_downsample/image'),
-                                ('camera_info', 'depth_downsample/camera_info'),
-                                ('points', 'depth_downsample/points')],
                 ),
             ],
             output='screen',
