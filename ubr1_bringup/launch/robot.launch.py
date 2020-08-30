@@ -95,6 +95,12 @@ def generate_launch_description():
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([head_camera_launch])
         ),
+        # Twitter Diagnostics
+        Node(
+            name='tweet_bot',
+            package='ubr_drivers',
+            executable='tweet_bot.py',
+        ),
         # Teleop
         Node(
             name='joy',
