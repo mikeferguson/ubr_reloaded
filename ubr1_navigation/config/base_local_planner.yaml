@@ -1,34 +1,16 @@
-TrajectoryPlannerROS:
+GracefulControllerROS:
   max_vel_x: 1.0
   min_vel_x: 0.1
 
-  max_vel_theta:  2.8
-  min_vel_theta: -2.8
+  max_vel_theta: 2.8
+  min_vel_theta: 0.3
   min_in_place_vel_theta: 0.6
-  
+
   acc_lim_x: 0.5
-  acc_lim_theta: 2.25
+  acc_lim_theta: 1.0
 
   yaw_goal_tolerance: 0.1
   xy_goal_tolerance: 0.1
-  latch_xy_goal_tolerance: true
 
-  sim_time: 1.5
-  sim_granularity: 0.025
-  dwa: true
-  vx_samples: 3
-  vtheta_samples: 20
-
-  meter_scoring: true
-  goal_distance_bias: 0.8
-  path_distance_bias: 0.6
-  occdist_scale: 0.01
-  heading_lookahead: 0.325
-  
-  oscillation_reset_dist: 0.05
-
-  holonomic_robot: false
-  max_vel_y: 0.0
-  min_vel_y: 0.0
-  acc_lim_y: 0.0
-  vy_samples: 0
+  max_lookahead: 1.25
+  initial_rotate_tolerance: 0.25
