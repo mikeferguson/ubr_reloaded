@@ -16,10 +16,10 @@
     <param name="kld_z"                     value="0.99"/>
     <!-- graft+imu means that rotational noise from rotational component is low.
                                                from translational not so much-->
-    <param name="odom_alpha1"               value="0.1"/>
+    <param name="odom_alpha1"               value="0.3"/>
     <param name="odom_alpha2"               value="0.2"/>
     <!-- graft+imu doesn't do much for our translational noise -->
-    <param name="odom_alpha3"               value="0.3"/>
+    <param name="odom_alpha3"               value="0.1"/>
     <param name="odom_alpha4"               value="0.2"/>
     <!-- laser parameters -->
     <param name="laser_z_hit"               value="0.6"/>
