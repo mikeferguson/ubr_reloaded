@@ -7,15 +7,15 @@ amcl:
     base_frame_id: "base_link"
     global_frame_id: "map"
     laser_model_type: "likelihood_field"
-    max_beams: 60
+    max_beams: 100
     max_particles: 2000
     min_particles: 500
     odom_frame_id: "odom"
     robot_model_type: "differential"
     tf_broadcast: true
-    z_hit: 0.6
+    z_hit: 0.9
     z_max: 0.05
-    z_rand: 0.3
+    z_rand: 0.1
     z_short: 0.05
 
 bt_navigator:
@@ -71,44 +71,17 @@ controller_server:
       stateful: True
     # DWB parameters
     FollowPath:
-      plugin: "dwb_core::DWBLocalPlanner"
-      debug_trajectory_details: True
-      min_vel_x: 0.0
-      min_vel_y: 0.0
-      max_vel_x: 0.5 # half
-      max_vel_y: 0.0
-      max_vel_theta: 1.4 # half
-      min_speed_xy: 0.0
-      max_speed_xy: 0.5
-      min_speed_theta: 0.0
+      plugin: "graceful_controller/GracefulControllerROS"
+      min_vel_x: 0.1
+      max_vel_x: 1.0
+      min_vel_theta: 0.3
+      max_vel_theta: 2.8
+      min_in_place_vel_theta: 0.6
       acc_lim_x: 0.5
-      acc_lim_y: 0.0
       acc_lim_theta: 1.0
-      decel_lim_x: -0.5
-      decel_lim_y: 0.0
-      decel_lim_theta: -1.0
-      vx_samples: 20
-      vy_samples: 1
-      vtheta_samples: 20
-      sim_time: 1.5
-      linear_granularity: 0.05
-      angular_granularity: 0.025
-      transform_tolerance: 0.2
       xy_goal_tolerance: 0.05
-      trans_stopped_velocity: 0.25
-      short_circuit_trajectory_evaluation: True
-      stateful: True
-      critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign", "PathAlign", "PathDist", "GoalDist"]
-      BaseObstacle.scale: 0.02
-      PathAlign.scale: 32.0
-      PathAlign.forward_point_distance: 0.15
-      GoalAlign.scale: 12.0
-      GoalAlign.forward_point_distance: 0.15
-      PathDist.scale: 32.0
-      GoalDist.scale: 12.0
-      RotateToGoal.scale: 32.0
-      RotateToGoal.slowing_factor: 5.0
-      RotateToGoal.lookahead_time: -1.0
+      max_lookahead: 1.25
+      initial_rotate_tolerance: 0.25
 
 local_costmap:
   local_costmap:
@@ -121,15 +94,15 @@ local_costmap:
       width: 3
       height: 3
       resolution: 0.05
-      robot_radius: 0.2413
+      robot_radius: 0.275
       footprint_padding: 0.025
       plugins: ["depth_layer", "inflation_layer"]
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 10.0
-        inflation_radius: 0.65
+        inflation_radius: 0.75
       depth_layer:
-        plugin: "nav2_costmap_2d::DepthLayer"
+        plugin: "nav2_costmap_2d::VoxelLayer"
         publish_observations: True
         enabled: True
         publish_voxel_map: True
@@ -157,7 +130,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
-      robot_radius: 0.2413
+      robot_radius: 0.275
       footprint_padding: 0.025
       resolution: 0.05
       plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
@@ -177,7 +150,7 @@ global_costmap:
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 10.0
-        inflation_radius: 0.65
+        inflation_radius: 0.75
       always_send_full_costmap: True
 
 map_server:
