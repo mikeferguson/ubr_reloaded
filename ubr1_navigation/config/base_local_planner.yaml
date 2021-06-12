@@ -14,3 +14,5 @@ GracefulControllerROS:
 
   max_lookahead: 1.25
   initial_rotate_tolerance: 0.25
+  prefer_final_rotation: true
+  yaw_filter_tolerance: 0.785
