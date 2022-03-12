@@ -1,14 +1,6 @@
 - git:
-    local-name: grasping_msgs
-    uri: https://github.com/mikeferguson/grasping_msgs.git
-    version: master
-- git:
     local-name: joystick_drivers
     uri: https://github.com/ros-drivers/joystick_drivers
-    version: master
-- git:
-    local-name: moveit_msgs
-    uri: https://github.com/ros-planning/moveit_msgs.git
     version: master
 - git:
     local-name: openni2_camera
@@ -17,11 +9,11 @@
 - git:
     local-name: robot_calibration
     uri: git@github.com:mikeferguson/robot_calibration.git
-    version: master
+    version: ros1
 - git:
     local-name: robot_controllers
     uri: git@github.com:mikeferguson/robot_controllers.git
-    version: noetic_support
+    version: ros1
 - git:
     local-name: ubr_drivers
     uri: git@github.com:mikeferguson/ubr_drivers.git
