@@ -1,0 +1,32 @@
+chains:
+  - name: arm
+    topic: /arm_controller/follow_joint_trajectory
+    joints:
+     - shoulder_pan_joint
+     - shoulder_lift_joint
+     - upperarm_roll_joint
+     - elbow_flex_joint
+     - forearm_roll_joint
+     - wrist_flex_joint
+     - wrist_roll_joint
+  - name: head
+    topic: /head_controller/follow_joint_trajectory
+    joints:
+     - head_pan_joint
+     - head_tilt_joint
+duration: 2.0
+features:
+  robot_finder:
+    type: robot_calibration/RobotFinder
+    topic: /head_camera/depth_registered/points
+    camera_sensor_name: camera_ground
+    robot_sensor_name: camera_robot
+    transform_frame: base_link
+    points_max: 60
+    tolerance: 0.05
+    min_robot_x: -0.35
+    max_robot_x: 0.35
+    min_robot_y: 0
+    max_robot_y: 0.35
+    min_robot_z: 0.15
+    max_robot_z: 2.0
