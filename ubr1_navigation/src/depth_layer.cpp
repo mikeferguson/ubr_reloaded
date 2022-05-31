@@ -67,8 +67,10 @@ void DepthLayer::onInitialize()
   declareParameter("max_obstacle_height", rclcpp::ParameterValue(2.0));
   declareParameter("min_clearing_height", rclcpp::ParameterValue(-std::numeric_limits<double>::infinity()));
   declareParameter("max_clearing_height", rclcpp::ParameterValue(std::numeric_limits<double>::infinity()));
-  declareParameter("obstacle_range", rclcpp::ParameterValue(2.5));
-  declareParameter("raytrace_range", rclcpp::ParameterValue(3.0));
+  declareParameter("obstacle_min_range", rclcpp::ParameterValue(0.0));
+  declareParameter("obstacle_max_range", rclcpp::ParameterValue(2.5));
+  declareParameter("raytrace_min_range", rclcpp::ParameterValue(0.0));
+  declareParameter("raytrace_max_range", rclcpp::ParameterValue(3.0));
 
   // Skipping of potentially noisy rays near the edge of the image
   declareParameter("skip_rays_bottom", rclcpp::ParameterValue(10));
@@ -92,44 +94,54 @@ void DepthLayer::onInitialize()
   declareParameter("depth_topic", rclcpp::ParameterValue(std::string("/head_camera/depth_downsample/image_raw")));
   declareParameter("info_topic", rclcpp::ParameterValue(std::string("/head_camera/depth_downsample/camera_info")));
 
+  auto node = node_.lock();
+  if (!node)
+  {
+    throw std::runtime_error{"Failed to lock node"};
+  }
+
   // Get parameters
-  node_->get_parameter(name_ + ".publish_observations", publish_observations_);
-  node_->get_parameter(name_ + ".observations_separation_threshold", observations_threshold_);
-  node_->get_parameter(name_ + ".ground_orientation_threshold", ground_threshold_);
-  node_->get_parameter(name_ + ".clear_nans", clear_nans_);
+  node->get_parameter(name_ + ".publish_observations", publish_observations_);
+  node->get_parameter(name_ + ".observations_separation_threshold", observations_threshold_);
+  node->get_parameter(name_ + ".ground_orientation_threshold", ground_threshold_);
+  node->get_parameter(name_ + ".clear_nans", clear_nans_);
   double min_obstacle_height, max_obstacle_height, min_clearing_height, max_clearing_height;
-  node_->get_parameter(name_ + ".min_obstacle_height", min_obstacle_height);
-  node_->get_parameter(name_ + ".max_obstacle_height", max_obstacle_height);
-  node_->get_parameter(name_ + ".min_clearing_height", min_clearing_height);
-  node_->get_parameter(name_ + ".max_clearing_height", max_clearing_height);
-  node_->get_parameter(name_ + ".skip_rays_bottom", skip_rays_bottom_);
-  node_->get_parameter(name_ + ".skip_rays_top",    skip_rays_top_);
-  node_->get_parameter(name_ + ".skip_rays_left",   skip_rays_left_);
-  node_->get_parameter(name_ + ".skip_rays_right",  skip_rays_right_);
-  node_->get_parameter(name_ + ".clear_with_skipped_rays", clear_with_skipped_rays_);
+  node->get_parameter(name_ + ".min_obstacle_height", min_obstacle_height);
+  node->get_parameter(name_ + ".max_obstacle_height", max_obstacle_height);
+  node->get_parameter(name_ + ".min_clearing_height", min_clearing_height);
+  node->get_parameter(name_ + ".max_clearing_height", max_clearing_height);
+  node->get_parameter(name_ + ".skip_rays_bottom", skip_rays_bottom_);
+  node->get_parameter(name_ + ".skip_rays_top",    skip_rays_top_);
+  node->get_parameter(name_ + ".skip_rays_left",   skip_rays_left_);
+  node->get_parameter(name_ + ".skip_rays_right",  skip_rays_right_);
+  node->get_parameter(name_ + ".clear_with_skipped_rays", clear_with_skipped_rays_);
   double observation_keep_time;
-  node_->get_parameter(name_ + ".observation_persistence", observation_keep_time);
+  node->get_parameter(name_ + ".observation_persistence", observation_keep_time);
   double expected_update_rate;
-  node_->get_parameter(name_ + ".expected_update_rate", expected_update_rate);
+  node->get_parameter(name_ + ".expected_update_rate", expected_update_rate);
   double transform_tolerance;
-  node_->get_parameter(name_ + ".transform_tolerance", transform_tolerance);
-  double obstacle_range, raytrace_range;
-  node_->get_parameter(name_ + ".obstacle_range", obstacle_range);
-  node_->get_parameter(name_ + ".raytrace_range", raytrace_range);
+  node->get_parameter(name_ + ".transform_tolerance", transform_tolerance);
+  double obstacle_min_range, obstacle_max_range, raytrace_min_range, raytrace_max_range;
+  node->get_parameter(name_ + ".obstacle_min_range", obstacle_min_range);
+  node->get_parameter(name_ + ".obstacle_max_range", obstacle_max_range);
+  node->get_parameter(name_ + ".raytrace_min_range", raytrace_min_range);
+  node->get_parameter(name_ + ".raytrace_max_range", raytrace_max_range);
 
   std::string sensor_frame = "";
 
   marking_buf_ = std::make_shared<nav2_costmap_2d::ObservationBuffer>(
-    node_, name_, observation_keep_time, expected_update_rate,
-    min_obstacle_height, max_obstacle_height, obstacle_range, raytrace_range,
-    *tf_, global_frame_, sensor_frame, transform_tolerance);
+    node, name_, observation_keep_time, expected_update_rate,
+    min_obstacle_height, max_obstacle_height, obstacle_max_range,
+    obstacle_min_range, raytrace_max_range, raytrace_min_range,
+    *tf_, global_frame_, sensor_frame, tf2::durationFromSec(transform_tolerance));
   marking_buffers_.push_back(marking_buf_);
   observation_buffers_.push_back(marking_buf_);
 
   clearing_buf_ = std::make_shared<nav2_costmap_2d::ObservationBuffer>(
     node_, name_, observation_keep_time, expected_update_rate,
-    min_clearing_height, max_clearing_height, obstacle_range, raytrace_range,
-    *tf_, global_frame_, sensor_frame, transform_tolerance);
+    min_clearing_height, max_clearing_height, obstacle_max_range,
+    obstacle_min_range, raytrace_max_range, raytrace_min_range,
+    *tf_, global_frame_, sensor_frame, tf2::durationFromSec(transform_tolerance));
   clearing_buffers_.push_back(clearing_buf_);
   observation_buffers_.push_back(clearing_buf_);
 
@@ -137,18 +149,18 @@ void DepthLayer::onInitialize()
   points_qos.best_effort();
   if (publish_observations_)
   {
-    clearing_pub_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>("clearing_obs", points_qos);
-    marking_pub_ = node_->create_publisher<sensor_msgs::msg::PointCloud2>("marking_obs", points_qos);
+    clearing_pub_ = node->create_publisher<sensor_msgs::msg::PointCloud2>("clearing_obs", points_qos);
+    marking_pub_ = node->create_publisher<sensor_msgs::msg::PointCloud2>("marking_obs", points_qos);
     clearing_pub_->on_activate();
     marking_pub_->on_activate();
   }
 
   // Subscribe to camera/info topics
   std::string camera_depth_topic, camera_info_topic;
-  node_->get_parameter(name_ + ".depth_topic", camera_depth_topic);
-  node_->get_parameter(name_ + ".info_topic", camera_info_topic);
+  node->get_parameter(name_ + ".depth_topic", camera_depth_topic);
+  node->get_parameter(name_ + ".info_topic", camera_info_topic);
 
-  camera_info_sub_ = node_->create_subscription<sensor_msgs::msg::CameraInfo>(
+  camera_info_sub_ = node->create_subscription<sensor_msgs::msg::CameraInfo>(
     camera_info_topic,
     points_qos,
     std::bind(&DepthLayer::cameraInfoCallback, this, std::placeholders::_1));

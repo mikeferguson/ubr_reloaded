@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Michael Ferguson
+ *  Copyright (c) 2020-2022, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -210,7 +210,7 @@ public:
         p.positions.push_back(tilt_);
         p.velocities.push_back(pan_vel);
         p.velocities.push_back(tilt_vel);
-        p.time_from_start = rclcpp::Duration(4 * elapsed_ns);
+        p.time_from_start = rclcpp::Duration(0, 4 * elapsed_ns);
         goal.trajectory.points.push_back(p);
         goal.goal_time_tolerance = rclcpp::Duration(0, 0);
         head_client_->async_send_goal(goal);
@@ -226,7 +226,7 @@ public:
         trajectory_msgs::msg::JointTrajectoryPoint p;
         p.positions.push_back(torso_);
         p.velocities.push_back(torso_vel);
-        p.time_from_start = rclcpp::Duration(4 * elapsed_ns);
+        p.time_from_start = rclcpp::Duration(0, 4 * elapsed_ns);
         goal.trajectory.points.push_back(p);
         goal.goal_time_tolerance = rclcpp::Duration(0, 0);
         torso_client_->async_send_goal(goal);
@@ -276,7 +276,7 @@ public:
     else
     {
       // Forward base commands from subscriber
-      if (last_base_msg_ && (this->now() - last_base_command_) < rclcpp::Duration(2e8))
+      if (last_base_msg_ && (this->now() - last_base_command_) < rclcpp::Duration(0, 2e8))
       {
         cmd_vel_pub_->publish(*last_base_msg_);
       }

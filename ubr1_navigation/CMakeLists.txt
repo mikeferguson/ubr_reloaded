@@ -3,6 +3,7 @@ project(ubr1_navigation)
 
 find_package(ament_cmake REQUIRED)
 find_package(cv_bridge REQUIRED)
+find_package(image_transport REQUIRED)
 find_package(nav2_costmap_2d REQUIRED)
 find_package(pluginlib REQUIRED)
 find_package(sensor_msgs REQUIRED)
@@ -23,6 +24,7 @@ ament_target_dependencies(depth_layer
   pluginlib
   sensor_msgs
   tf2_ros
+  image_transport
 )
 target_link_libraries(depth_layer
   ${OpenCV_LIBRARIES}
