@@ -1,0 +1,10 @@
+
+---
+- hosts: all
+  roles:
+    - ros_user
+    - ubr_ros2
+  vars:
+    rosdistro: foxy
+    workspace_root: /home/ubr/foxy
+

@@ -24,6 +24,16 @@
     pkg: python3-vcstool
   become: yes
 
+- name: Install rosdep
+  apt:
+    pkg: python3-rosdep
+  become: yes
+
+- name: Install colcon
+  apt:
+    pkg: python3-colcon-common-extensions
+  become: yes
+
 - name: Create workspace
   file:
     path: "{{ workspace_root }}/src"
@@ -89,12 +99,6 @@
     dest: "/etc/ros/{{ rosdistro }}/robot.launch.py"
     force: no
     mode: '0755'
-  become: yes
-
-- name: Copy cyclonedds.xml to /etc/ros
-  template:
-    src: cyclonedds.j2
-    dest: /etc/ros/{{ rosdistro }}/cyclonedds.xml
   become: yes
 
 - name: Create a systemd service for robot drivers
