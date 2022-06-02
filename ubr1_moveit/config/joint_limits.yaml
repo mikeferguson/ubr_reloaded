@@ -10,51 +10,41 @@ default_acceleration_scaling_factor: 0.1
 joint_limits:
   elbow_flex_joint:
     has_velocity_limits: true
-    max_velocity: 1.30899694
+    max_velocity: 1.3089969400000001
     has_acceleration_limits: false
     max_acceleration: 0
   forearm_roll_joint:
     has_velocity_limits: true
-    max_velocity: 2.0943951
-    has_acceleration_limits: false
-    max_acceleration: 0
-  left_gripper_joint:
-    has_velocity_limits: true
-    max_velocity: 0.1
-    has_acceleration_limits: false
-    max_acceleration: 0
-  right_gripper_joint:
-    has_velocity_limits: true
-    max_velocity: 0.1
+    max_velocity: 2.0943950999999998
     has_acceleration_limits: false
     max_acceleration: 0
   shoulder_lift_joint:
     has_velocity_limits: true
-    max_velocity: 1.30899694
+    max_velocity: 1.3089969400000001
     has_acceleration_limits: false
     max_acceleration: 0
   shoulder_pan_joint:
     has_velocity_limits: true
-    max_velocity: 1.30899694
+    max_velocity: 1.3089969400000001
     has_acceleration_limits: false
     max_acceleration: 0
   torso_lift_joint:
     has_velocity_limits: true
-    max_velocity: 0.1
+    max_velocity: 0.10000000000000001
     has_acceleration_limits: false
     max_acceleration: 0
   upperarm_roll_joint:
     has_velocity_limits: true
-    max_velocity: 2.0943951
+    max_velocity: 2.0943950999999998
     has_acceleration_limits: false
     max_acceleration: 0
   wrist_flex_joint:
     has_velocity_limits: true
-    max_velocity: 2.0943951
+    max_velocity: 2.0943950999999998
     has_acceleration_limits: false
     max_acceleration: 0
   wrist_roll_joint:
     has_velocity_limits: true
-    max_velocity: 2.0943951
+    max_velocity: 2.0943950999999998
     has_acceleration_limits: false
     max_acceleration: 0
