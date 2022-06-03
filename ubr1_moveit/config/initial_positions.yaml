@@ -1,0 +1,18 @@
+# Default initial positions for ubr1's ros2_control fake system
+
+initial_positions:
+  shoulder_pan_joint: 0
+  shoulder_lift_joint: 0
+  upperarm_roll_joint: 0
+  elbow_flex_joint: 0
+  forearm_roll_joint: 0
+  wrist_flex_joint: 0
+  wrist_roll_joint: 0
+  torso_lift_joint: 0
+  shoulder_pan_joint: 0
+  shoulder_lift_joint: 0
+  upperarm_roll_joint: 0
+  elbow_flex_joint: 0
+  forearm_roll_joint: 0
+  wrist_flex_joint: 0
+  wrist_roll_joint: 0
