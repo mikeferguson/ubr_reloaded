@@ -11,7 +11,7 @@ amcl:
     max_particles: 2000
     min_particles: 500
     odom_frame_id: "odom"
-    robot_model_type: "differential"
+    robot_model_type: "nav2_amcl::DifferentialMotionModel"
     tf_broadcast: true
     z_hit: 0.9
     z_max: 0.05
