@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020, Michael Ferguson
+# Copyright (c) 2020-2022, Michael Ferguson
 # All rights reserved.
 #
 # Software License Agreement (BSD License 2.0)
@@ -45,7 +45,7 @@ Topic map:
 
   /head_camera
     /depth
-      /camera_info
+      /camera_info -> DEPTH_RECTIFY
       /image_raw
     /depth_registered
       /image_raw -> DEPTH_RECTIFY -> /image_rect
@@ -54,10 +54,12 @@ Topic map:
       /camera_info
       /image
     /rgb
-      /camera_info -> RGB_RECTIFY
-      /image_raw -> RGB_RECTIFY -> /rgb/image_rect
+      /camera_info -> RGB_RECTIFY | POINTS_XYZRGB
+      /image_raw -> RGB_RECTIFY -> /rgb/image_rect -> POINTS_XYZRGB
     /projector
       /camera_info
+
+  POINTS_XYZRGB outputs depth_registered/points
 """
 
 
@@ -146,9 +148,9 @@ def generate_launch_description():
                     name='depth_downsample',
                     namespace=LaunchConfiguration('namespace'),
                     parameters=[{'decimation_x': 4, 'decimation_y': 4}],
-                    remappings=[('in/image', 'depth_registered/image_rect'),
+                    remappings=[('in/image_raw', 'depth_registered/image_rect'),
                                 ('in/camera_info', 'depth/camera_info'),
-                                ('out/image', 'depth_downsample/image_raw'),
+                                ('out/image_raw', 'depth_downsample/image_raw'),
                                 ('out/camera_info', 'depth_downsample/camera_info')],
                 ),
             ],
