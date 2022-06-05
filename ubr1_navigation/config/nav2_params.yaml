@@ -13,6 +13,7 @@ amcl:
     odom_frame_id: "odom"
     robot_model_type: "nav2_amcl::DifferentialMotionModel"
     tf_broadcast: true
+    transform_tolerance: 0.5
     z_hit: 0.9
     z_max: 0.05
     z_rand: 0.1
@@ -23,30 +24,50 @@ bt_navigator:
     global_frame: map
     robot_base_frame: base_link
     odom_topic: /odom
-    default_bt_xml_filename: "navigate_w_replanning_and_recovery.xml"
     plugin_lib_names:
     - nav2_compute_path_to_pose_action_bt_node
+    - nav2_compute_path_through_poses_action_bt_node
+    - nav2_smooth_path_action_bt_node
     - nav2_follow_path_action_bt_node
-    - nav2_back_up_action_bt_node
     - nav2_spin_action_bt_node
     - nav2_wait_action_bt_node
+    - nav2_back_up_action_bt_node
+    - nav2_drive_on_heading_bt_node
     - nav2_clear_costmap_service_bt_node
     - nav2_is_stuck_condition_bt_node
     - nav2_goal_reached_condition_bt_node
     - nav2_goal_updated_condition_bt_node
+    - nav2_globally_updated_goal_condition_bt_node
+    - nav2_is_path_valid_condition_bt_node
     - nav2_initial_pose_received_condition_bt_node
     - nav2_reinitialize_global_localization_service_bt_node
     - nav2_rate_controller_bt_node
     - nav2_distance_controller_bt_node
     - nav2_speed_controller_bt_node
-#    - nav2_truncate_path_action_bt_node
-#    - nav2_goal_updater_node_bt_node
+    - nav2_truncate_path_action_bt_node
+    - nav2_truncate_path_local_action_bt_node
+    - nav2_goal_updater_node_bt_node
     - nav2_recovery_node_bt_node
     - nav2_pipeline_sequence_bt_node
     - nav2_round_robin_node_bt_node
     - nav2_transform_available_condition_bt_node
     - nav2_time_expired_condition_bt_node
+    - nav2_path_expiring_timer_condition
     - nav2_distance_traveled_condition_bt_node
+    - nav2_single_trigger_bt_node
+    - nav2_is_battery_low_condition_bt_node
+    - nav2_navigate_through_poses_action_bt_node
+    - nav2_navigate_to_pose_action_bt_node
+    - nav2_remove_passed_goals_action_bt_node
+    - nav2_planner_selector_bt_node
+    - nav2_controller_selector_bt_node
+    - nav2_goal_checker_selector_bt_node
+    - nav2_controller_cancel_bt_node
+    - nav2_path_longer_on_approach_bt_node
+    - nav2_wait_cancel_bt_node
+    - nav2_spin_cancel_bt_node
+    - nav2_back_up_cancel_bt_node
+    - nav2_drive_on_heading_cancel_bt_node
 
 controller_server:
   ros__parameters:
@@ -55,7 +76,7 @@ controller_server:
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
     progress_checker_plugin: "progress_checker"
-    goal_checker_plugin: "goal_checker"
+    goal_checker_plugins: ["general_goal_checker"]
     controller_plugins: ["FollowPath"]
 
     # Progress checker parameters
@@ -64,24 +85,25 @@ controller_server:
       required_movement_radius: 0.5
       movement_time_allowance: 10.0
     # Goal checker parameters
-    goal_checker:
+    general_goal_checker:
       plugin: "nav2_controller::SimpleGoalChecker"
       xy_goal_tolerance: 0.125
       yaw_goal_tolerance: 0.25
       stateful: True
-    # DWB parameters
+    # Controller parameters
     FollowPath:
       plugin: "graceful_controller/GracefulControllerROS"
       min_vel_x: 0.1
       max_vel_x: 1.0
-      min_vel_theta: 0.3
       max_vel_theta: 2.8
       min_in_place_vel_theta: 0.6
       acc_lim_x: 0.5
       acc_lim_theta: 1.0
-      xy_goal_tolerance: 0.05
       max_lookahead: 1.25
       initial_rotate_tolerance: 0.25
+      prefer_final_rotation: true
+      yaw_filter_tolerance: 0.785
+      publish_collision_points: true
 
 local_costmap:
   local_costmap:
@@ -111,8 +133,10 @@ local_costmap:
         z_voxels: 16
         min_obstacle_height: 0.0
         max_obstacle_height: 2.0
-        obstacle_range: 3.0
-        raytrace_range: 4.0
+        obstacle_min_range: 0.0
+        obstacle_max_range: 3.0
+        raytrace_min_range: 0.0
+        raytrace_max_range: 4.0
         mark_threshold: 0
         observation_sources: base_scan
         base_scan:
@@ -146,7 +170,7 @@ global_costmap:
           data_type: "LaserScan"
       static_layer:
         plugin: "nav2_costmap_2d::StaticLayer"
-#       map_subscribe_transient_local: True
+        map_subscribe_transient_local: True
       inflation_layer:
         plugin: "nav2_costmap_2d::InflationLayer"
         cost_scaling_factor: 10.0
