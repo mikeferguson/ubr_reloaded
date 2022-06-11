@@ -165,11 +165,13 @@ void DepthLayer::onInitialize()
     points_qos,
     std::bind(&DepthLayer::cameraInfoCallback, this, std::placeholders::_1));
 
-  depth_image_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image>>(
-    rclcpp_node_, camera_depth_topic, rmw_qos_profile_sensor_data);
-  depth_image_filter_ = std::shared_ptr< tf2_ros::MessageFilter<sensor_msgs::msg::Image> >(
-    new tf2_ros::MessageFilter<sensor_msgs::msg::Image>(
-      *depth_image_sub_, *tf_, global_frame_, 10, rclcpp_node_));
+  depth_image_sub_ = std::make_shared<message_filters::Subscriber<sensor_msgs::msg::Image,
+    rclcpp_lifecycle::LifecycleNode>>(node, camera_depth_topic, rmw_qos_profile_sensor_data);
+  depth_image_filter_ = std::make_shared<tf2_ros::MessageFilter<sensor_msgs::msg::Image>>(
+    *depth_image_sub_, *tf_, global_frame_, 10,
+    node->get_node_logging_interface(),
+    node->get_node_clock_interface(),
+    tf2::durationFromSec(transform_tolerance));
   depth_image_filter_->registerCallback(
     std::bind(&DepthLayer::depthImageCallback, this, std::placeholders::_1));
   observation_subscribers_.push_back(depth_image_sub_);

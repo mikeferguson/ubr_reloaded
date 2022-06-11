@@ -107,7 +107,8 @@ private:
 
   // retrieves depth image from head_camera
   // used to fit ground plane to
-  std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image>> depth_image_sub_;
+  std::shared_ptr<message_filters::Subscriber<sensor_msgs::msg::Image,
+                                              rclcpp_lifecycle::LifecycleNode>> depth_image_sub_;
   std::shared_ptr<tf2_ros::MessageFilter<sensor_msgs::msg::Image>> depth_image_filter_;
 
   // retrieves camera matrix for head_camera

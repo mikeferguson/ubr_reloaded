@@ -124,7 +124,7 @@ local_costmap:
         cost_scaling_factor: 10.0
         inflation_radius: 0.75
       depth_layer:
-        plugin: "nav2_costmap_2d::VoxelLayer"
+        plugin: "nav2_costmap_2d::DepthLayer"
         publish_observations: True
         enabled: True
         publish_voxel_map: True
