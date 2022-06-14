@@ -1,18 +1,21 @@
-cmake_minimum_required(VERSION 2.8.12)
-project(ubr_calibration)
+cmake_minimum_required(VERSION 3.5)
+project(ubr1_calibration)
 
-find_package(catkin)
-catkin_package()
+find_package(ament_cmake REQUIRED)
 
-install(DIRECTORY config
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(
+  DIRECTORY config
+  DESTINATION share/${PROJECT_NAME}/
 )
 
-install(DIRECTORY launch
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+install(
+  DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 install(
   PROGRAMS scripts/camera_reconfigure.py
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+  DESTINATION lib/${PROJECT_NAME}
 )
+
+ament_package()
