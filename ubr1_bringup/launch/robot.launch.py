@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020, Michael Ferguson
+# Copyright (c) 2020-2022, Michael Ferguson
 # All rights reserved.
 #
 # Software License Agreement (BSD License 2.0)
@@ -34,6 +34,7 @@
 
 import os
 import sys
+import yaml
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -44,9 +45,29 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    # Load the URDF into a parameter
+    # Set default parameters
     bringup_dir = get_package_share_directory('ubr1_description')
     urdf_path = os.path.join(bringup_dir, 'robots', 'ubr1_robot.urdf')
+    depth_camera_info_url = ""
+    rgb_camera_info_url = ""
+    z_offset_mm = "0"
+    z_scaling = "1.0"
+
+    # See if there is a calibration.yaml in /etc/ros/distro
+    distro = os.getenv('ROS_DISTRO')
+    etc_conf = os.path.join('/etc', 'ros', distro)
+    calibration_yaml = os.path.join(etc_conf, 'calibration.yaml')
+
+    if os.path.exists(calibration_yaml):
+        with open(calibration_yaml) as file:
+            yaml_data = yaml.load(file, Loader=yaml.FullLoader)
+            urdf_path = os.path.join(etc_conf, yaml_data["urdf"])
+            depth_camera_info_url = "file://" + os.path.join(etc_conf, yaml_data["depth_camera_info_url"])
+            rgb_camera_info_url = "file://" + os.path.join(etc_conf, yaml_data["rgb_camera_info_url"])
+            z_offset_mm = str(yaml_data["z_offset_mm"])
+            z_scaling = str(yaml_data["z_scaling"])
+
+    # Load the URDF into a parameter
     urdf = open(urdf_path).read()
 
     # Load the driver config
@@ -79,7 +100,8 @@ def generate_launch_description():
             name='robot_state_publisher',
             package='robot_state_publisher',
             executable='robot_state_publisher',
-            parameters=[{'robot_description': urdf}],
+            parameters=[{'robot_description': urdf,
+                         'publish_frequency': 100.0}],
         ),
         Node(
             name='base_laser_node',
@@ -93,7 +115,11 @@ def generate_launch_description():
             output='screen',
         ),
         IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([head_camera_launch])
+            PythonLaunchDescriptionSource([head_camera_launch]),
+            launch_arguments = {'depth_camera_info_url': depth_camera_info_url,
+                                'rgb_camera_info_url': rgb_camera_info_url,
+                                'z_offset_mm': z_offset_mm,
+                                'z_scaling': z_scaling}.items()
         ),
         # Twitter Diagnostics
         Node(

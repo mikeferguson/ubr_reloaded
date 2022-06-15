@@ -76,6 +76,18 @@ def generate_launch_description():
         DeclareLaunchArgument(
             'depth_frame_id', default_value='head_camera_rgb_depth_optical_frame'
         ),
+        DeclareLaunchArgument(
+            'rgb_camera_info_url', default_value=''
+        ),
+        DeclareLaunchArgument(
+            'depth_camera_info_url', default_value=''
+        ),
+        DeclareLaunchArgument(
+            'z_offset_mm', default_value="0"
+        ),
+        DeclareLaunchArgument(
+            'z_scaling', default_value="1.0"
+        ),
         ComposableNodeContainer(
             name='container',
             namespace=LaunchConfiguration('namespace'),
@@ -90,11 +102,17 @@ def generate_launch_description():
                     namespace=LaunchConfiguration('namespace'),
                     parameters=[{'rgb_frame_id':
                                  LaunchConfiguration('rgb_frame_id'),
+                                 'rgb_camera_info_url':
+                                 LaunchConfiguration('rgb_camera_info_url'),
                                  'depth_frame_id':
                                  LaunchConfiguration('depth_frame_id'),
+                                 'depth_camera_info_url':
+                                 LaunchConfiguration('depth_camera_info_url'),
                                  'depth_registration': True,
                                  'data_skip': 1,  # throttle to 15hz
-                                 'use_device_time': False}, ],
+                                 'use_device_time': False,
+                                 'z_scaling': LaunchConfiguration('z_scaling'),
+                                 'z_offset_mm': LaunchConfiguration('z_offset_mm')}, ],
                     remappings=[('depth/image', 'depth_registered/image_raw')],
                 ),
                 # Create rectified color image
