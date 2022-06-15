@@ -1,0 +1,4 @@
+#!/bin/bash
+
+# ros2 launch (from python) doesn't seem to pipe stdin to our node, so manual capture doesn't work
+ros2 run robot_calibration calibrate --manual --ros-args --params-file ../config/capture.yaml --params-file ../config/calibrate.yaml

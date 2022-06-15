@@ -13,7 +13,7 @@ robot_calibration:
       - forearm_roll_joint
       - wrist_flex_joint
       - wrist_roll_joint
-      planning_group: arm
+      #planning_group: arm TODO: revert when moveit is setup
     head:
       topic: /head_controller/follow_joint_trajectory
       joints:
@@ -23,7 +23,7 @@ robot_calibration:
     - led_finder
     led_finder:
       type: robot_calibration/LedFinder
-      action: /gripper_led_action
+      action: /gripper_controller/led_command
       topic: /head_camera/depth_registered/points
       camera_sensor_name: camera
       chain_sensor_name: arm
