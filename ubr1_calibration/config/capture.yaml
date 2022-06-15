@@ -22,7 +22,7 @@ robot_calibration:
     features:
     - led_finder
     led_finder:
-      type: robot_calibration/LedFinder
+      type: robot_calibration::LedFinder
       action: /gripper_controller/led_command
       topic: /head_camera/depth_registered/points
       camera_sensor_name: camera
