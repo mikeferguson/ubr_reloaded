@@ -9,12 +9,11 @@ install(
 )
 
 install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
-)
-
-install(
-  PROGRAMS scripts/camera_reconfigure.py
+  PROGRAMS
+    scripts/calibrate_from_bag
+    scripts/calibrate_launch.py
+    scripts/calibrate_manually
+    scripts/camera_reconfigure.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

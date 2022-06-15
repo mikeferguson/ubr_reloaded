@@ -65,7 +65,10 @@ def generate_launch_description():
     )
 
     # Make a directory for bagfiles to be located
-    os.mkdir("/tmp/ubr1_calibration")
+    try:
+        os.mkdir("/tmp/ubr1_calibration")
+    except FileExistsError:
+        pass
 
     return LaunchDescription([
         # Calibration
