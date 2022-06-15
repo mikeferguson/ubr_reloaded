@@ -56,13 +56,20 @@ def generate_launch_description():
         'calibrate.yaml'
     )
 
+    # Load the calibration poses YAML
+    calibration_poses = os.path.join(
+        get_package_share_directory('ubr1_calibration'),
+        'config',
+        'calibration_poses.yaml'
+    )
+
     return LaunchDescription([
         # Drivers
         Node(
             name='robot_calibration',
             package='robot_calibration',
             executable='calibrate',
-            arguments=["--manual"],
+            arguments=[calibration_poses],
             parameters=[capture_config,
                         calibration_config],
             output='screen',
