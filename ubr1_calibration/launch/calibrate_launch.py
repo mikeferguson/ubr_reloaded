@@ -38,6 +38,7 @@ import sys
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription, LaunchService
+from launch.actions import ExecuteProcess
 from launch_ros.actions import Node
 
 
@@ -63,8 +64,11 @@ def generate_launch_description():
         'calibration_poses.yaml'
     )
 
+    # Make a directory for bagfiles to be located
+    os.mkdir("/tmp/ubr1_calibration")
+
     return LaunchDescription([
-        # Drivers
+        # Calibration
         Node(
             name='robot_calibration',
             package='robot_calibration',
@@ -74,6 +78,11 @@ def generate_launch_description():
                         calibration_config],
             output='screen',
         ),
+        # Record bagfile for debugging
+        ExecuteProcess(
+            cmd=["ros2", "bag", "record", "/calibration_data", "/robot_description"],
+            cwd="/tmp/ubr1_calibration"
+        )
     ])
 
 
