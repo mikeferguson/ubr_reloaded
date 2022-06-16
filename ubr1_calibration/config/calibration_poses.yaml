@@ -1,4 +1,30 @@
 - features:
+  - ground_plane_finder
+  joints:
+  - elbow_flex_joint
+  - forearm_roll_joint
+  - head_pan_joint
+  - head_tilt_joint
+  - shoulder_lift_joint
+  - shoulder_pan_joint
+  - torso_lift_joint
+  - bellows_joint
+  - upperarm_roll_joint
+  - wrist_flex_joint
+  - wrist_roll_joint
+  positions:
+  - -1.7587368488311768
+  - 0.12431373447179794
+  - 0.05062127113342285
+  - 0.9062328338623047
+  - 0.6606110334396362
+  - 1.3299683332443237
+  - 0.01208497490733862
+  - -0.00604248745366931
+  - -0.0010552206076681614
+  - -0.6388223767280579
+  - -0.059184011071920395
+- features:
   - led_finder
   joints:
   - base_l_wheel_joint

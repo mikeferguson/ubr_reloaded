@@ -8,11 +8,17 @@ robot_calibration:
       models:
       - arm
       - camera
+      - ground_camera
       arm:
         type: chain3d
         frame: wrist_roll_link
       camera:
         type: camera3d
+        frame: head_camera_rgb_optical_frame
+        topic: /head_camera/depth_registered/points
+      ground_camera:
+        type: camera3d
+        param_name: camera  # this is the same physical camera as above
         frame: head_camera_rgb_optical_frame
         topic: /head_camera/depth_registered/points
       free_params:
@@ -62,6 +68,14 @@ robot_calibration:
         type: chain3d_to_chain3d
         model_a: camera
         model_b: arm
+      ground_plane:
+        type: chain3d_to_plane
+        model: ground_camera
+        a: 0.0
+        b: 0.0
+        c: 1.0
+        d: 0.0
+        scale: 1.0
       restrict_camera:
         type: outrageous
         param: head_camera_rgb_joint

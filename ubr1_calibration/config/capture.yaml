@@ -21,6 +21,7 @@ robot_calibration:
       - head_tilt_joint
     features:
     - led_finder
+    - ground_plane_finder
     led_finder:
       type: robot_calibration::LedFinder
       action: /gripper_controller/led_command
@@ -29,7 +30,7 @@ robot_calibration:
       chain_sensor_name: arm
       threshold: 500.0
       max_iterations: 25
-      debug_image: false
+      debug: false
       gripper_led_frame: wrist_roll_link
       leds:
       - led1
@@ -60,3 +61,9 @@ robot_calibration:
         x: 0.027
         y: -0.023
         z: 0.026875
+    ground_plane_finder:
+      type: robot_calibration::PlaneFinder
+      topic: /head_camera/depth_registered/points
+      camera_sensor_name: ground_camera
+      points_max: 60
+      debug: false
