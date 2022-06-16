@@ -32,12 +32,10 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import os
-
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch_ros.actions import ComposableNodeContainer
 from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import ComposableNodeContainer
 from launch_ros.descriptions import ComposableNode
 
 """
@@ -83,10 +81,10 @@ def generate_launch_description():
             'depth_camera_info_url', default_value=''
         ),
         DeclareLaunchArgument(
-            'z_offset_mm', default_value="0"
+            'z_offset_mm', default_value='0'
         ),
         DeclareLaunchArgument(
-            'z_scaling', default_value="1.0"
+            'z_scaling', default_value='1.0'
         ),
         ComposableNodeContainer(
             name='container',

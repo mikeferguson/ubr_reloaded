@@ -33,12 +33,11 @@
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import rclpy
-from rclpy.node import Node
-from rclpy.duration import Duration
-from rclpy.action import ActionClient
-
 from control_msgs.action import GripperCommand
+import rclpy
+from rclpy.action import ActionClient
+from rclpy.duration import Duration
+from rclpy.node import Node
 from robot_controllers_msgs.msg import ControllerState
 from robot_controllers_msgs.srv import QueryControllerStates
 from sensor_msgs.msg import Joy
@@ -47,10 +46,10 @@ from sensor_msgs.msg import Joy
 class ControllerResetTeleop(Node):
 
     def __init__(self):
-        super().__init__("controller_reset")
+        super().__init__('controller_reset')
 
         # ROS Service connection to controller state query
-        self.client = self.create_client(QueryControllerStates, "query_controller_states")
+        self.client = self.create_client(QueryControllerStates, 'query_controller_states')
         while not self.client.wait_for_service(timeout_sec=1.0):
             print('query_controller_states not available, waiting again...')
 
@@ -59,25 +58,25 @@ class ControllerResetTeleop(Node):
         while not self.gripper_client.wait_for_server(timeout_sec=1.0):
             print('gripper_controller/command not available, waiting again...')
 
-        self.start = list()
-        self.start.append("arm_controller.gravity_compensation")
+        self.start = []
+        self.start.append('arm_controller.gravity_compensation')
 
-        self.stop = list()
-        self.stop.append("arm_controller.follow_joint_trajectory")
-        self.stop.append("arm_with_torso_controller.follow_joint_trajectory")
-        self.stop.append("torso_controller.follow_joint_trajectory")
-        self.stop.append("head_controller.follow_joint_trajectory")
-        self.stop.append("head_controller.point_head")
+        self.stop = []
+        self.stop.append('arm_controller.follow_joint_trajectory')
+        self.stop.append('arm_with_torso_controller.follow_joint_trajectory')
+        self.stop.append('torso_controller.follow_joint_trajectory')
+        self.stop.append('head_controller.follow_joint_trajectory')
+        self.stop.append('head_controller.point_head')
 
-        button_param = self.declare_parameter("reset_axis", 7)
+        button_param = self.declare_parameter('reset_axis', 7)
         self.reset_button = button_param.get_parameter_value().integer_value
-        value_param = self.declare_parameter("reset_value", 1.0)
+        value_param = self.declare_parameter('reset_value', 1.0)
         self.reset_value = value_param.get_parameter_value().double_value
 
         self.pressed = False
         self.pressed_last = None
 
-        self.joy_sub = self.create_subscription(Joy, "joy", self.joy_callback, 10)
+        self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
 
     def joy_callback(self, msg):
         try:
@@ -92,7 +91,7 @@ class ControllerResetTeleop(Node):
             else:
                 self.pressed = False
         except KeyError:
-            self.get_logger().warn("reset_button is out of range")
+            self.get_logger().warn('reset_button is out of range')
 
     def reset(self):
         # Reset controllers
@@ -118,7 +117,7 @@ class ControllerResetTeleop(Node):
         self.gripper_client.send_goal_async(goal)
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     rclpy.init()
 
     c = ControllerResetTeleop()

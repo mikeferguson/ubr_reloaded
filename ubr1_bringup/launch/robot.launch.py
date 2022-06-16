@@ -34,7 +34,6 @@
 
 import os
 import sys
-import yaml
 
 from ament_index_python.packages import get_package_share_directory
 
@@ -43,15 +42,17 @@ from launch.actions import IncludeLaunchDescription
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 
+import yaml
+
 
 def generate_launch_description():
     # Set default parameters
     bringup_dir = get_package_share_directory('ubr1_description')
     urdf_path = os.path.join(bringup_dir, 'robots', 'ubr1_robot.urdf')
-    depth_camera_info_url = ""
-    rgb_camera_info_url = ""
-    z_offset_mm = "0"
-    z_scaling = "1.0"
+    depth_camera_info_url = ''
+    rgb_camera_info_url = ''
+    z_offset_mm = '0'
+    z_scaling = '1.0'
 
     # See if there is a calibration.yaml in /etc/ros/distro
     distro = os.getenv('ROS_DISTRO')
@@ -61,11 +62,13 @@ def generate_launch_description():
     if os.path.exists(calibration_yaml):
         with open(calibration_yaml) as file:
             yaml_data = yaml.load(file, Loader=yaml.FullLoader)
-            urdf_path = os.path.join(etc_conf, yaml_data["urdf"])
-            depth_camera_info_url = "file://" + os.path.join(etc_conf, yaml_data["depth_camera_info_url"])
-            rgb_camera_info_url = "file://" + os.path.join(etc_conf, yaml_data["rgb_camera_info_url"])
-            z_offset_mm = str(yaml_data["z_offset_mm"])
-            z_scaling = str(yaml_data["z_scaling"])
+            urdf_path = os.path.join(etc_conf, yaml_data['urdf'])
+            depth_camera_info_url = 'file://' + os.path.join(etc_conf,
+                                                             yaml_data['depth_camera_info_url'])
+            rgb_camera_info_url = 'file://' + os.path.join(etc_conf,
+                                                           yaml_data['rgb_camera_info_url'])
+            z_offset_mm = str(yaml_data['z_offset_mm'])
+            z_scaling = str(yaml_data['z_scaling'])
 
     # Load the URDF into a parameter
     urdf = open(urdf_path).read()
@@ -94,7 +97,7 @@ def generate_launch_description():
                         driver_config],
             output='screen',
             # TODO use debug param
-            #prefix=['xterm -e gdb --args'],
+            # prefix=['xterm -e gdb --args'],
         ),
         Node(
             name='robot_state_publisher',
@@ -116,10 +119,10 @@ def generate_launch_description():
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([head_camera_launch]),
-            launch_arguments = {'depth_camera_info_url': depth_camera_info_url,
-                                'rgb_camera_info_url': rgb_camera_info_url,
-                                'z_offset_mm': z_offset_mm,
-                                'z_scaling': z_scaling}.items()
+            launch_arguments={'depth_camera_info_url': depth_camera_info_url,
+                              'rgb_camera_info_url': rgb_camera_info_url,
+                              'z_offset_mm': z_offset_mm,
+                              'z_scaling': z_scaling}.items()
         ),
         # Twitter Diagnostics
         Node(
@@ -153,7 +156,6 @@ def generate_launch_description():
 
 
 def main(argv=sys.argv[1:]):
-    """Run lifecycle nodes via launch."""
     ld = generate_launch_description()
     ls = LaunchService(argv=argv)
     ls.include_launch_description(ld)
