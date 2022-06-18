@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020, Michael Ferguson
+# Copyright (c) 2020-2022, Michael Ferguson
 # Copyright (c) 2013-2014 Unbounded Robotics Inc.
 # All right reserved.
 #
@@ -82,7 +82,7 @@ class NavHeadController(Node):
         self.client.wait_for_server()
         self.get_logger().info("...OK")
 
-        self.plan_sub = self.create_subscription(Path, '/local_plan', self.plan_callback, 10)
+        self.plan_sub = self.create_subscription(Path, 'FollowPath/local_plan', self.plan_callback, 10)
 
     def plan_callback(self, msg):
         # get the goal

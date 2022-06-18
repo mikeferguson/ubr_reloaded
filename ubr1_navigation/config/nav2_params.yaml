@@ -72,6 +72,7 @@ bt_navigator:
 controller_server:
   ros__parameters:
     controller_frequency: 20.0
+    failure_tolerance: 1.0
     min_x_velocity_threshold: 0.001
     min_y_velocity_threshold: 0.5
     min_theta_velocity_threshold: 0.001
@@ -191,21 +192,21 @@ planner_server:
       use_astar: false
       allow_unknown: true
 
-recoveries_server:
+behavior_server:
   ros__parameters:
     costmap_topic: local_costmap/costmap_raw
     footprint_topic: local_costmap/published_footprint
     cycle_frequency: 10.0
     recovery_plugins: ["spin", "wait"]
     spin:
-      plugin: "nav2_recoveries/Spin"
+      plugin: "nav2_behaviors/Spin"
     wait:
-      plugin: "nav2_recoveries/Wait"
+      plugin: "nav2_behaviors/Wait"
     global_frame: odom
     robot_base_frame: base_link
     transform_timeout: 0.1
+    # Parameters for spin recovery
     simulate_ahead_time: 2.0
-    max_rotational_vel: 1.0
-    min_rotational_vel: 0.4
-    rotational_acc_lim: 3.2
-
+    max_rotational_vel: 2.8
+    min_rotational_vel: 0.6
+    rotational_acc_lim: 1.0

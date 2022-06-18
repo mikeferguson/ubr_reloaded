@@ -31,6 +31,7 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
     autostart = LaunchConfiguration('autostart')
     params_file = LaunchConfiguration('params_file')
+    default_nav_to_pose_bt_xml = LaunchConfiguration('default_nav_to_pose_bt_xml')
     map_subscribe_transient_local = LaunchConfiguration('map_subscribe_transient_local')
 
     lifecycle_nodes = ['controller_server',
@@ -51,6 +52,7 @@ def generate_launch_description():
     param_substitutions = {
         'use_sim_time': use_sim_time,
         'autostart': autostart,
+        'default_nav_to_pose_bt_xml': default_nav_to_pose_bt_xml,
         'map_subscribe_transient_local': map_subscribe_transient_local}
 
     configured_params = RewrittenYaml(
@@ -79,6 +81,13 @@ def generate_launch_description():
             'params_file',
             default_value=os.path.join(bringup_dir, 'config', 'nav2_params.yaml'),
             description='Full path to the ROS2 parameters file to use'),
+
+        DeclareLaunchArgument(
+            'default_nav_to_pose_bt_xml',
+            default_value=os.path.join(
+                get_package_share_directory('nav2_bt_navigator'), 'behavior_trees',
+                'navigate_w_recovery_and_replanning_only_if_path_becomes_invalid.xml'),
+            description='Full path to the behavior tree xml file to use'),
 
         DeclareLaunchArgument(
             'map_subscribe_transient_local', default_value='true',
