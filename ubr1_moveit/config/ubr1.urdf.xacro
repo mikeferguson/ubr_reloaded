@@ -5,8 +5,9 @@
     <!-- Import ubr1 urdf file -->
     <xacro:include filename="$(find ubr1_description)/robots/ubr1_robot.urdf" />
 
-    <!-- Import ros2_control -->
+    <!-- Import control_xacro -->
     <xacro:include filename="ubr1.ros2_control.xacro" />
+
 
     <xacro:ubr1_ros2_control name="FakeSystem" initial_positions_file="$(arg initial_positions_file)"/>
 
