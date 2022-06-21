@@ -2,10 +2,11 @@ ARG WORKSPACE=/opt/workspace
 
 FROM osrf/ros:humble-desktop
 
-# install build tools
+# install build tools and cyclonedds
 RUN apt-get update && apt-get install -q -y --no-install-recommends \
     python3-colcon-common-extensions \
     git-core \
+    ros-humble-rmw-cyclonedds-cpp \
     && rm -rf /var/lib/apt/lists/*
 
 # get ubr code
