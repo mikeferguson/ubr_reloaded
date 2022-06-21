@@ -5,5 +5,5 @@ package (so we can see the robot model) and provides a way to
 access the standard rviz configurations.
 
     sudo apt-get install docker python3-rocker
-    docker build --tag ubr:main .
+    sudo docker build --tag ubr:main .
     sudo rocker --net=host --x11 ubr:main rviz2
