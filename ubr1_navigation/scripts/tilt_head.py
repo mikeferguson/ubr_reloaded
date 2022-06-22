@@ -45,7 +45,6 @@ import tf2_geometry_msgs
 
 import numpy as np
 
-# sudo pip3 install transforms3d
 from transforms3d.quaternions import quat2mat
 
 from control_msgs.action import PointHead
