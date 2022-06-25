@@ -31,7 +31,7 @@ target_link_libraries(depth_layer
 )
 
 install(
-  DIRECTORY config launch maps
+  DIRECTORY behavior_trees config launch maps
   DESTINATION share/${PROJECT_NAME}/
 )
 

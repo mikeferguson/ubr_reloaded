@@ -84,9 +84,7 @@ def generate_launch_description():
 
         DeclareLaunchArgument(
             'default_nav_to_pose_bt_xml',
-            default_value=os.path.join(
-                get_package_share_directory('nav2_bt_navigator'), 'behavior_trees',
-                'navigate_w_recovery_and_replanning_only_if_path_becomes_invalid.xml'),
+            default_value=os.path.join(bringup_dir, 'behavior_trees', 'default.xml'),
             description='Full path to the behavior tree xml file to use'),
 
         DeclareLaunchArgument(
