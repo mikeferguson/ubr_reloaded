@@ -18,6 +18,7 @@
   <exec_depend>joy</exec_depend>
   <exec_depend>openni2_camera</exec_depend>
   <!--<exec_depend>openni2_launch</exec_depend>-->
+  <exec_depend>robot_localization</exec_depend>
   <exec_depend>ubr_teleop</exec_depend>
   <exec_depend>ubr1_description</exec_depend>
   <exec_depend>urg_node</exec_depend>

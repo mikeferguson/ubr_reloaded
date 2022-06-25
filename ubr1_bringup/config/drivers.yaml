@@ -84,3 +84,36 @@ ubr_driver:
        - "base_l_wheel_joint"
       r_wheel_joints:
        - "base_r_wheel_joint"
+      # tf will be published by ekf node
+      publish_tf: false
+
+ekf_node:
+  ros__parameters:
+    odom_frame: odom
+    base_link_frame: base_link
+    world_frame: odom
+
+    two_d_mode: true
+
+    frequency: 50
+
+    odom0: base_controller/odom
+    odom0_config: [false, false, false,   # x,   y,   z
+                  false, false, false,   # r,   p,   w (yaw)
+                  true,  true,  true,    # dx,  dy,  dz
+                  false, false, true,    # dr,  dp,  dw
+                  false, false, false]   # ddx, ddy, ddz
+    odom0_differential: false
+    odom0_nodelay: true
+    odom0_queue_size: 10
+
+    imu0: imu/filtered
+    imu0_config: [false, false, false,   # x,   y,   z
+                  false, false, false,   # r,   p,   w (yaw)
+                  false, false, false,   # dx,  dy,  dz
+                  true,  true,  true,    # dr,  dp,  dw
+                  false, false, false]   # ddx, ddy, ddz
+    imu0_differential: true
+    imu0_nodelay: true
+    imu0_queue_size: 10
+    imu0_remove_gravitational_acceleration: true

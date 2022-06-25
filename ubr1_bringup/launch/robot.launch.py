@@ -77,7 +77,7 @@ def generate_launch_description():
     driver_config = os.path.join(
         get_package_share_directory('ubr1_bringup'),
         'config',
-        'default_controllers.yaml'
+        'drivers.yaml'
     )
 
     # Get path to the head camera launch file
@@ -95,6 +95,7 @@ def generate_launch_description():
             executable='ubr_driver',
             parameters=[{'robot_description': urdf},
                         driver_config],
+            remappings=[{'odom', 'base_controller/odom'}],
             output='screen',
             # TODO use debug param
             # prefix=['xterm -e gdb --args'],
@@ -115,7 +116,12 @@ def generate_launch_description():
                          'angle_max': 1.52,
                          'laser_frame_id': 'base_laser_link'}],
             remappings=[('scan', 'base_scan'), ],
-            output='screen',
+        ),
+        Node(
+            name='ekf_node',
+            package='robot_localization',
+            executable='ekf_node',
+            parameters=[driver_config],
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([head_camera_launch]),
