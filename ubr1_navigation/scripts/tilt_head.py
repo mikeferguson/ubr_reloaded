@@ -81,7 +81,7 @@ class NavHeadController(Node):
         self.client.wait_for_server()
         self.get_logger().info("...OK")
 
-        self.plan_sub = self.create_subscription(Path, 'FollowPath/local_plan', self.plan_callback, 10)
+        self.plan_sub = self.create_subscription(Path, 'GracefulController/local_plan', self.plan_callback, 10)
 
     def plan_callback(self, msg):
         # get the goal

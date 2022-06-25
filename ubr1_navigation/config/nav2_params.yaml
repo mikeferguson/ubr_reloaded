@@ -79,7 +79,7 @@ controller_server:
     min_theta_velocity_threshold: 0.001
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"]
-    controller_plugins: ["FollowPath"]
+    controller_plugins: ["GracefulController"]
 
     # Progress checker parameters
     progress_checker:
@@ -93,7 +93,7 @@ controller_server:
       yaw_goal_tolerance: 0.25
       stateful: True
     # Controller parameters
-    FollowPath:
+    GracefulController:
       plugin: "graceful_controller/GracefulControllerROS"
       min_vel_x: 0.1
       max_vel_x: 1.0
