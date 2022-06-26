@@ -3,8 +3,11 @@
 initial_positions:
   elbow_flex_joint: 0
   forearm_roll_joint: 0
+  left_gripper_joint: 0
+  right_gripper_joint: 0
   shoulder_lift_joint: 0
   shoulder_pan_joint: 0
+  torso_lift_joint: 0
   upperarm_roll_joint: 0
   wrist_flex_joint: 0
   wrist_roll_joint: 0

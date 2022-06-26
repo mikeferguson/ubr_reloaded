@@ -4,16 +4,7 @@ moveit_setup_assistant_config:
     relative_path: robots/ubr1_robot.urdf
   srdf:
     relative_path: config/ubr1.srdf
-  modified_urdf:
-    headers:
-      - ros2_control
-  ros2_control:
-    command:
-      - position
-    state:
-      - position
-      - velocity
   package_settings:
     author_name: Michael Ferguson
     author_email: mfergs7@gmail.com
-    generated_timestamp: 1654218663
+    generated_timestamp: 1656272801

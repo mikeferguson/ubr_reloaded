@@ -18,6 +18,16 @@ joint_limits:
     max_velocity: 2.0943950999999998
     has_acceleration_limits: false
     max_acceleration: 0
+  left_gripper_joint:
+    has_velocity_limits: true
+    max_velocity: 0.10000000000000001
+    has_acceleration_limits: false
+    max_acceleration: 0
+  right_gripper_joint:
+    has_velocity_limits: true
+    max_velocity: 0.10000000000000001
+    has_acceleration_limits: false
+    max_acceleration: 0
   shoulder_lift_joint:
     has_velocity_limits: true
     max_velocity: 1.3089969400000001

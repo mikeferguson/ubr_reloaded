@@ -7,6 +7,14 @@ controller_manager:
       type: joint_trajectory_controller/JointTrajectoryController
 
 
+    arm_with_torso_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+
+    gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+
+
     joint_state_broadcaster:
       type: joint_state_broadcaster/JointStateBroadcaster
 
@@ -21,7 +29,30 @@ arm_controller:
       - wrist_flex_joint
       - wrist_roll_joint
     command_interfaces:
-      - position
+      []
     state_interfaces:
-      - position
-      - velocity
+      []
+arm_with_torso_controller:
+  ros__parameters:
+    joints:
+      - torso_lift_joint
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - upperarm_roll_joint
+      - elbow_flex_joint
+      - forearm_roll_joint
+      - wrist_flex_joint
+      - wrist_roll_joint
+    command_interfaces:
+      []
+    state_interfaces:
+      []
+gripper_controller:
+  ros__parameters:
+    joints:
+      - left_gripper_joint
+      - right_gripper_joint
+    command_interfaces:
+      []
+    state_interfaces:
+      []
