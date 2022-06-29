@@ -38,14 +38,4 @@ moveit_simple_controller_manager:
     joints:
       - left_gripper_joint
       - right_gripper_joint
-    gains:
-      left_gripper_joint:
-        p: 100
-        d: 1
-        i: 1
-        i_clamp: 1
-      right_gripper_joint:
-        p: 100
-        d: 1
-        i: 1
-        i_clamp: 1
+    action_ns: command

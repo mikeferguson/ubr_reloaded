@@ -12,7 +12,7 @@ controller_manager:
 
 
     gripper_controller:
-      type: joint_trajectory_controller/JointTrajectoryController
+      type: position_controllers/GripperActionController
 
 
     joint_state_broadcaster:
@@ -52,7 +52,3 @@ gripper_controller:
     joints:
       - left_gripper_joint
       - right_gripper_joint
-    command_interfaces:
-      []
-    state_interfaces:
-      []
