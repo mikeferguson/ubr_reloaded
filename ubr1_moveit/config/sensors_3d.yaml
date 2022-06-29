@@ -1,6 +1,6 @@
-sensors: ["head_camera"]
-head_camera:
-  sensor_plugin: occupancy_map_monitor/DepthImageOctomapUpdater
+sensors:
+  - default_sensor
+default_sensor:
   far_clipping_plane_distance: 5.0
   filtered_cloud_topic: ""
   image_topic: /head_camera/depth_downsample/image_raw
