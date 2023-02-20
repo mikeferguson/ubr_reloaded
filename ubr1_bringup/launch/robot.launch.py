@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020-2022, Michael Ferguson
+# Copyright (c) 2020-2023, Michael Ferguson
 # All rights reserved.
 #
 # Software License Agreement (BSD License 2.0)
@@ -123,12 +123,6 @@ def generate_launch_description():
                               'rgb_camera_info_url': rgb_camera_info_url,
                               'z_offset_mm': z_offset_mm,
                               'z_scaling': z_scaling}.items()
-        ),
-        # Twitter Diagnostics
-        Node(
-            name='tweet_bot',
-            package='ubr_drivers',
-            executable='tweet_bot.py',
         ),
         # Teleop
         Node(
