@@ -15,12 +15,10 @@ robot_calibration:
       camera:
         type: camera3d
         frame: head_camera_rgb_optical_frame
-        topic: /head_camera/depth_registered/points
       ground_camera:
         type: camera3d
         param_name: camera  # this is the same physical camera as above
         frame: head_camera_rgb_optical_frame
-        topic: /head_camera/depth_registered/points
       free_params:
       - shoulder_pan_joint
       - shoulder_lift_joint
