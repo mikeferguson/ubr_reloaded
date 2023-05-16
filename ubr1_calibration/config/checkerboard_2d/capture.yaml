@@ -1,0 +1,32 @@
+robot_calibration:
+  ros__parameters:
+    chains:
+    - arm
+    - head
+    arm:
+      topic: /arm_controller/follow_joint_trajectory
+      joints:
+      - shoulder_pan_joint
+      - shoulder_lift_joint
+      - upperarm_roll_joint
+      - elbow_flex_joint
+      - forearm_roll_joint
+      - wrist_flex_joint
+      - wrist_roll_joint
+      #planning_group: arm TODO: revert when moveit is setup
+    head:
+      topic: /head_controller/follow_joint_trajectory
+      joints:
+      - head_pan_joint
+      - head_tilt_joint
+    features:
+    - checkerboard_finder
+    checkerboard_finder:
+      type: robot_calibration::CheckerboardFinder2d
+      topic: /head_camera/rgb/image_raw
+      camera_sensor_name: camera
+      chain_sensor_name: arm
+      debug: false
+      points_x: 6
+      points_y: 7
+      size: 0.02635
