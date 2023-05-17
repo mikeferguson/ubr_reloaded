@@ -1,0 +1,34 @@
+# This is a sample for testing the 2d checkerboard finder
+# No part of the robot is actually being calibrated,
+# It will simply find the checkerboard pose in the hand
+robot_calibration:
+  ros__parameters:
+    verbose: true
+    base_link: torso_lift_link
+    calibration_steps:
+    - single_calibration_step
+    single_calibration_step:
+      models:
+      - arm
+      - camera
+      arm:
+        type: chain3d
+        frame: wrist_roll_link
+      camera:
+        type: camera2d
+        frame: head_camera_rgb_optical_frame
+      free_frames:
+      - checkerboard
+      checkerboard:
+        x: true
+        y: false
+        z: true
+        roll: true
+        pitch: true
+        yaw: true
+      error_blocks:
+      - hand_eye
+      hand_eye:
+        type: chain3d_to_camera2d
+        model_2d: camera
+        model_3d: arm
