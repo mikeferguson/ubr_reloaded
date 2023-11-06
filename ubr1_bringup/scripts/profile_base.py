@@ -1,7 +1,10 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
+# Copyright 2023, Michael Ferguson
 # Copyright 2013-2014, Unbounded Robotics, Inc.
 # All rights reserved.
+#
+# Software License Agreement (BSD License 2.0)
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -13,7 +16,7 @@
 #    copyright notice, this list of conditions and the following
 #    disclaimer in the documentation and/or other materials provided
 #    with the distribution.
-#  * Neither the name of Unbounded Robotics, Inc. nor the names of its
+#  * Neither the name of the copyright holder nor the names of its
 #    contributors may be used to endorse or promote products derived
 #    from this software without specific prior written permission.
 #
@@ -29,8 +32,6 @@
 # LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
 # ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
-#
-# Author: Michael Ferguson
 
 """
 This script is used to profile the robot base. It commands a particular
@@ -38,7 +39,11 @@ velocity to the base_controller and then plots the actual outputs.
 """
 
 import argparse
-import rospy
+import threading
+import time
+
+import rclpy
+from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry
 from sensor_msgs.msg import JointState
@@ -46,13 +51,15 @@ from sensor_msgs.msg import JointState
 # visualization
 from pylab import *
 
-class BaseTest:
+class BaseTest(Node):
 
     ## x is m/s, accel_x is m/s^2
     ## r is rad/s, accel_r is rad/s^2
     def __init__(self, x, r, plot_effort, plot_velocity, accel_x = 0.5, accel_r = 2.97044, rate = 100.0):
+        super().__init__("profile_base")
+
         # Create a publisher to command the base
-        self.pub = rospy.Publisher("cmd_vel", Twist, queue_size=5)
+        self.pub = self.create_publisher(Twist, "base_controller/command", 5)
 
         # Rate to publish and run loop at
         self.rate = rate
@@ -70,7 +77,7 @@ class BaseTest:
 
         self.data = list()
         self.error = list()
-        rospy.Subscriber("odom", Odometry, self.odomCb)
+        self.odom_sub = self.create_subscription(Odometry, "base_controller/odom", self.odomCb, 10)
 
         self.effort = list()
         self.velocity = list()
@@ -79,9 +86,7 @@ class BaseTest:
         self.plot_effort = plot_effort
         self.plot_velocity = plot_velocity
         if plot_effort or plot_velocity:
-            rospy.Subscriber("joint_states", JointState, self.stateCb)
-
-        rospy.sleep(1)
+            self.js_sub = self.create_subscription(JointState, "joint_states", self.stateCb, 10)
 
     def odomCb(self, msg):
         if abs(self.vel.linear.x) > 0 or abs(self.vel.angular.z) > 0:
@@ -95,7 +100,7 @@ class BaseTest:
             self.velocity.append([msg.velocity[0], msg.velocity[1]])
 
     def ramp(self):
-        r = rospy.Rate(self.rate) # match odometry for plotting
+        r = self.create_rate(self.rate) # match odometry for plotting
         while abs(self.vel.linear.x - self.x) > self.x_accel or abs(self.vel.angular.z - self.r) > self.r_accel:
 
             if self.x - self.vel.linear.x > self.x_accel:
@@ -112,24 +117,24 @@ class BaseTest:
             r.sleep()
 
     def run(self, constant_duration):
-        r = rospy.Rate(self.rate) # match odometry for plotting
+        r = self.create_rate(self.rate) # match odometry for plotting
 
-        rospy.loginfo("Ramping up to %f, %f" % (self.x, self.r))
+        self.get_logger().info("Ramping up to %f, %f" % (self.x, self.r))
         self.ramp()
 
         # run forward for constant_duration seconds
-        rospy.loginfo("Constant velocity")
+        self.get_logger().info("Constant velocity")
         for i in range(int(constant_duration * self.rate)):
             self.pub.publish(self.vel)
             r.sleep()
 
         # ramp speed down
-        rospy.loginfo("Ramping to a stop")
+        self.get_logger().info("Ramping to a stop")
         self.x = 0.0
         self.r = 0.0
         self.ramp()
         self.vel = Twist()
-        rospy.loginfo("Done")
+        self.get_logger().info("Done")
 
     def plot(self):
         x_err = [abs(e[0]) for e in self.error]
@@ -189,10 +194,14 @@ if __name__ == "__main__":
         print("Must specify a velocity")
         exit(-1)
 
-    rospy.init_node("profile_base")
+    rclpy.init()
 
     b = BaseTest(args.x, args.r, args.effort, args.velocity)
-    rospy.sleep(1)
+
+    thread = threading.Thread(target=rclpy.spin, args=(b,), daemon=True)
+    thread.start()
+
+    time.sleep(1)
     b.run(args.t)
 
     b.pub.publish(Twist())

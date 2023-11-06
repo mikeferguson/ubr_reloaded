@@ -15,6 +15,7 @@ install(
 
 install(
   PROGRAMS scripts/controller_reset.py
+           scripts/profile_base.py
   DESTINATION lib/${PROJECT_NAME}
 )
 
