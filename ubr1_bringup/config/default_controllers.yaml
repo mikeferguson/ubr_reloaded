@@ -84,3 +84,5 @@ ubr_driver:
        - "base_l_wheel_joint"
       r_wheel_joints:
        - "base_r_wheel_joint"
+      # TF will be published by fuse
+      publish_tf: false

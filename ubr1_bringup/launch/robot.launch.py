@@ -80,6 +80,13 @@ def generate_launch_description():
         'default_controllers.yaml'
     )
 
+    # Load the fuse config
+    fuse_config = os.path.join(
+        get_package_share_directory('ubr1_bringup'),
+        'config',
+        'fixed_lag_smoother.yaml'
+    )
+
     # Get path to the head camera launch file
     head_camera_launch = os.path.join(
         get_package_share_directory('ubr1_bringup'),
@@ -95,6 +102,7 @@ def generate_launch_description():
             executable='ubr_driver',
             parameters=[{'robot_description': urdf},
                         driver_config],
+            remappings=[('odom', 'base_controller/odom')],
             output='screen',
             # TODO use debug param
             # prefix=['xterm -e gdb --args'],
@@ -115,7 +123,12 @@ def generate_launch_description():
                          'angle_max': 1.52,
                          'laser_frame_id': 'base_laser_link'}],
             remappings=[('scan', 'base_scan'), ],
-            output='screen',
+        ),
+        Node(
+            name='odom_fusion_node',
+            package='fuse_optimizers',
+            executable='fixed_lag_smoother_node',
+            parameters=[fuse_config],
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([head_camera_launch]),
