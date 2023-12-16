@@ -11,5 +11,5 @@ Setup networking through the GUI:
 Run the playbook:
 
     ansible-playbook ubr_ros1.yml -i inventory --ask-become-pass
-    ansible-playbook ubr_foxy.yml -i inventory --ask-become-pass
     ansible-playbook ubr_humble.yml -i inventory --ask-become-pass
+    ansible-playbook ubr_iron.yml -i inventory --ask-become-pass

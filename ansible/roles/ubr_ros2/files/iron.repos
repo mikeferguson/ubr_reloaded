@@ -1,0 +1,17 @@
+repositories:
+  graceful_controller:
+    type: git
+    url: git@github.com:mikeferguson/graceful_controller.git
+    version: ros2
+  robot_controllers:
+    type: git
+    url: git@github.com:mikeferguson/robot_controllers.git
+    version: ros2
+  ubr_drivers:
+    type: git
+    url: git@github.com:mikeferguson/ubr_drivers.git
+    version: ros2
+  ubr_reloaded:
+    type: git
+    url: git@github.com:mikeferguson/ubr_reloaded.git
+    version: ros2
