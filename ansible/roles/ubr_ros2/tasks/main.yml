@@ -87,6 +87,12 @@
     mode: '0755'
   become: yes
 
+- name: Create the Cyclone DDS config
+  template:
+    src: cyclonedds.j2
+    dest: "/etc/ros/{{ rosdistro }}/cyclonedds.xml"
+  become: yes
+
 - name: Create a systemd service for robot drivers
   template:
     src: robot.j2
