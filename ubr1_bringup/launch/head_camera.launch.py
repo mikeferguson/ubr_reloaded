@@ -122,8 +122,7 @@ def generate_launch_description():
                     # Use nearest neighbor (0)  so we don't streak across depth boundaries
                     parameters=[{'interpolation': 0}],
                     remappings=[('image', 'rgb/image_raw'),
-                                ('image_rect', 'rgb/image_rect'),
-                                ('camera_info', 'rgb/camera_info')],
+                                ('image_rect', 'rgb/image_rect')],
                 ),
                 # Create rectified depth image
                 ComposableNode(
@@ -135,7 +134,7 @@ def generate_launch_description():
                     parameters=[{'interpolation': 0}],
                     remappings=[('image', 'depth_registered/image_raw'),
                                 ('image_rect', 'depth_registered/image_rect'),
-                                ('camera_info', 'depth/camera_info')],
+                                ('depth_registered/camera_info', 'depth/camera_info')],
                 ),
                 # Create XYZRGB point cloud
                 ComposableNode(
@@ -144,7 +143,6 @@ def generate_launch_description():
                     name='points_xyzrgb',
                     namespace=LaunchConfiguration('namespace'),
                     remappings=[('rgb/image_rect_color', 'rgb/image_rect'),
-                                ('rgb/camera_info', 'rgb/camera_info'),
                                 ('depth_registered/image_rect', 'depth_registered/image_rect'),
                                 ('points', 'depth_registered/points'), ],
                 ),
