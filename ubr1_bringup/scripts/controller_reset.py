@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright (c) 2020, Michael Ferguson
+# Copyright (c) 2020-2024, Michael Ferguson
 # Copyright (c) 2015, Fetch Robotics Inc.
 # All rights reserved.
 #
@@ -120,5 +120,8 @@ class ControllerResetTeleop(Node):
 if __name__ == '__main__':
     rclpy.init()
 
-    c = ControllerResetTeleop()
-    rclpy.spin(c)
+    try:
+        c = ControllerResetTeleop()
+        rclpy.spin(c)
+    except KeyboardInterrupt:
+        pass
