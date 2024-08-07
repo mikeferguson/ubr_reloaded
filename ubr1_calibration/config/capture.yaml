@@ -26,6 +26,7 @@ robot_calibration:
       type: robot_calibration::LedFinder
       action: /gripper_controller/led_command
       topic: /head_camera/depth_registered/points
+      camera_info_topic: /head_camera/depth_registered/camera_info
       camera_sensor_name: camera
       chain_sensor_name: arm
       threshold: 500.0
@@ -64,6 +65,7 @@ robot_calibration:
     ground_plane_finder:
       type: robot_calibration::PlaneFinder
       topic: /head_camera/depth_registered/points
+      camera_info_topic: /head_camera/depth_registered/camera_info
       camera_sensor_name: ground_camera
       points_max: 60
       debug: false

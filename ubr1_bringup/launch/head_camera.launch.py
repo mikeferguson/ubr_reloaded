@@ -111,7 +111,8 @@ def generate_launch_description():
                                  'use_device_time': False,
                                  'z_scaling': LaunchConfiguration('z_scaling'),
                                  'z_offset_mm': LaunchConfiguration('z_offset_mm')}, ],
-                    remappings=[('depth/image', 'depth_registered/image_raw')],
+                    remappings=[('depth/image', 'depth_registered/image_raw'),
+                                ('depth/camera_info', 'depth_registered/camera_info')],
                 ),
                 # Create rectified color image
                 ComposableNode(
@@ -133,8 +134,7 @@ def generate_launch_description():
                     # Use nearest neighbor (0) so we don't streak across depth boundaries
                     parameters=[{'interpolation': 0}],
                     remappings=[('image', 'depth_registered/image_raw'),
-                                ('image_rect', 'depth_registered/image_rect'),
-                                ('depth_registered/camera_info', 'depth/camera_info')],
+                                ('image_rect', 'depth_registered/image_rect')],
                 ),
                 # Create XYZRGB point cloud
                 ComposableNode(
@@ -146,15 +146,6 @@ def generate_launch_description():
                                 ('depth_registered/image_rect', 'depth_registered/image_rect'),
                                 ('points', 'depth_registered/points'), ],
                 ),
-                # Create metric depth image
-                ComposableNode(
-                    package='depth_image_proc',
-                    plugin='depth_image_proc::ConvertMetricNode',
-                    name='depth_registered_hw_metric_rect',
-                    namespace=LaunchConfiguration('namespace'),
-                    remappings=[('image_raw', 'depth_registered/image_rect'),
-                                ('image', 'depth_registered/image')],
-                ),
                 # Decimate cloud to 160x120 (for navigation)
                 ComposableNode(
                     package='image_proc',
@@ -163,7 +154,7 @@ def generate_launch_description():
                     namespace=LaunchConfiguration('namespace'),
                     parameters=[{'decimation_x': 4, 'decimation_y': 4}],
                     remappings=[('in/image_raw', 'depth_registered/image_rect'),
-                                ('in/camera_info', 'depth/camera_info'),
+                                ('in/camera_info', 'depth_registered/camera_info'),
                                 ('out/image_raw', 'depth_downsample/image_raw'),
                                 ('out/camera_info', 'depth_downsample/camera_info')],
                 ),
