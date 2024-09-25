@@ -29,9 +29,11 @@ arm_controller:
       - wrist_flex_joint
       - wrist_roll_joint
     command_interfaces:
-      []
+      - position
     state_interfaces:
-      []
+      - position
+      - velocity
+    allow_nonzero_velocity_at_trajectory_end: true
 arm_with_torso_controller:
   ros__parameters:
     joints:
@@ -44,11 +46,11 @@ arm_with_torso_controller:
       - wrist_flex_joint
       - wrist_roll_joint
     command_interfaces:
-      []
+      - position
     state_interfaces:
-      []
+      - position
+      - velocity
+    allow_nonzero_velocity_at_trajectory_end: true
 gripper_controller:
   ros__parameters:
-    joints:
-      - left_gripper_joint
-      - right_gripper_joint
+    joint: left_gripper_joint

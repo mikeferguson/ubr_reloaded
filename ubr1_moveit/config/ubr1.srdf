@@ -49,13 +49,13 @@
     <disable_collisions link1="base_laser_link" link2="head_camera_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="head_pan_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="head_tilt_link" reason="Never"/>
+    <disable_collisions link1="base_laser_link" link2="left_gripper_finger_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="left_wheel_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="right_wheel_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="shoulder_lift_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="shoulder_pan_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="torso_lift_link" reason="Never"/>
     <disable_collisions link1="base_laser_link" link2="upperarm_roll_link" reason="Never"/>
-    <disable_collisions link1="base_laser_link" link2="wrist_roll_link" reason="Never"/>
     <disable_collisions link1="base_link" link2="elbow_flex_link" reason="Never"/>
     <disable_collisions link1="base_link" link2="estop_link" reason="Never"/>
     <disable_collisions link1="base_link" link2="fixed_torso_link" reason="Adjacent"/>
@@ -122,10 +122,10 @@
     <disable_collisions link1="estop_link" link2="wrist_flex_link" reason="Never"/>
     <disable_collisions link1="estop_link" link2="wrist_roll_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="forearm_roll_link" reason="Never"/>
+    <disable_collisions link1="fixed_bellows_link" link2="gripper_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="head_camera_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="head_pan_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="head_tilt_link" reason="Never"/>
-    <disable_collisions link1="fixed_bellows_link" link2="left_gripper_finger_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="left_wheel_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="right_gripper_finger_link" reason="Never"/>
     <disable_collisions link1="fixed_bellows_link" link2="right_wheel_link" reason="Never"/>
@@ -154,6 +154,7 @@
     <disable_collisions link1="forearm_roll_link" link2="wrist_flex_link" reason="Adjacent"/>
     <disable_collisions link1="forearm_roll_link" link2="wrist_roll_link" reason="Never"/>
     <disable_collisions link1="gripper_link" link2="left_gripper_finger_link" reason="Adjacent"/>
+    <disable_collisions link1="gripper_link" link2="left_wheel_link" reason="Never"/>
     <disable_collisions link1="gripper_link" link2="right_gripper_finger_link" reason="Adjacent"/>
     <disable_collisions link1="gripper_link" link2="shoulder_lift_link" reason="Never"/>
     <disable_collisions link1="gripper_link" link2="shoulder_pan_link" reason="Never"/>
@@ -185,13 +186,17 @@
     <disable_collisions link1="left_gripper_finger_link" link2="left_wheel_link" reason="Never"/>
     <disable_collisions link1="left_gripper_finger_link" link2="right_gripper_finger_link" reason="Default"/>
     <disable_collisions link1="left_gripper_finger_link" link2="shoulder_lift_link" reason="Never"/>
+    <disable_collisions link1="left_gripper_finger_link" link2="shoulder_pan_link" reason="Never"/>
+    <disable_collisions link1="left_gripper_finger_link" link2="upperarm_roll_link" reason="Never"/>
     <disable_collisions link1="left_gripper_finger_link" link2="wrist_flex_link" reason="Never"/>
     <disable_collisions link1="left_gripper_finger_link" link2="wrist_roll_link" reason="Never"/>
+    <disable_collisions link1="left_wheel_link" link2="right_gripper_finger_link" reason="Never"/>
     <disable_collisions link1="left_wheel_link" link2="right_wheel_link" reason="Never"/>
     <disable_collisions link1="left_wheel_link" link2="shoulder_lift_link" reason="Never"/>
     <disable_collisions link1="left_wheel_link" link2="shoulder_pan_link" reason="Never"/>
     <disable_collisions link1="left_wheel_link" link2="torso_lift_link" reason="Never"/>
     <disable_collisions link1="left_wheel_link" link2="upperarm_roll_link" reason="Never"/>
+    <disable_collisions link1="left_wheel_link" link2="wrist_roll_link" reason="Never"/>
     <disable_collisions link1="right_gripper_finger_link" link2="shoulder_lift_link" reason="Never"/>
     <disable_collisions link1="right_gripper_finger_link" link2="shoulder_pan_link" reason="Never"/>
     <disable_collisions link1="right_gripper_finger_link" link2="upperarm_roll_link" reason="Never"/>

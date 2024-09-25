@@ -39,3 +39,4 @@ moveit_simple_controller_manager:
       - left_gripper_joint
       - right_gripper_joint
     action_ns: command
+    default: true
