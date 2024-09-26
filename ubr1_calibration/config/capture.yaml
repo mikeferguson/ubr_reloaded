@@ -69,3 +69,7 @@ robot_calibration:
       camera_sensor_name: ground_camera
       points_max: 60
       debug: false
+    qos_overrides:
+      /head_camera/depth_registered/points:
+        subscription:
+          'reliability': 'reliable'
