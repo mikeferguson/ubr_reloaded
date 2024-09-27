@@ -17,6 +17,7 @@
   <exec_depend>image_proc</exec_depend>
   <exec_depend>fuse</exec_depend>
   <exec_depend>joy</exec_depend>
+  <exec_depend>joy_linux</exec_depend>
   <exec_depend>openni2_camera</exec_depend>
   <exec_depend>ubr_teleop</exec_depend>
   <exec_depend>ubr1_description</exec_depend>

@@ -140,8 +140,8 @@ def generate_launch_description():
         # Teleop
         Node(
             name='joy',
-            package='joy',
-            executable='joy_node',
+            package='joy_linux',
+            executable='joy_linux_node',
             parameters=[{'autorepeat_rate': 1.0}, ],
         ),
         Node(
