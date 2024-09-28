@@ -11,50 +11,50 @@ joint_limits:
   elbow_flex_joint:
     has_velocity_limits: true
     max_velocity: 1.3089969400000001
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
   forearm_roll_joint:
     has_velocity_limits: true
     max_velocity: 2.0943950999999998
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
   left_gripper_joint:
     has_velocity_limits: true
     max_velocity: 0.10000000000000001
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.0
   right_gripper_joint:
     has_velocity_limits: true
     max_velocity: 0.10000000000000001
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.0
   shoulder_lift_joint:
     has_velocity_limits: true
     max_velocity: 1.3089969400000001
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
   shoulder_pan_joint:
     has_velocity_limits: true
     max_velocity: 1.3089969400000001
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
   torso_lift_joint:
     has_velocity_limits: true
     max_velocity: 0.10000000000000001
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.0
   upperarm_roll_joint:
     has_velocity_limits: true
     max_velocity: 2.0943950999999998
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
   wrist_flex_joint:
     has_velocity_limits: true
     max_velocity: 2.0943950999999998
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
   wrist_roll_joint:
     has_velocity_limits: true
     max_velocity: 2.0943950999999998
-    has_acceleration_limits: false
-    max_acceleration: 0
+    has_acceleration_limits: true
+    max_acceleration: 1.5
