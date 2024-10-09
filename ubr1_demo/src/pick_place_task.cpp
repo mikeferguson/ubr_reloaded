@@ -238,13 +238,7 @@ bool PickPlaceTask::configure(
       stage->setMinMaxDistance(grasps[0].post_grasp_retreat.min_distance, grasps[0].post_grasp_retreat.desired_distance);
       stage->setIKFrame(eef_frame);
       stage->properties().set("marker_ns", "lift_object");
-
-      // Set upward direction
-      // TODO: take this from grasp
-      geometry_msgs::msg::Vector3Stamped vec;
-      vec.header.frame_id = "base_link";
-      vec.vector.z = 1.0;
-      stage->setDirection(vec);
+      stage->setDirection(grasps[0].post_grasp_retreat.direction);
       grasp->insert(std::move(stage));
     }
 
@@ -292,15 +286,8 @@ bool PickPlaceTask::configure(
       stage->properties().set("marker_ns", "lower_object");
       stage->properties().set("link", eef_frame);
       stage->properties().configureInitFrom(mtc::Stage::PARENT, { "group" });
-      // TODO: take this from grasp
-      stage->setMinMaxDistance(.03, .13);
-
-      // Set downward direction
-      // TODO: take this from grasp
-      geometry_msgs::msg::Vector3Stamped vec;
-      vec.header.frame_id = "base_link";
-      vec.vector.z = -1.0;
-      stage->setDirection(vec);
+      stage->setMinMaxDistance(grasps[0].pre_grasp_approach.min_distance, grasps[0].pre_grasp_approach.desired_distance);
+      stage->setDirection(grasps[0].pre_grasp_approach.direction);
       place->insert(std::move(stage));
     }
 
@@ -372,13 +359,10 @@ bool PickPlaceTask::configure(
     {
       auto stage = std::make_unique<mtc::stages::MoveRelative>("retreat after place", cartesian_planner);
       stage->properties().configureInitFrom(mtc::Stage::PARENT, { "group" });
-      stage->setMinMaxDistance(grasps[0].post_place_retreat.min_distance, grasps[0].post_place_retreat.desired_distance);
+      stage->setMinMaxDistance(grasps[0].post_grasp_retreat.min_distance, grasps[0].post_grasp_retreat.desired_distance);
       stage->setIKFrame(eef_frame);
       stage->properties().set("marker_ns", "retreat");
-      geometry_msgs::msg::Vector3Stamped vec;
-      vec.header.frame_id = "base_link";
-      vec.vector.z = 1.0;
-      stage->setDirection(vec);
+      stage->setDirection(grasps[0].post_grasp_retreat.direction);
       place->insert(std::move(stage));
     }
 
