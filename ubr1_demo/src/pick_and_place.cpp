@@ -204,8 +204,11 @@ bool PickAndPlace::doTask(double x_offset)
                    "arm",
                    "gripper",
                    "wrist_roll_link");
-  task_->plan(1);
-  //task_->execute();
+  if (task_->plan(5))
+  {
+    task_->execute();
+    return true;
+  }
 
   return false;
 }

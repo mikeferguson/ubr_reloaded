@@ -192,7 +192,7 @@ bool PickPlaceTask::configure(
      *          Allow collision (object support)        *
      ***************************************************/
     {
-      auto stage = std::make_unique<mtc::stages::ModifyPlanningScene>("allow collision (object,support)");
+      auto stage = std::make_unique<mtc::stages::ModifyPlanningScene>("allow collision (object,surface)");
       stage->allowCollisions({ object.name }, { object.support_surface }, true);
       grasp->insert(std::move(stage));
     }
@@ -272,7 +272,7 @@ bool PickPlaceTask::configure(
         "move to place", mtc::stages::Connect::GroupPlannerVector{ { arm_group_name, sampling_planner } });
     stage->setTimeout(5.0);
     stage->properties().configureInitFrom(mtc::Stage::PARENT);
-    //t.add(std::move(stage));
+    t.add(std::move(stage));
   }
 
   /******************************************************
@@ -316,16 +316,23 @@ bool PickPlaceTask::configure(
 
       // Set target pose
       geometry_msgs::msg::PoseStamped p;
-      //p.header.frame_id = params.object_reference_frame;
-      //p.pose = vectorToPose(params.place_pose);
-      //p.pose.position.z += 0.5 * params.object_dimensions[0] + params.place_surface_offset;
+      p.header.frame_id = object.header.frame_id;
+      p.pose = object.primitive_poses[0];
+      p.pose.position.y *= -1;
+      p.pose.position.z += 0.05;
       stage->setPose(p);
       stage->setMonitoredStage(pick_stage_ptr);  // hook into successful pick solutions
 
       // Compute IK
       auto wrapper = std::make_unique<mtc::stages::ComputeIK>("place pose IK", std::move(stage));
       wrapper->setMaxIKSolutions(2);
-      //wrapper->setIKFrame(vectorToEigen(params.grasp_frame_transform), params.hand_frame);
+      // Define virtual frame to reach the target_pose
+      Eigen::Isometry3d grasp_frame_transform =
+        Eigen::Translation3d(0.15, 0.0, 0.0) *
+        Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitX()) *
+        Eigen::AngleAxisd(-1.57, Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ());
+      wrapper->setIKFrame(grasp_frame_transform, eef_frame);
       wrapper->properties().configureInitFrom(mtc::Stage::PARENT, { "eef", "group" });
       wrapper->properties().configureInitFrom(mtc::Stage::INTERFACE, { "target_pose" });
       place->insert(std::move(wrapper));
@@ -369,14 +376,14 @@ bool PickPlaceTask::configure(
       stage->setIKFrame(eef_frame);
       stage->properties().set("marker_ns", "retreat");
       geometry_msgs::msg::Vector3Stamped vec;
-      vec.header.frame_id = eef_frame;
-      vec.vector.z = -1.0;
+      vec.header.frame_id = "base_link";
+      vec.vector.z = 1.0;
       stage->setDirection(vec);
       place->insert(std::move(stage));
     }
 
     // Add place container to task
-    //t.add(std::move(place));
+    t.add(std::move(place));
   }
 
   /******************************************************
