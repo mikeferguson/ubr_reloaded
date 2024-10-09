@@ -35,6 +35,7 @@ moveit_simple_controller_manager:
     default: true
   gripper_controller:
     type: GripperCommand
+    parallel: true
     joints:
       - left_gripper_joint
       - right_gripper_joint
