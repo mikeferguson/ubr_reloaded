@@ -60,6 +60,8 @@ def generate_launch_description():
                     }
                 },
                 'debug_topics': True,
+                'gripper/tool_to_planning_frame': 0.120,
+                'gripper/max_opening': 0.09,
             }],
         )
     ])
