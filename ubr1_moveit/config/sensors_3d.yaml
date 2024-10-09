@@ -1,5 +1,5 @@
-sensors:
-  - default_sensor
+sensors: []
+#  - default_sensor
 default_sensor:
   far_clipping_plane_distance: 5.0
   filtered_cloud_topic: ""
