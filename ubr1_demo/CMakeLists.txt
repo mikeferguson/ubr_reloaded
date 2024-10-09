@@ -13,6 +13,7 @@ find_package(rclcpp REQUIRED)
 find_package(simple_actions REQUIRED)
 
 add_executable(pick_and_place
+  src/generate_grasps_from_msg.cpp
   src/pick_and_place.cpp
   src/pick_place_task.cpp
 )

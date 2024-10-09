@@ -32,6 +32,7 @@
  *********************************************************************/
 
 #include <ubr1_demo/pick_place_task.hpp>
+#include <ubr1_demo/generate_grasps_from_msg.hpp>
 #include <moveit/task_constructor/stages/compute_ik.h>
 #include <moveit/task_constructor/stages/connect.h>
 #include <moveit/task_constructor/stages/current_state.h>
@@ -85,7 +86,6 @@ bool PickPlaceTask::configure(
   t.setProperty("group", arm_group_name);
   t.setProperty("eef", gripper_group_name);
   t.setProperty("hand", gripper_group_name);
-  //t.setProperty("hand_grasping_frame", params.hand_frame);
   t.setProperty("ik_frame", eef_frame);
 
   /****************************************************
@@ -162,14 +162,11 @@ bool PickPlaceTask::configure(
      *               Generate Grasp Pose                *
      ***************************************************/
     {
-      // Sample grasp pose candidates in angle increments around the z-axis of the object
-      auto stage = std::make_unique<mtc::stages::GenerateGraspPose>("generate grasp pose");
+      auto stage = std::make_unique<mtc::stages::GenerateGraspsFromMsg>("generate grasp pose");
       stage->properties().configureInitFrom(mtc::Stage::PARENT);
       stage->properties().set("marker_ns", "grasp_pose");
-      stage->setPreGraspPose("open");
-      stage->setObject(object.name);  // object to sample grasps for
-      stage->setAngleDelta(M_PI / 12);
       stage->setMonitoredStage(initial_state_ptr);  // hook into successful initial-phase solutions
+      stage->setGrasps(grasps);
 
       // Compute IK for sampled grasp poses
       auto wrapper = std::make_unique<mtc::stages::ComputeIK>("grasp pose IK", std::move(stage));
@@ -177,14 +174,13 @@ bool PickPlaceTask::configure(
       wrapper->setMinSolutionDistance(1.0);
       // Define virtual frame to reach the target_pose
       Eigen::Isometry3d grasp_frame_transform =
-        Eigen::Translation3d(0.15, 0.0, 0.0) *
+        Eigen::Translation3d(0.0, 0.0, 0.0) *
         Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitX()) *
-        Eigen::AngleAxisd(-1.57, Eigen::Vector3d::UnitY()) *
+        Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitY()) *
         Eigen::AngleAxisd(0.0, Eigen::Vector3d::UnitZ());
       wrapper->setIKFrame(grasp_frame_transform, eef_frame);
       wrapper->properties().configureInitFrom(mtc::Stage::PARENT, { "eef", "group" });  // inherit properties from parent
-      wrapper->properties().configureInitFrom(mtc::Stage::INTERFACE,
-                                              { "target_pose" });  // inherit property from child solution
+      wrapper->properties().configureInitFrom(mtc::Stage::INTERFACE, { "target_pose" });  // inherit property from child solution
       grasp->insert(std::move(wrapper));
     }
 
@@ -301,12 +297,12 @@ bool PickPlaceTask::configure(
       stage->properties().set("marker_ns", "place_pose");
       stage->setObject(object.name);
 
-      // Set target pose
+      // Set target pose - drop cube slightly above table and on opposite side
       geometry_msgs::msg::PoseStamped p;
       p.header.frame_id = object.header.frame_id;
       p.pose = object.primitive_poses[0];
       p.pose.position.y *= -1;
-      p.pose.position.z += 0.05;
+      p.pose.position.z += 0.075;
       stage->setPose(p);
       stage->setMonitoredStage(pick_stage_ptr);  // hook into successful pick solutions
 
