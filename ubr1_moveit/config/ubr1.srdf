@@ -24,7 +24,7 @@
         <joint name="elbow_flex_joint" value="-1.3769"/>
         <joint name="forearm_roll_joint" value="0"/>
         <joint name="shoulder_lift_joint" value="0.0617"/>
-        <joint name="shoulder_pan_joint" value="-1.3962"/>
+        <joint name="shoulder_pan_joint" value="-1.37"/>
         <joint name="upperarm_roll_joint" value="0.1084"/>
         <joint name="wrist_flex_joint" value="0"/>
         <joint name="wrist_roll_joint" value="0"/>
