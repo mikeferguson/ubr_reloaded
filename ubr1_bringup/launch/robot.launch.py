@@ -102,6 +102,7 @@ def generate_launch_description():
             executable='ubr_driver',
             parameters=[{'robot_description': urdf},
                         driver_config],
+            # This remapping is only needed when using fuse
             remappings=[('odom', 'base_controller/odom')],
             output='screen',
             # TODO use debug param
