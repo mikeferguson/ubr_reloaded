@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020, Michael Ferguson
+ * Copyright (c) 2020-2024, Michael Ferguson
  * Copyright (c) 2015-2016, Fetch Robotics Inc.
  * All rights reserved.
  *
@@ -36,7 +36,7 @@
 
 #include "nav2_costmap_2d/observation_buffer.hpp"
 #include "nav2_costmap_2d/voxel_layer.hpp"
-#include "cv_bridge/cv_bridge.h"
+#include "cv_bridge/cv_bridge.hpp"
 #include "image_transport/image_transport.hpp"
 #include "sensor_msgs/image_encodings.hpp"
 #include "sensor_msgs/msg/image.hpp"
