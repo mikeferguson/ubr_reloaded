@@ -229,7 +229,10 @@ int main(int argc, char ** argv)
     executor.remove_node(pnp->getNodeBaseInterface());
   });
 
-  pnp->doTask();
+  while (rclcpp::ok())
+  {
+    pnp->doTask();
+  }
 
   spin_thread->join();
   rclcpp::shutdown();

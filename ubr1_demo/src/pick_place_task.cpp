@@ -302,7 +302,7 @@ bool PickPlaceTask::configure(
       p.header.frame_id = object.header.frame_id;
       p.pose = object.primitive_poses[0];
       p.pose.position.y *= -1;
-      p.pose.position.z += 0.075;
+      p.pose.position.z += 0.06;
       stage->setPose(p);
       stage->setMonitoredStage(pick_stage_ptr);  // hook into successful pick solutions
 
