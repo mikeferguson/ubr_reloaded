@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Michael Ferguson
+ *  Copyright (c) 2020-2024, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -39,16 +39,14 @@
 #define UBR1_GAZEBO_CONTROLLERS_SIMULATED_GRIPPER_CONTROLLER_H_
 
 #include <string>
-#include <boost/shared_ptr.hpp>
 
-#include <ros/ros.h>
-#include <actionlib/server/simple_action_server.h>
+#include <simple_actions/simple_server.hpp>
 #include <robot_controllers_interface/controller.h>
 #include <robot_controllers_interface/controller_manager.h>
 #include <robot_controllers_interface/joint_handle.h>
 #include <ubr1_gazebo/joint_handle.h>
 
-#include <control_msgs/GripperCommandAction.h>
+#include <control_msgs/action/gripper_command.hpp>
 
 namespace ubr1_gazebo_controllers
 {

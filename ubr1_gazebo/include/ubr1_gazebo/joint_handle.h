@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Michael Ferguson
+ *  Copyright (c) 2020-2024, Michael Ferguson
  *  Copyright (c) 2013-2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -38,12 +38,12 @@
 #ifndef UBR1_GAZEBO_JOINT_HANDLE_H_
 #define UBR1_GAZEBO_JOINT_HANDLE_H_
 
-#include <ros/ros.h>
+#include <rclcpp/rclcpp.hpp>
 #include <angles/angles.h>
 
-#include <gazebo/physics/physics.hh>
+#include <ignition/physics/Joint.hh>
 #include <robot_controllers_interface/joint_handle.h>
-#include <control_toolbox/pid.h>
+#include <control_toolbox/pid.hpp>
 
 namespace ubr1_gazebo
 {
@@ -56,18 +56,18 @@ enum CommandState
   MODE_CONTROL_POSITION
 };
 
-class GazeboJointHandle : public robot_controllers::JointHandle
+class GazeboJointHandle : public robot_controllers_interface::JointHandle
 {
 public:
-  GazeboJointHandle(gazebo::physics::JointPtr joint_ptr) :
+  GazeboJointHandle(ignition::physics::JointPtr joint_ptr) :
     joint_(joint_ptr),
     mode_(MODE_DISABLED)
   {
     ros::NodeHandle nh("~");
 
     // Load controller parameters
-    position_pid_.init(ros::NodeHandle(nh, getName() + "/position"));
-    velocity_pid_.init(ros::NodeHandle(nh, getName() + "/velocity"));
+    //position_pid_.init(ros::NodeHandle(nh, getName() + "/position"));
+    //velocity_pid_.init(ros::NodeHandle(nh, getName() + "/velocity"));
 
     // Load optional effort_limit as a workaround to gzsdf limitation
     nh.param(getName() + "/effort_limit", effort_limit_, -1.0);

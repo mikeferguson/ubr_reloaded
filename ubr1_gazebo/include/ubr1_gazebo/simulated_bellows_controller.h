@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Michael Ferguson
+ *  Copyright (c) 2020-2024, Michael Ferguson
  *  Copyright (c) 2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -39,9 +39,7 @@
 #define UBR1_GAZEBO_CONTROLLERS_SIMULATED_BELLOWS_CONTROLLER_H_
 
 #include <string>
-#include <boost/shared_ptr.hpp>
 
-#include <ros/ros.h>
 #include <robot_controllers_interface/controller.h>
 #include <robot_controllers_interface/controller_manager.h>
 #include <robot_controllers_interface/joint_handle.h>
@@ -54,14 +52,16 @@ namespace ubr1_gazebo_controllers
  *         be in the right place. If you ever find yourself reading this
  *         code... I apologize in advance.
  */
-class SimulatedBellowsController : public robot_controllers::Controller
+class SimulatedBellowsController : public robot_controllers_interface::Controller
 {
 public:
   SimulatedBellowsController() : initialized_(false) {}
   virtual ~SimulatedBellowsController() {}
 
   /** \brief Initialize parameters, interfaces */
-  virtual int init(ros::NodeHandle& nh, robot_controllers::ControllerManager* manager);
+  virtual int init(const std::string& name,
+                   rclcpp::Node::SharedPtr node,
+                   robot_controllers_interface::ControllerManagerPtr manager);
 
   /** \brief Start the controller. */
   virtual bool start();
@@ -73,7 +73,7 @@ public:
   virtual bool reset();
 
   /** \brief Update controller, called from controller_manager update */
-  virtual void update(const ros::Time& now, const ros::Duration& dt);
+  virtual void update(const rclcpp::Time& now, const rclcpp::Duration& dt);
 
   virtual std::string getType()
   {
@@ -86,8 +86,8 @@ public:
 
 private:
   bool initialized_;
-  robot_controllers::JointHandlePtr bellows_;
-  robot_controllers::JointHandlePtr torso_lift_;
+  robot_controllers_interface::JointHandlePtr bellows_;
+  robot_controllers_interface::JointHandlePtr torso_lift_;
 };
 
 }  // namespace ubr1_gazebo_controllers

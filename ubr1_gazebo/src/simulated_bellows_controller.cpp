@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Michael Ferguson
+ *  Copyright (c) 2020-2024, Michael Ferguson
  *  Copyright (c) 2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -35,15 +35,18 @@
 
 // Author: Michael Ferguson
 
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <ubr1_gazebo/simulated_bellows_controller.h>
 
-PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedBellowsController, robot_controllers::Controller)
+PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedBellowsController,
+                       robot_controllers_interface::Controller)
 
 namespace ubr1_gazebo_controllers
 {
 
-int SimulatedBellowsController::init(ros::NodeHandle& nh, robot_controllers::ControllerManager* manager)
+int SimulatedBellowsController::init(const std::string& name,
+                                     rclcpp::Node::SharedPtr node,
+                                     robot_controllers_interface::ControllerManagerPtr manager)
 {
   // We absolutely need access to the controller manager
   if (!manager)
@@ -52,7 +55,7 @@ int SimulatedBellowsController::init(ros::NodeHandle& nh, robot_controllers::Con
     return -1;
   }
 
-  robot_controllers::Controller::init(nh, manager);
+  robot_controllers_interface::Controller::init(name, node, manager);
 
   // Get Joint Handles
   bellows_ = manager->getJointHandle("bellows_joint");
@@ -70,8 +73,7 @@ bool SimulatedBellowsController::start()
 {
   if (!initialized_)
   {
-    ROS_ERROR_NAMED("SimulatedBellowsController",
-                    "Unable to start, not initialized.");
+    RCLCPP_ERROR(rclcpp::get_logger(getName()), "Unable to start, not initialized.");
     return false;
   }
 
@@ -95,7 +97,7 @@ bool SimulatedBellowsController::reset()
   return true;
 }
 
-void SimulatedBellowsController::update(const ros::Time& now, const ros::Duration& dt)
+void SimulatedBellowsController::update(const rclcpp::Time&, const rclcpp::Duration&)
 {
   // I warned you this controller was stupid
   bellows_->setPosition(torso_lift_->getPosition() / -2.0, 0.0, 0.0);

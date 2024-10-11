@@ -1,7 +1,7 @@
 /*********************************************************************
  *  Software License Agreement (BSD License)
  *
- *  Copyright (c) 2020, Michael Ferguson
+ *  Copyright (c) 2020-2024, Michael Ferguson
  *  Copyright (c) 2014, Unbounded Robotics Inc.
  *  All rights reserved.
  *
@@ -36,7 +36,7 @@
 // Author: Michael Ferguson
 
 #include <boost/pointer_cast.hpp>
-#include <pluginlib/class_list_macros.h>
+#include <pluginlib/class_list_macros.hpp>
 #include <ubr1_gazebo/simulated_gripper_controller.h>
 
 PLUGINLIB_EXPORT_CLASS(ubr1_gazebo_controllers::SimulatedGripperController, robot_controllers::Controller)
