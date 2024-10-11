@@ -38,6 +38,8 @@
 #ifndef UBR1_GAZEBO_JOINT_HANDLE_H_
 #define UBR1_GAZEBO_JOINT_HANDLE_H_
 
+#include <memory>
+
 #include <rclcpp/rclcpp.hpp>
 #include <angles/angles.h>
 
@@ -59,7 +61,7 @@ enum CommandState
 class GazeboJointHandle : public robot_controllers_interface::JointHandle
 {
 public:
-  GazeboJointHandle(ignition::physics::JointPtr joint_ptr) :
+  GazeboJointHandle(/*ignition::physics::JointPtr joint_ptr*/) :
     joint_(joint_ptr),
     mode_(MODE_DISABLED)
   {
@@ -223,7 +225,7 @@ public:
     return mode_ == MODE_CONTROL_EFFORT;
   }
 
-  void update(const ros::Time& now, const ros::Duration& dt)
+  void update(const rclcpp::Time& now, const rclcpp::Duration& dt)
   {
     float effort = 0.0;
     if (isEffortControlled())
@@ -248,7 +250,8 @@ public:
     applied_effort_ = std::max(-lim, std::min(effort, lim));
 
     if (debug_)
-      ROS_INFO_STREAM(getName() << " commanded effort of " << effort);
+      RCLCPP_INFO_STREAM(rclcpp::get_logger(getName()),
+                         getName() << " commanded effort of " << effort);
 
     // Actually update
     joint_->SetForce(0, applied_effort_ + effort_offset_);
@@ -262,7 +265,7 @@ public:
   }
 
 private:
-  gazebo::physics::JointPtr joint_;
+  ignition::physics::JointPtr joint_;
 
   float desired_position_;
   float desired_velocity_;
@@ -291,7 +294,7 @@ private:
   GazeboJointHandle& operator=(const GazeboJointHandle&);
 };
 
-typedef boost::shared_ptr<GazeboJointHandle> GazeboJointHandlePtr;
+typedef std::shared_ptr<GazeboJointHandle> GazeboJointHandlePtr;
 
 }  // namespace ubr1_gazebo
 
