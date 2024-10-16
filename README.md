@@ -3,6 +3,9 @@ UBR-1 Reloaded
 This is a fork of the ubr1_preview repo, updated to work with an actual robot
 on newer versions of ROS.
 
+The closest thing to documentation would be to read the
+[posts about the UBR-1 on my blog](https://www.robotandchisel.com/tag/ubr1/)
+
 ## Launch Files
 
 ### ubr1_bringup/robot.launch.py
