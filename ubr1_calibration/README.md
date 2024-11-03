@@ -27,7 +27,11 @@ There are several entry points:
    I find this is generally only useful for developing new feature
    finders. This is NOT a launch file, since launch would eat our
    input data and we would not be able to hit enter...
- * 
+
+An additional aspect of the calibration of the UBR-1 is that the LED detection
+works much better if auto exposure and white balance for the Primesense camera
+are turned off. This is done by running the `scripts/camera_reconfigure.py`
+script, which calls the `SetParameter` service to disable these features.
 
 There are additional files that are really maybe not great examples:
 

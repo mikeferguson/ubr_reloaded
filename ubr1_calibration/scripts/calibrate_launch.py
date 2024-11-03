@@ -71,6 +71,14 @@ def generate_launch_description():
         pass
 
     return LaunchDescription([
+        # Turn off auto exposure on camera for better results
+        Node(
+            name='camera_reconfigure',
+            package='ubr1_calibration',
+            executable='camera_reconfigure.py',
+            arguments=['--disable'],
+            output='screen'
+        ),
         # Calibration
         Node(
             name='robot_calibration',
