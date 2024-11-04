@@ -1,9 +1,0 @@
-
----
-- hosts: all
-  roles:
-    - ros_user
-    - ubr_ros2
-  vars:
-    rosdistro: humble
-    workspace_root: /home/ubr/humble

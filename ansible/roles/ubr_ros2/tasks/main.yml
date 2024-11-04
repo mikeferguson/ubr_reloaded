@@ -52,13 +52,6 @@
   args:
     chdir: "{{ workspace_root }}"
 
-- name: Disable ubr1_gazebo (not currently building right)
-  file:
-    path: "{{ workspace_root }}/src/ubr_reloaded/ubr1_gazebo/CATKIN_IGNORE"
-    state: touch
-    owner: ubr
-    group: ubr
-
 - name: Install dependencies
   shell: rosdep update && rosdep install --from-paths src --ignore-src --rosdistro={{ rosdistro }} -y -r
   args:
@@ -85,6 +78,12 @@
     dest: "/etc/ros/{{ rosdistro }}/robot.launch.py"
     force: no
     mode: '0755'
+  become: yes
+
+- name: Setup kernel parameters for Cyclone DDS
+  template:
+    src: cyclonesysctl.j2
+    dest: /etc/sysctl.d/10-cyclone-max.conf
   become: yes
 
 - name: Create the Cyclone DDS config

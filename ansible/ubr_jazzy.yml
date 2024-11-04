@@ -6,4 +6,4 @@
     - ubr_ros2
   vars:
     rosdistro: iron
-    workspace_root: /home/ubr/iron
+    workspace_root: /home/ubr/jazzy

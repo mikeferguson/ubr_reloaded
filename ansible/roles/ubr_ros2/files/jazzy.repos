@@ -3,9 +3,17 @@ repositories:
     type: git
     url: git@github.com:mikeferguson/graceful_controller.git
     version: ros2
+  grasping_msgs:
+    type: git
+    url: git@github.com:mikeferguson/grasping_msgs.git
+    version: ros2
   robot_controllers:
     type: git
     url: git@github.com:mikeferguson/robot_controllers.git
+    version: ros2
+  simple_grasping:
+    type: git
+    url: git@github.com:mikeferguson/simple_grasping.git
     version: ros2
   ubr_drivers:
     type: git
