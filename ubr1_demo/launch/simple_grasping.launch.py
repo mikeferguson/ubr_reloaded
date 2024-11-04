@@ -52,13 +52,14 @@ def generate_launch_description():
             package='simple_grasping',
             executable='basic_grasping_perception_node',
             parameters=[{
-                'qos_overrides': {
-                    '/head_camera/depth_registered/points': {
-                        'subscription': {
-                            'reliability': 'reliable',
-                        }
-                    }
-                },
+                # No longer needed with CycloneDDS working on 24.04
+                #'qos_overrides': {
+                #    '/head_camera/depth_registered/points': {
+                #        'subscription': {
+                #            'reliability': 'reliable',
+                #        }
+                #    }
+                #},
                 'debug_topics': True,
                 'gripper/tool_to_planning_frame': 0.120,
                 'gripper/max_opening': 0.09,
