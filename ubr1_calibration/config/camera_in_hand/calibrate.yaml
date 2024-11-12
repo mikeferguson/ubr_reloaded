@@ -1,0 +1,40 @@
+robot_calibration:
+  ros__parameters:
+    verbose: true
+    base_link: torso_lift_link
+    calibration_steps:
+    - single_calibration_step
+    single_calibration_step:
+      models:
+      - gripper_camera
+      - fixed
+      gripper_camera:
+        type: camera3d
+        frame: gripper_camera_rgb_optical_frame
+      # We will determine the checkerboard pose in the torso_lift_link
+      fixed:
+        type: chain3d
+        frame: torso_lift_link
+      free_frames:
+      - gripper_camera_rgb_joint
+      - checkerboard
+      gripper_camera_rgb_joint:
+        x: true
+        y: true
+        z: true
+        roll: true
+        pitch: true
+        yaw: true
+      checkerboard:
+        x: true
+        y: true
+        z: true
+        roll: true
+        pitch: true
+        yaw: true
+      error_blocks:
+      - gripper_camera_to_checkerboard
+      gripper_camera_to_checkerboard:
+        type: chain3d_to_chain3d
+        model_a: gripper_camera
+        model_b: fixed
