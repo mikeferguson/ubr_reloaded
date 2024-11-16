@@ -6,6 +6,9 @@ on newer versions of ROS.
 The closest thing to documentation would be to read the
 [posts about the UBR-1 on my blog](https://www.robotandchisel.com/tag/ubr1/)
 
+There are some specific notes on calibration (using `robot_calibration`)
+in the [ubr1_calibration README](https://github.com/mikeferguson/ubr_reloaded/blob/ros2/ubr1_calibration/README.md)
+
 ## Launch Files
 
 ### ubr1_bringup/robot.launch.py
