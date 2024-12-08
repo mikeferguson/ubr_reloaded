@@ -10,7 +10,7 @@ repositories:
   robot_controllers:
     type: git
     url: git@github.com:mikeferguson/robot_controllers.git
-    version: ros2
+    version: fix_cancel
   simple_grasping:
     type: git
     url: git@github.com:mikeferguson/simple_grasping.git
