@@ -58,7 +58,7 @@
     chdir: "{{ workspace_root }}"
 
 - name: Build workspace
-  shell: "colcon build --symlink-install"
+  shell: source /opt/ros/{{ rosdistro }}/setup.bash && colcon build --symlink-install
   args:
     chdir: "{{ workspace_root }}"
 
