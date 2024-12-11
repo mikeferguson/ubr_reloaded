@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-
-# Copyright (c) 2020-2022, Michael Ferguson
+# Copyright (c) 2020-2024, Michael Ferguson
 # All rights reserved.
 #
 # Software License Agreement (BSD License 2.0)
@@ -37,72 +35,25 @@ import sys
 
 from ament_index_python.packages import get_package_share_directory
 
-from launch import LaunchDescription, LaunchService
-from launch.actions import ExecuteProcess
+from launch import LaunchDescription
 from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    # Load the capture config
-    capture_config = os.path.join(
-        get_package_share_directory('ubr1_calibration'),
-        'config',
-        'capture.yaml'
-    )
-
-    # Load the calibration config
     calibration_config = os.path.join(
         get_package_share_directory('ubr1_calibration'),
         'config',
-        'calibrate.yaml'
+        'calibrate_base.yaml'
     )
-
-    # Load the calibration poses YAML
-    calibration_poses = os.path.join(
-        get_package_share_directory('ubr1_calibration'),
-        'config',
-        'calibration_poses.yaml'
-    )
-
-    # Make a directory for bagfiles to be located
-    try:
-        os.mkdir("/tmp/ubr1_calibration")
-    except FileExistsError:
-        pass
 
     return LaunchDescription([
-        # Turn off auto exposure on camera for better results
         Node(
-            name='camera_reconfigure',
-            package='ubr1_calibration',
-            executable='camera_reconfigure.py',
-            arguments=['--disable'],
-            output='screen'
-        ),
-        # Calibration
-        Node(
-            name='robot_calibration',
+            name='base_calibration_node',
             package='robot_calibration',
-            executable='calibrate',
-            arguments=[calibration_poses],
-            parameters=[capture_config,
-                        calibration_config],
+            executable='base_calibration_node',
+            parameters=[calibration_config],
+            remappings=[('odom', 'base_controller/odom'),
+                        ('imu', 'imu/filtered')],
             output='screen',
         ),
-        # Record bagfile for debugging
-        ExecuteProcess(
-            cmd=["ros2", "bag", "record", "/calibration_data", "/robot_description"],
-            cwd="/tmp/ubr1_calibration"
-        )
     ])
-
-
-def main(argv=sys.argv[1:]):
-    ld = generate_launch_description()
-    ls = LaunchService(argv=argv)
-    ls.include_launch_description(ld)
-    return ls.run()
-
-
-if __name__ == '__main__':
-    main()

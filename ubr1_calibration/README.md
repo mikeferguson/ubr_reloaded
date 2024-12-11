@@ -17,8 +17,10 @@ There are several config files of interest here:
 
 There are several entry points:
 
- * `scripts/calibrate_launch.py` - Launch file that I use 99% of the
+ * `launch/calibrate.launch.py` - Launch file that I use 99% of the
    time to calibrate the robot.
+ * `launch/calibrate_base.launch.py` - Launch file for calibrating base
+   track width, base rollout, and IMU gain.
  * `scripts/calibrate_from_bag` - If the launch file has already
    been run, and I have a bagfile, but want to tweak some aspect of the
    calibration step, this is how to run it.
