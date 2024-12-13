@@ -38,14 +38,22 @@ import sys
 from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription, LaunchService
-from launch.actions import IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.conditions import IfCondition, UnlessCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
+from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 import yaml
 
 
 def generate_launch_description():
+    # Arguments
+    use_fuse = LaunchConfiguration('use_fuse')
+    declare_use_fuse = DeclareLaunchArgument(
+        'use_fuse', default_value='False', description='Use fuse with IMU'
+    )
+
     # Set default parameters
     bringup_dir = get_package_share_directory('ubr1_description')
     urdf_path = os.path.join(bringup_dir, 'robots', 'ubr1_robot.urdf')
@@ -96,18 +104,31 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        declare_use_fuse,
         # Drivers
         Node(
             name='ubr_driver',
             package='ubr_drivers',
             executable='ubr_driver',
-            parameters=[{'robot_description': urdf},
+            parameters=[{'robot_description': urdf,
+                         'base_controller.publish_tf': False},
                         driver_config],
             # This remapping is only needed when using fuse
             remappings=[('odom', 'base_controller/odom')],
             output='screen',
             # TODO use debug param
             # prefix=['xterm -e gdb --args'],
+            condition=IfCondition(use_fuse),
+        ),
+        Node(
+            name='ubr_driver',
+            package='ubr_drivers',
+            executable='ubr_driver',
+            parameters=[{'robot_description': urdf,
+                         'base_controller.publish_tf': True},
+                        driver_config],
+            output='screen',
+            condition=UnlessCondition(use_fuse),
         ),
         Node(
             name='robot_state_publisher',
@@ -131,6 +152,7 @@ def generate_launch_description():
             package='fuse_optimizers',
             executable='fixed_lag_smoother_node',
             parameters=[fuse_config],
+            condition=IfCondition(use_fuse),
         ),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([head_camera_launch]),
