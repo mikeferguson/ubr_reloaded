@@ -57,18 +57,19 @@ def generate_launch_description():
     # See if there is a calibration.yaml in /etc/ros/distro
     distro = os.getenv('ROS_DISTRO')
     etc_conf = os.path.join('/etc', 'ros', distro)
-    calibration_yaml = os.path.join(etc_conf, 'calibration.yaml')
+    if os.path.exists(etc_conf):
+        calibration_yaml = os.path.join(etc_conf, 'calibration.yaml')
 
-    if os.path.exists(calibration_yaml):
-        with open(calibration_yaml) as file:
-            yaml_data = yaml.load(file, Loader=yaml.FullLoader)
-            urdf_path = os.path.join(etc_conf, yaml_data['urdf'])
-            depth_camera_info_url = 'file://' + os.path.join(etc_conf,
-                                                             yaml_data['depth_camera_info_url'])
-            rgb_camera_info_url = 'file://' + os.path.join(etc_conf,
-                                                           yaml_data['rgb_camera_info_url'])
-            z_offset_mm = str(yaml_data['z_offset_mm'])
-            z_scaling = str(yaml_data['z_scaling'])
+        if os.path.exists(calibration_yaml):
+            with open(calibration_yaml) as file:
+                yaml_data = yaml.load(file, Loader=yaml.FullLoader)
+                urdf_path = os.path.join(etc_conf, yaml_data['urdf'])
+                depth_camera_info_url = 'file://' + os.path.join(etc_conf,
+                                                                yaml_data['depth_camera_info_url'])
+                rgb_camera_info_url = 'file://' + os.path.join(etc_conf,
+                                                            yaml_data['rgb_camera_info_url'])
+                z_offset_mm = str(yaml_data['z_offset_mm'])
+                z_scaling = str(yaml_data['z_scaling'])
 
     # Load the URDF into a parameter
     urdf = open(urdf_path).read()
