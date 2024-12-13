@@ -41,6 +41,7 @@ controller_server:
     progress_checker_plugin: "progress_checker"
     goal_checker_plugins: ["general_goal_checker"]
     controller_plugins: ["GracefulController"]
+    enable_stamped_cmd_vel: false
 
     # Progress checker parameters
     progress_checker:
@@ -55,18 +56,24 @@ controller_server:
       stateful: True
     # Controller parameters
     GracefulController:
-      plugin: "graceful_controller/GracefulControllerROS"
-      min_vel_x: 0.1
-      max_vel_x: 1.0
-      max_vel_theta: 2.8
-      min_in_place_vel_theta: 0.6
-      acc_lim_x: 0.5
-      acc_lim_theta: 1.0
+      plugin: "nav2_graceful_controller::GracefulController"
+      v_linear_min: 0.1
+      v_linear_max: 1.0
+      v_angular_max: 2.8
+      v_angular_min_in_place: 0.6
       max_lookahead: 1.25
-      initial_rotate_tolerance: 0.25
+      initial_rotation_tolerance: 0.25
       prefer_final_rotation: true
-      yaw_filter_tolerance: 0.785
-      publish_collision_points: true
+      # The defaults aren't as good as this (more wiggling)
+      k_phi: 2.0
+      k_delta: 1.0
+      beta: 0.4
+      lambda: 2.0
+      # This isn't quite comparable to using actual acceleration limits
+      # (but works well in practice)
+      slowdown_radius: 0.75
+      # NavFn does not add orientations
+      add_orientations: true
 
 local_costmap:
   local_costmap:
@@ -174,3 +181,5 @@ behavior_server:
     max_rotational_vel: 2.8
     min_rotational_vel: 0.6
     rotational_acc_lim: 1.0
+    # Temporary for Rolling/K-Turtle
+    enable_stamped_cmd_vel: false
