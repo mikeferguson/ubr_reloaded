@@ -62,6 +62,7 @@ controller_server:
       v_angular_max: 2.8
       v_angular_min_in_place: 0.6
       max_lookahead: 1.25
+      initial_rotation: true
       initial_rotation_tolerance: 0.25
       prefer_final_rotation: true
       # The defaults aren't as good as this (more wiggling)
@@ -72,8 +73,6 @@ controller_server:
       # This isn't quite comparable to using actual acceleration limits
       # (but works well in practice)
       slowdown_radius: 0.75
-      # NavFn does not add orientations
-      add_orientations: true
 
 local_costmap:
   local_costmap:
